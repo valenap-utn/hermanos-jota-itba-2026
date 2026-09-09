@@ -1,7 +1,9 @@
+require('dotenv').config();
+
 const app = require('./app');
 
 // Usa el puerto definido por el `.env` o 3001 por defecto
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Inicia el servidor
 const start = async () => {
