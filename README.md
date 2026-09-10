@@ -10,10 +10,22 @@ El repositorio se encuentra organizado de la siguiente manera:
 
 ```text
 /
-├── entrega-1/     # Entrega correspondiente a los primeros sprints (1 y 2)
-├── cliente/       # Aplicación frontend desarrollada con React
-├── servidor/      # API desarrollada con Node.js y Express
-└── README.md
+├── README.md
+├── .gitignore
+│
+├── entrega1-vanilla/
+│   ├── index.html
+│   └── ...
+│
+└── entrega2-monolito/
+    ├── cliente/       # Aplicación frontend desarrollada con React
+    │   ├── src/
+    │   ├── public/
+    │   └── package.json
+    │
+    └── backend/       # API desarrollada con Node.js y Express
+        ├── src/
+        └── package.json
 ```
 
 ## Requisitos previos
@@ -25,14 +37,14 @@ Para ejecutar el proyecto es necesario tener instalado:
 
 ## Cliente
 
-La aplicación cliente se encuentra dentro de `cliente/`.
+La aplicación cliente se encuentra dentro de `entrega2-monolito/cliente/`.
 
 ### Instalación
 
 Desde la raíz del proyecto:
 
 ```bash
-cd cliente
+cd entrega2-monolito/cliente
 npm install
 ```
 
@@ -50,20 +62,20 @@ http://localhost:3000
 
 ## Servidor
 
-La aplicación backend se encuentra dentro de `servidor/`.
+La aplicación backend se encuentra dentro de `entrega2-monolito/backend/`.
 
 ### Instalación
 
 Desde la raíz del proyecto:
 
 ```bash
-cd servidor
+cd entrega2-monolito/backend
 npm install
 ```
 
 ### Variables de entorno
 
-Crear un archivo `.env` dentro de `servidor/` tomando como referencia el archivo `.env.example`.
+Crear un archivo `.env` dentro de `entrega2-monolito/backend/` tomando como referencia el archivo `.env.example`.
 
 Ejemplo:
 
