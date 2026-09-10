@@ -1,0 +1,26 @@
+const express = require('express');
+const cors = require('cors');
+const router = require('./routes/router');
+
+// App config: crea la app de Express
+// A partir de `app` vamos a registrar middlewares y rutas
+const app = express();
+
+// Usa el puerto deifinido por el `.env` si existe, sino el local
+const port = process.env.PORT || 3001;
+
+// Permite que el front pueda realizar peticiones al servidor
+app.use(cors());
+
+// ============ MIDDLEWARES ============
+
+// Permite que Express interprete cuerpos de perticiones en formato JSON
+app.use(express.json());
+
+// =============== ROUTES ===============
+
+// Todas las rutas de la API se agrupan bajo el prefijo /api
+app.use('/api', router);
+
+// Exporta la app para poder iniciar el servidor desde `server.js`
+module.exports = app;
