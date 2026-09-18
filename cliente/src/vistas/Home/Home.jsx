@@ -102,51 +102,46 @@ function Home({
                         aria-live="polite"
                     >
                         {destacados.length > 0 && (
-                            <div
-                                className="row g-4"
-                                aria-live="polite"
-                            >
-                                {destacados.map((producto) => (
-                                    <article
-                                        key={producto.id}
-                                        className="col-12 col-sm-6 col-lg-3"
+                            destacados.map((producto) => (
+                                <article
+                                    key={producto.id}
+                                    className="col-12 col-sm-6 col-lg-3"
+                                >
+                                    <button
+                                        type="button"
+                                        className="home-producto-card"
+                                        aria-label={`Ver detalle de ${producto.nombre}`}
+                                        onClick={() => onSelectProducto(producto)}
                                     >
-                                        <button
-                                            type="button"
-                                            className="home-producto-card"
-                                            aria-label={`Ver detalle de ${producto.nombre}`}
-                                            onClick={() => onSelectProducto(producto)}
-                                        >
-                                            <figure className="home-producto-figure">
-                                                <img
-                                                    className="home-producto-image"
-                                                    src={`/${producto.imagen}`}
-                                                    alt={producto.nombre}
-                                                    loading="lazy"
-                                                />
-                                            </figure>
+                                        <figure className="home-producto-figure">
+                                            <img
+                                                className="home-producto-image"
+                                                src={`/${producto.imagen}`}
+                                                alt={producto.nombre}
+                                                loading="lazy"
+                                            />
+                                        </figure>
 
-                                            <div className="home-producto-content">
-                                                <p className="home-producto-categoria texto-secundario-leyenda">
-                                                    {producto.categoria}
-                                                </p>
+                                        <div className="home-producto-content">
+                                            <p className="home-producto-categoria texto-secundario-leyenda">
+                                                {producto.categoria}
+                                            </p>
 
-                                                <h3 className="home-producto-nombre texto-enfasis-editorial">
-                                                    {producto.nombre}
-                                                </h3>
+                                            <h3 className="home-producto-nombre texto-enfasis-editorial">
+                                                {producto.nombre}
+                                            </h3>
 
-                                                <span className="home-producto-link texto-titulo-cta">
-                                            <span>
-                                                Ver pieza
-                                            </span>
-
-                                            <ArrowRight size={16} aria-hidden="true" />
+                                            <span className="home-producto-link texto-titulo-cta">
+                                        <span>
+                                            Ver pieza
                                         </span>
-                                            </div>
-                                        </button>
-                                    </article>
-                                ))}
-                            </div>
+
+                                        <ArrowRight size={16} aria-hidden="true" />
+                                    </span>
+                                        </div>
+                                    </button>
+                                </article>
+                            ))
                         )}
                     </div>
                 </div>
