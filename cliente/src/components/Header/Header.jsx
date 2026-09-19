@@ -1,16 +1,12 @@
 import "./Header.styles.css";
 import Logo from "../Logo/Logo";
 import { ShoppingCart } from "lucide-react";
+import { Link, NavLink } from "react-router-dom";
 
-function Header({ cartCount = 0, onNavigate }) {
+function Header({ cartCount = 0 }) {
     const cartLabel = `Carrito, ${cartCount} ${
         cartCount === 1 ? "producto" : "productos"
     }`;
-
-    const handleNavigation = (event, vista) => {
-        event.preventDefault();
-        onNavigate(vista);
-    };
 
     return (
         <>
@@ -26,16 +22,13 @@ function Header({ cartCount = 0, onNavigate }) {
                     <div className="container">
                         {/* Logo y nombre */}
                         <div className="d-flex align-items-center marca-container">
-                            <a
+                            <Link
                                 className="navbar-brand"
-                                href="/"
+                                to="/"
                                 aria-label="Hermanos Jota - Inicio"
-                                onClick={(event) =>
-                                    handleNavigation(event, "home")
-                                }
                             >
                                 <Logo className="logo-primary" />
-                            </a>
+                            </Link>
 
                             <span className="texto-titulo-elegante nombre-marca">
                                 Hermanos Jota
@@ -44,13 +37,10 @@ function Header({ cartCount = 0, onNavigate }) {
 
                         {/* Acciones mobile */}
                         <div className="d-flex align-items-center ms-auto d-lg-none navbar-actions">
-                            <a
-                                href="/carrito"
+                            <Link
+                                to="/carrito"
                                 className="carrito-link"
                                 aria-label={cartLabel}
-                                onClick={(event) =>
-                                    handleNavigation(event, "carrito")
-                                }
                             >
                                 <ShoppingCart
                                     size={18}
@@ -63,7 +53,7 @@ function Header({ cartCount = 0, onNavigate }) {
                                 >
                                     {cartCount}
                                 </span>
-                            </a>
+                            </Link>
 
                             {/* Menú hamburguesa */}
                             <button
@@ -93,72 +83,56 @@ function Header({ cartCount = 0, onNavigate }) {
                         >
                             <ul className="navbar-nav ms-auto align-items-lg-center">
                                 <li className="nav-item">
-                                    <a
-                                        href="/"
-                                        className="nav-link"
-                                        onClick={(event) =>
-                                            handleNavigation(event, "home")
+                                    <NavLink
+                                        to="/"
+                                        end
+                                        className={({ isActive }) =>
+                                            `nav-link${isActive ? " active" : ""}`
                                         }
                                     >
                                         Inicio
-                                    </a>
+                                    </NavLink>
                                 </li>
 
                                 <li className="nav-item">
-                                    <a
-                                        href="/productos"
-                                        className="nav-link"
-                                        onClick={(event) =>
-                                            handleNavigation(
-                                                event,
-                                                "productos"
-                                            )
+                                    <NavLink
+                                        to="/productos"
+                                        className={({ isActive }) =>
+                                            `nav-link${isActive ? " active" : ""}`
                                         }
                                     >
                                         Productos
-                                    </a>
+                                    </NavLink>
                                 </li>
 
                                 <li className="nav-item">
-                                    <a
-                                        href="/contacto"
-                                        className="nav-link"
-                                        onClick={(event) =>
-                                            handleNavigation(
-                                                event,
-                                                "contacto"
-                                            )
+                                    <NavLink
+                                        to="/contacto"
+                                        className={({ isActive }) =>
+                                            `nav-link${isActive ? " active" : ""}`
                                         }
                                     >
                                         Contacto
-                                    </a>
+                                    </NavLink>
                                 </li>
 
-                                {/* Carrito desktop */}
                                 <li className="nav-item d-none d-lg-flex align-items-center ms-lg-3">
-                                    <a
-                                        href="/carrito"
+                                    <Link
+                                        to="/carrito"
                                         className="carrito-link"
                                         aria-label={cartLabel}
-                                        onClick={(event) =>
-                                            handleNavigation(
-                                                event,
-                                                "carrito"
-                                            )
-                                        }
                                     >
                                         <ShoppingCart
                                             size={18}
                                             aria-hidden="true"
                                         />
-
                                         <span
                                             className="cart-count"
                                             aria-hidden="true"
                                         >
                                             {cartCount}
                                         </span>
-                                    </a>
+                                    </Link>
                                 </li>
                             </ul>
                         </div>

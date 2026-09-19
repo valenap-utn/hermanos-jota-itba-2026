@@ -1,16 +1,8 @@
 import "./Home.styles.css";
-import {
-    ArrowRight,
-    Leaf,
-    Hand,
-    History
-} from "lucide-react";
+import { ArrowRight, Leaf, Hand, History } from "lucide-react";
+import { Link } from "react-router-dom";
 
-function Home({
-                  productos = [],
-                  onNavigate,
-                  onSelectProducto
-              }) {
+function Home({ productos = [] }) {
     const destacados = productos.filter(
         (producto) => producto.destacado
     );
@@ -41,13 +33,12 @@ function Home({
                                 para acompañarte durante años.
                             </p>
 
-                            <button
-                                type="button"
+                            <Link
+                                to="/productos"
                                 className="home-btn-primary texto-titulo-cta"
-                                onClick={() => onNavigate("productos")}
                             >
                                 Ver colección
-                            </button>
+                            </Link>
                         </div>
 
                         <figure className="home-hero-figure">
@@ -86,63 +77,65 @@ function Home({
                             </p>
                         </div>
 
-                        <button
-                            type="button"
+                        <Link
+                            to="/productos"
                             className="home-link-catalogo texto-titulo-cta"
-                            onClick={() => onNavigate("productos")}
                         >
                             Ver toda la colección
 
-                            <ArrowRight size={16} aria-hidden="true" />
-                        </button>
+                            <ArrowRight
+                                size={16}
+                                aria-hidden="true"
+                            />
+                        </Link>
                     </div>
 
                     <div
                         className="row g-4"
                         aria-live="polite"
                     >
-                        {destacados.length > 0 && (
-                            destacados.map((producto) => (
-                                <article
-                                    key={producto.id}
-                                    className="col-12 col-sm-6 col-lg-3"
+                        {destacados.map((producto) => (
+                            <article
+                                key={producto.id}
+                                className="col-12 col-sm-6 col-lg-3"
+                            >
+                                <Link
+                                    to={`/productos/${producto.id}`}
+                                    className="home-producto-card"
+                                    aria-label={`Ver detalle de ${producto.nombre}`}
                                 >
-                                    <button
-                                        type="button"
-                                        className="home-producto-card"
-                                        aria-label={`Ver detalle de ${producto.nombre}`}
-                                        onClick={() => onSelectProducto(producto)}
-                                    >
-                                        <figure className="home-producto-figure">
-                                            <img
-                                                className="home-producto-image"
-                                                src={`/${producto.imagen}`}
-                                                alt={producto.nombre}
-                                                loading="lazy"
+                                    <figure className="home-producto-figure">
+                                        <img
+                                            className="home-producto-image"
+                                            src={`/${producto.imagen}`}
+                                            alt={producto.nombre}
+                                            loading="lazy"
+                                        />
+                                    </figure>
+
+                                    <div className="home-producto-content">
+                                        <p className="home-producto-categoria texto-secundario-leyenda">
+                                            {producto.categoria}
+                                        </p>
+
+                                        <h3 className="home-producto-nombre texto-enfasis-editorial">
+                                            {producto.nombre}
+                                        </h3>
+
+                                        <span className="home-producto-link texto-titulo-cta">
+                                            <span>
+                                                Ver pieza
+                                            </span>
+
+                                            <ArrowRight
+                                                size={16}
+                                                aria-hidden="true"
                                             />
-                                        </figure>
-
-                                        <div className="home-producto-content">
-                                            <p className="home-producto-categoria texto-secundario-leyenda">
-                                                {producto.categoria}
-                                            </p>
-
-                                            <h3 className="home-producto-nombre texto-enfasis-editorial">
-                                                {producto.nombre}
-                                            </h3>
-
-                                            <span className="home-producto-link texto-titulo-cta">
-                                        <span>
-                                            Ver pieza
                                         </span>
-
-                                        <ArrowRight size={16} aria-hidden="true" />
-                                    </span>
-                                        </div>
-                                    </button>
-                                </article>
-                            ))
-                        )}
+                                    </div>
+                                </Link>
+                            </article>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -181,7 +174,6 @@ function Home({
                                             size={22}
                                             aria-hidden="true"
                                         />
-
 
                                         <h3 className="home-valor-title texto-enfasis-subtitulo">
                                             Materiales sustentables
@@ -260,13 +252,12 @@ function Home({
                             para habitar el presente y perdurar en el tiempo.
                         </p>
 
-                        <button
-                            type="button"
+                        <Link
+                            to="/productos"
                             className="home-btn-secondary texto-titulo-cta"
-                            onClick={() => onNavigate("productos")}
                         >
                             Explorar productos
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </section>
