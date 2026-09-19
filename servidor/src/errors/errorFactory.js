@@ -1,4 +1,4 @@
-const AppError = require('/AppError');
+const AppError = require('./appError');
 
 const ErrorFactory = {
   notFound: (message) => new AppError(message, 404, 'not_found'),
