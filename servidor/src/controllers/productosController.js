@@ -1,5 +1,4 @@
-const productos = require('../data/productos.mock');
-// TODO: reemplazar por require('../data/productos')
+const productos = require('../data/productos');
 const ErrorFactory = require('../errors/errorFactory');
 const asyncHandler = require('../utils/asyncHandler');
 const successResponse = require('../utils/successResponse');
