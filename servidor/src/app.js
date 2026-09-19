@@ -6,9 +6,6 @@ const router = require('./routes/router');
 // A partir de `app` vamos a registrar middlewares y rutas
 const app = express();
 
-// Usa el puerto deifinido por el `.env` si existe, sino el local
-const port = process.env.PORT || 3001;
-
 // Permite que el front pueda realizar peticiones al servidor
 app.use(cors());
 

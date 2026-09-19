@@ -1,0 +1,152 @@
+/* ===== FUENTES ===== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+
+/* ===== DESIGN TOKENS ===== */
+
+:root {
+    /* ===== Brand ===== */
+    --color-primary: #A0522D;
+    --color-secondary: #87A96B;
+
+    /* ===== Text ===== */
+    --color-text-titles: #A0522D;
+
+    /* ===== Backgrounds ===== */
+    --color-background: #F5E6D3;
+
+    /* ===== Detalles Premium / acentos ===== */
+    --color-premium: #D4A437;
+
+    /* ===== Detalles femeninos / acentos suaves ===== */
+    --color-suave: #C47A6D;
+
+    /* ===== Neutros ===== */
+    --color-white: #FFFFFF;
+    --color-black: #000000;
+    --color-dark-gray: #333333;
+    --color-gray: #666666;
+    --color-light-gray: #999999;
+
+    /* ===== Sombras ===== */
+    --shadow-strong: rgba(0, 0, 0, 0.25);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+    --shadow-soft: rgba(0, 0, 0, 0.08);
+
+    /* ===== Bordes ===== */
+    --border-strong: rgba(160, 82, 45, 0.25);
+    --border-medium: rgba(160, 82, 45, 0.2);
+    --border-soft: rgba(160, 82, 45, 0.15);
+    --border-light: rgba(160, 82, 45, 0.08);
+
+    /* ===== Tipografías ===== */
+    --font-primary: 'Inter', sans-serif;
+    --font-editorial: 'Playfair Display', Georgia, serif;
+
+    /* Pesos Inter / Playfair */
+    --font-light: 300;
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-bold: 700;
+
+    /* Títulos principales */
+    --title-letter-spacing: 0.1em;
+
+    /* Texto del cuerpo */
+    --body-size: 1rem;
+    --body-line-height: 1.6;
+
+    /* Leyendas */
+    --caption-size: 0.75rem;
+    --caption-letter-spacing: 0.02em;
+
+    /* Cards */
+    --product-card-title-size: 1.2rem;
+
+    /* Botones y CTAs */
+    --cta-letter-spacing: 0.08em;
+
+    /* ===== Logo ===== */
+    --logo-min-width-digital: 120px;
+
+    /* ===== Cards / Surfaces ===== */
+    --color-surface-light: rgba(255, 255, 255, 0.58);
+}
+
+
+/* ===== ESTILOS GLOBALES ===== */
+
+html,
+body,
+#root {
+    min-height: 100%;
+    background-color: var(--color-background);
+}
+
+body {
+    margin: 0;
+
+    background-color: var(--color-background);
+    color: var(--color-dark-gray);
+
+    font-family: var(--font-primary);
+    font-size: var(--body-size);
+    line-height: var(--body-line-height);
+}
+
+
+/* ===== TIPOGRAFÍA ===== */
+
+/* Leyendas */
+.texto-secundario-leyenda {
+    font-family: var(--font-primary);
+    font-weight: var(--font-light);
+
+    font-size: var(--caption-size);
+    letter-spacing: var(--caption-letter-spacing);
+}
+
+
+/* Texto del cuerpo */
+.texto-principal {
+    font-family: var(--font-primary);
+    font-weight: var(--font-regular);
+
+    font-size: var(--body-size);
+    line-height: var(--body-line-height);
+}
+
+
+/* Énfasis y subtítulos */
+.texto-enfasis-subtitulo {
+    font-family: var(--font-primary);
+    font-weight: var(--font-medium);
+}
+
+
+/* Botones y CTAs */
+.texto-titulo-cta {
+    font-family: var(--font-primary);
+    font-weight: var(--font-medium);
+
+    text-transform: uppercase;
+    letter-spacing: var(--cta-letter-spacing);
+}
+
+
+/* Títulos principales */
+.texto-titulo-elegante {
+    font-family: var(--font-editorial);
+    font-weight: var(--font-regular);
+
+    text-transform: uppercase;
+    letter-spacing: var(--title-letter-spacing);
+}
+
+
+/* Énfasis editorial */
+.texto-enfasis-editorial {
+    font-family: var(--font-editorial);
+    font-weight: var(--font-bold);
+}

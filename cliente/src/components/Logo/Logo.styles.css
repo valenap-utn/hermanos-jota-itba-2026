@@ -1,0 +1,26 @@
+.logo {
+    width: var(--logo-min-width-digital);
+    aspect-ratio: 1;
+
+    display: block;
+
+    background-color: currentColor;
+
+    mask-image: var(--logo-mask);
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+
+    -webkit-mask-image: var(--logo-mask);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+}
+
+.logo-primary {
+    color: var(--color-primary);
+}
+
+.logo-inverted {
+    color: var(--color-background);
+}
