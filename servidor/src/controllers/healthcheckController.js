@@ -1,9 +1,8 @@
+const successResponse = require('../utils/successResponse');
+
 // Responde si el servidor está funcionando correctamente
 const healthcheck = (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        success: true,
-    });
+  successResponse(res, { statusCode: 200 });
 }
 
 module.exports = {healthcheck};
