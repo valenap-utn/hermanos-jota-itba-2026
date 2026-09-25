@@ -8,6 +8,12 @@
 :root {
     /* ===== Brand ===== */
     --color-primary: #A0522D;
+    --color-primary-hover: color-mix(
+            in srgb,
+            var(--color-primary) 85%,
+            white
+    );
+
     --color-secondary: #87A96B;
 
     /* ===== Text ===== */
@@ -149,4 +155,32 @@ body {
 .texto-enfasis-editorial {
     font-family: var(--font-editorial);
     font-weight: var(--font-bold);
+}
+
+/* Estilos botones */
+.btn-marca-primario {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border: 2px solid var(--color-primary);
+
+    transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease;
+}
+
+.btn-marca-primario:hover {
+    background-color: var(--color-primary-hover);
+    color: var(--color-white);
+    border-color: var(--color-primary-hover);
+}
+
+.btn-marca-primario:active {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
+}
+
+.btn-marca-primario:focus-visible {
+    outline: 3px solid var(--color-premium);
+    outline-offset: 3px;
 }

@@ -1,0 +1,260 @@
+/* ===== FORMULARIO ===== */
+
+.contacto-formulario .form-control:focus,
+.contacto-formulario .form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem var(--border-medium);
+}
+
+.contacto-formulario .btn-marca-primario:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+
+/* ===== HERO ===== */
+
+.contacto-hero {
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.contacto-hero__title {
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+}
+
+.contacto-hero__description {
+    max-width: 48rem;
+    margin: 0 auto;
+    color: var(--color-gray);
+}
+
+.texto-marca-primario {
+    color: var(--color-primary);
+}
+
+.contacto-hero__description::after {
+    content: "";
+    display: block;
+    width: 4rem;
+    height: 1px;
+    margin: 1.5rem auto 0;
+    background-color: var(--color-primary);
+    opacity: 0.5;
+}
+
+
+/* ===== CONTENIDO PRINCIPAL ===== */
+
+.contacto-main {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+}
+
+
+/* ===== INFORMACIÓN DE CONTACTO ===== */
+
+.contacto-section-title {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.contacto-info__items {
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* ===== LINKS DE CONTACTO ===== */
+
+.contacto-info-item__links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
+
+.contacto-info-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.contacto-info-link:hover {
+    color: var(--color-primary);
+    opacity: 0.7;
+}
+
+.contacto-info-link:focus-visible {
+    outline: 2px solid var(--color-premium);
+    outline-offset: 3px;
+}
+
+.contacto-info-link__icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: var(--color-secondary);
+}
+
+
+/* ===== MAPA ===== */
+
+.mapa-taller-container {
+    height: 300px;
+    margin-top: 3rem;
+    padding: 0.5rem;
+    background-color: var(--color-white);
+    border: 1px solid var(--border-soft);
+    overflow: hidden;
+}
+
+.mapa-taller-iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    filter: sepia(30%) contrast(90%) hue-rotate(-20deg);
+}
+
+
+/* ===== GARANTÍA Y SUSTENTABILIDAD ===== */
+
+.contacto-sustentabilidad {
+    padding-block: 3rem;
+    background-color: var(--color-surface-light);
+}
+
+.contacto-sustentabilidad .container {
+    padding-inline: 1rem;
+}
+
+.contacto-sustentabilidad__header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.contacto-sustentabilidad__title {
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.contacto-sustentabilidad__description {
+    max-width: 34rem;
+    margin: 0 auto;
+    opacity: 0.75;
+}
+
+
+/* ===== BENEFICIOS ===== */
+
+.contacto-beneficios {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+.contacto-beneficio-col {
+    min-width: 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.contacto-beneficio-col:last-child {
+    border-bottom: 0;
+}
+
+
+/* ===== MOBILE GRANDE / TABLET CHICA ===== */
+
+@media (min-width: 640px) {
+    .contacto-beneficios {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .contacto-beneficio-col {
+        border-right: 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .contacto-beneficio-col:nth-child(odd) {
+        border-right: 1px solid var(--border-light);
+    }
+
+    .contacto-beneficio-col:nth-child(5) {
+        grid-column: 1 / -1;
+        width: 50%;
+        justify-self: center;
+        border-right: 0;
+        border-bottom: 0;
+    }
+}
+
+
+/* ===== DESKTOP ===== */
+
+@media (min-width: 992px) {
+    .contacto-hero {
+        padding: 4.5rem 0;
+    }
+
+    .contacto-sustentabilidad {
+        padding-block: 5rem;
+    }
+
+    .contacto-sustentabilidad__header {
+        margin-bottom: 3rem;
+    }
+
+    .contacto-sustentabilidad__description {
+        max-width: 48rem;
+    }
+
+    .contacto-beneficios {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .contacto-beneficio-col {
+        width: auto;
+        border-right: 0;
+        border-bottom: 0;
+    }
+
+    /* Primera fila: tres bloques */
+    .contacto-beneficio-col:nth-child(1) {
+        grid-column: 1 / 3;
+        border-right: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .contacto-beneficio-col:nth-child(2) {
+        grid-column: 3 / 5;
+        border-right: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .contacto-beneficio-col:nth-child(3) {
+        grid-column: 5 / 7;
+        border-right: 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    /* Segunda fila: dos bloques */
+    .contacto-beneficio-col:nth-child(4) {
+        grid-column: 1 / 4;
+        border-right: 1px solid var(--border-light);
+    }
+
+    .contacto-beneficio-col:nth-child(5) {
+        grid-column: 4 / 7;
+        width: auto;
+        border-right: 0;
+        border-bottom: 0;
+    }
+}
