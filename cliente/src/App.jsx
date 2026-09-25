@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import Home from "./vistas/Home/Home";
+import Contacto from "./vistas/Contacto/Contacto";
 
 import "./App.css";
 
@@ -36,12 +37,7 @@ function App() {
 
                     <Route
                         path="/contacto"
-                        element={
-                            <section>
-                                <h1>Contacto</h1>
-                                <p>Formulario de contacto</p>
-                            </section>
-                        }
+                        element={<Contacto/>}
                     />
 
                     <Route
