@@ -59,7 +59,7 @@ function ContactForm() {
     return (
         <>
             <div className="contacto-formulario">
-                <h2 className="texto-titulo-elegante fs-4 mb-4 texto-marca-primario">
+                <h2 className="texto-titulo-elegante fs-4 texto-marca-primario contacto-section-title">
                     Envíanos un mensaje
                 </h2>
 
