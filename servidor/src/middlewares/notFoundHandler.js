@@ -1,7 +1,7 @@
-const ErrorFactory = require('../errors/errorFactory');
+const createError = require('http-errors');
 
 const notFoundHandler = (req, res, next) => {
-  next(ErrorFactory.notFound(`Ruta '${req.originalUrl}' no encontrada`));
+    next(createError.NotFound(`Ruta '${req.originalUrl}' no encontrada`));
 };
 
 module.exports = notFoundHandler;

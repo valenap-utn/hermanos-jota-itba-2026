@@ -1,5 +1,5 @@
 const productos = require('../data/productos');
-const ErrorFactory = require('../errors/errorFactory');
+const createError = require('http-errors');
 const asyncHandler = require('../utils/asyncHandler');
 const successResponse = require('../utils/successResponse');
 
@@ -13,12 +13,12 @@ const obtenerProductoPorId = asyncHandler ((req, res) => {
   const id = Number(req.params.id);
 
   if (Number.isNaN(id))
-    throw ErrorFactory.badRequest(`El id '${req.params.id}' no es válido`);
+    throw createError.BadRequest(`El id '${req.params.id}' no es válido`);
 
   const producto = productos.find((p) => p.id === id);
 
   if (!producto)
-    throw ErrorFactory.notFound(`No se encontró ningún producto con id ${id}`);
+    throw createError.NotFound(`No se encontró ningún producto con id ${id}`);
 
   successResponse(res, { data: producto });
 });
