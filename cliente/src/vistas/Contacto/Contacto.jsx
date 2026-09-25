@@ -1,4 +1,5 @@
 import ContactForm from "../../components/ContactForm/ContactForm";
+import "./Contacto.styles.css";
 
 function Contacto() {
     return (

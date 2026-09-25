@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useRef, useState} from 'react';
 import StatusModal from '../StatusModal/StatusModal';
 
 const initialFormData = {
@@ -14,6 +14,7 @@ function ContactForm() {
     const [formData, setFormData] = useState(initialFormData);
     const [wasValidated, setWasValidated] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
+    const submitButtonRef = useRef(null);
 
     const handleChange = (event) => {
         const {name, value} = event.target;
@@ -32,6 +33,8 @@ function ContactForm() {
         setWasValidated(true);
 
         if (!form.checkValidity()) {
+            const firstInvalidField = form.querySelector(":invalid");
+            firstInvalidField?.focus();
             return;
         }
 
@@ -43,6 +46,14 @@ function ContactForm() {
 
         // Elimina los estados verdes de validación
         setWasValidated(false);
+    };
+
+    const handleCloseStatusModal = () => {
+        setShowStatusModal(false);
+
+        requestAnimationFrame(() => {
+            submitButtonRef.current?.focus();
+        });
     };
 
     return (
@@ -76,9 +87,12 @@ function ContactForm() {
                                 required
                                 minLength={3}
                                 placeholder="Tu nombre"
+                                aria-describedby="nombre-error"
                             />
 
-                            <div className="invalid-feedback texto-secundario-leyenda">
+                            <div
+                                id="nombre-error"
+                                className="invalid-feedback texto-secundario-leyenda">
                                 Por favor, ingresa tu nombre.
                             </div>
                         </div>
@@ -100,9 +114,12 @@ function ContactForm() {
                                 onChange={handleChange}
                                 required
                                 placeholder="tu@email.com"
+                                aria-describedby="email-error"
                             />
 
-                            <div className="invalid-feedback texto-secundario-leyenda">
+                            <div
+                                id="email-error"
+                                className="invalid-feedback texto-secundario-leyenda">
                                 Por favor, ingresa un correo electrónico válido.
                             </div>
                         </div>
@@ -141,6 +158,7 @@ function ContactForm() {
                                 name="motivo"
                                 value={formData.motivo}
                                 onChange={handleChange}
+                                aria-describedby="motivo-error"
                             >
                                 <option value="" disabled>
                                     Selecciona una opción
@@ -157,7 +175,9 @@ function ContactForm() {
                                 </option>
                             </select>
 
-                            <div className="invalid-feedback texto-secundario-leyenda">
+                            <div
+                                id="motivo-error"
+                                className="invalid-feedback texto-secundario-leyenda">
                                 Por favor, selecciona un motivo.
                             </div>
                         </div>
@@ -180,17 +200,21 @@ function ContactForm() {
                                 required
                                 minLength={10}
                                 placeholder="Cuéntanos sobre tu proyecto..."
+                                aria-describedby="mensaje-error"
                             />
 
-                            <div className="invalid-feedback texto-secundario-leyenda">
+                            <div
+                                id="mensaje-error"
+                                className="invalid-feedback texto-secundario-leyenda">
                                 Por favor, escribe tu mensaje.
                             </div>
                         </div>
 
                         <div className="col-12 mt-4">
                             <button
+                                ref={submitButtonRef}
                                 type="submit"
-                                className="btn texto-titulo-cta py-3 px-5 border-0 rounded-0 w-100 w-sm-auto btn-marca-primario"
+                                className="texto-titulo-cta py-3 px-5 rounded-0 w-100 btn-marca-primario"
                             >
                                 Enviar Mensaje
                             </button>
@@ -204,7 +228,7 @@ function ContactForm() {
                 show={showStatusModal}
                 title="¡Mensaje enviado!"
                 message="Gracias por comunicarte con la Casa Taller. Hemos recibido tu consulta y uno de nuestros artesanos se contactará contigo a la brevedad."
-                onClose={() => setShowStatusModal(false)}
+                onClose={handleCloseStatusModal}
             />
         </>
     );

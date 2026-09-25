@@ -1,0 +1,10 @@
+.contacto-formulario .form-control:focus,
+.contacto-formulario .form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem var(--border-medium);
+}
+
+.contacto-formulario .btn-marca-primario:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
