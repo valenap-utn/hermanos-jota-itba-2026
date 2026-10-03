@@ -13,11 +13,27 @@ import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 function App() {
     const [carrito, setCarrito] = useState([]);
 
+    const cartCount = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+
+    const handleAgregarAlCarrito = (producto) => {
+        setCarrito((prevCarrito) => {
+            const itemExistente = prevCarrito.find((item) => item.id === producto.id);
+            if (itemExistente) {
+                return prevCarrito.map((item) =>
+                    item.id === producto.id
+                        ? { ...item, cantidad: item.cantidad + 1 }
+                        : item
+                );
+            }
+            return [...prevCarrito, { ...producto, cantidad: 1 }];
+        });
+    };
+
     return (
         <>
             <ScrollToTop />
             <Header
-                cartCount={carrito.length}
+                cartCount={cartCount}
             />
 
             <main id="main-content">
@@ -30,14 +46,16 @@ function App() {
                     <Route
                         path="/productos"
                         element={
-                            <ListaProductos />
+                            <ListaProductos
+                                onAgregarAlCarrito={handleAgregarAlCarrito}
+                            />
                         }
                     />
 
                     <Route
                         path="/productos/:id"
                         element={
-                            <DetalleProducto />
+                            <DetalleProducto onAgregarAlCarrito={handleAgregarAlCarrito} />
                         }
                     />
 
@@ -51,7 +69,7 @@ function App() {
                         element={
                             <section>
                                 <h1>Carrito</h1>
-                                <p>Productos agregados: {carrito.length}</p>
+                                <p>Productos agregados: {cartCount}</p>
                             </section>
                         }
                     />

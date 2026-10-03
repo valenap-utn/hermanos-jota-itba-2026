@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import "./DetalleProducto.styles.css";
 import { obtenerProductoPorId } from "../../services/productosService";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
 
-function DetalleProducto() {
+function DetalleProducto({ onAgregarAlCarrito }) {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -103,6 +103,17 @@ function DetalleProducto() {
               </p>
 
               <p className="texto-principal detalle-descripcion">{producto.descripcion}</p>
+
+              {onAgregarAlCarrito && (
+                <button
+                  type="button"
+                  className="btn btn-marca-primario texto-titulo-cta rounded-0 w-100 py-3 d-flex align-items-center justify-content-center gap-2 mt-2"
+                  onClick={() => onAgregarAlCarrito(producto)}
+                >
+                  <ShoppingCart size={18} aria-hidden="true" />
+                  Añadir al carrito
+                </button>
+              )}
             </div>
 
             <div className="col-12">

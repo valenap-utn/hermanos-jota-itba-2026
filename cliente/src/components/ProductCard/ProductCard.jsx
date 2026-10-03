@@ -1,18 +1,33 @@
+import { useState, useRef, useEffect } from "react";
 import "./ProductCard.styles.css";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShoppingCart, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 
-function ProductCard({ producto }) {
+function ProductCard({ producto, onAgregarAlCarrito }) {
+  const [agregado, setAgregado] = useState(false);
+  const timeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const handleAgregar = () => {
+    onAgregarAlCarrito(producto);
+    setAgregado(true);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setAgregado(false);
+    }, 1500);
+  };
+
   const precio = producto.precio > 0
     ? `$${producto.precio.toLocaleString('es-AR')}`
     : 'Consultar precio';
 
   return (
-    <Link
-      to={`/productos/${producto.id}`}
-      className="product-card"
-      aria-label={`Ver detalle de ${producto.nombre}`}
-    >
+    <article className="product-card">
       <figure className="product-card-figure">
         <img
           className="product-card-image"
@@ -30,16 +45,42 @@ function ProductCard({ producto }) {
           {producto.nombre}
         </h2>
 
-        <p className="product-card-precio">
-          {precio}
-        </p>
+        <div className="product-card-precio-row">
+          <p className="product-card-precio">
+            {precio}
+          </p>
 
-        <span className="product-card-link texto-titulo-cta">
+          {onAgregarAlCarrito && (
+            <button
+              type="button"
+              className="btn btn-marca-primario product-card-btn-carrito"
+              aria-label={`Añadir ${producto.nombre} al carrito`}
+              title="Añadir al carrito"
+              onClick={handleAgregar}
+            >
+              {agregado ? (
+                <Check size={20} aria-hidden="true" />
+              ) : (
+                <ShoppingCart size={20} aria-hidden="true" />
+              )}
+            </button>
+          )}
+
+          <span role="status" className="visually-hidden">
+            {agregado ? "Añadido al carrito" : ""}
+          </span>
+        </div>
+
+        <Link
+          to={`/productos/${producto.id}`}
+          className="product-card-link texto-titulo-cta"
+          aria-label={`Ver detalle de ${producto.nombre}`}
+        >
           <span>Ver pieza</span>
           <ArrowRight size={16} aria-hidden="true" />
-        </span>
+        </Link>
       </div>
-    </Link>
+    </article>
   );
 }
 
