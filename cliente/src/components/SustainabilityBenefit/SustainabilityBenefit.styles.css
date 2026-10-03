@@ -1,0 +1,69 @@
+.contacto-beneficio {
+    height: 100%;
+    padding: 1.5rem 0.75rem;
+    text-align: center;
+}
+
+.contacto-beneficio__icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-bottom: 0.75rem;
+    stroke-width: 2.5;
+}
+
+.contacto-beneficio__icon--primary {
+    color: var(--color-primary);
+}
+
+.contacto-beneficio__icon--secondary {
+    color: var(--color-secondary);
+}
+
+.contacto-beneficio__icon--premium {
+    color: var(--color-premium);
+}
+
+.contacto-beneficio__icon--soft {
+    color: var(--color-suave);
+}
+
+.contacto-beneficio__title {
+    margin-bottom: 0.4rem;
+    color: var(--color-primary);
+    font-size: 1.15rem;
+}
+
+.contacto-beneficio__description {
+    max-width: 32rem;
+    margin: 0 auto;
+    opacity: 0.75;
+}
+
+
+/* ===== MOBILE GRANDE / TABLET CHICA ===== */
+
+@media (min-width: 640px) {
+    .contacto-beneficio {
+        padding: 1.75rem 1rem;
+    }
+
+    .contacto-beneficio__icon {
+        width: 2rem;
+        height: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .contacto-beneficio__title {
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+    }
+}
+
+
+/* ===== DESKTOP ===== */
+
+@media (min-width: 992px) {
+    .contacto-beneficio {
+        padding: 2rem 1.5rem;
+    }
+}

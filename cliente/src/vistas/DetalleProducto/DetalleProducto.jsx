@@ -1,0 +1,157 @@
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import "./DetalleProducto.styles.css";
+import { obtenerProductoPorId } from "../../services/productosService";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
+
+function DetalleProducto({ onAgregarAlCarrito }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [producto, setProducto] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let activo = true;
+
+    async function cargarProducto() {
+      try {
+        setCargando(true);
+        setError(null);
+        const data = await obtenerProductoPorId(id);
+        if (activo) setProducto(data);
+      } catch (err) {
+        if (activo) setError("No pudimos encontrar este producto. Puede que ya no esté disponible.");
+      } finally {
+        if (activo) setCargando(false);
+      }
+    }
+
+    cargarProducto();
+
+    return () => {
+      activo = false;
+    };
+  }, [id]);
+
+  if (cargando) {
+    return (
+      <section className="detalle-section">
+        <div className="container text-center my-5" role="status" aria-live="polite">
+          <div className="spinner-border" aria-hidden="true" />
+          <p className="texto-principal mt-3">Cargando producto...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !producto) {
+      return (
+        <section className="detalle-section">
+          <div className="container text-center my-5" role="alert">
+            <h1 className="texto-titulo-elegante detalle-nombre">Producto no encontrado</h1>
+            <p className="texto-principal mb-4">
+              {error || "El producto que buscás no existe o no está disponible."}
+            </p>
+            <button
+              type="button"
+              className="detalle-btn-volver texto-titulo-cta"
+              onClick={() => navigate("/productos")}
+            >
+              Volver al catálogo
+            </button>
+          </div>
+        </section>
+      );
+  }
+
+  return (
+      <section className="detalle-section">
+        <div className="container py-4 py-lg-5">
+          <div className="detalle-topbar mb-4">
+            <nav aria-label="Migas de pan" className="detalle-breadcrumb">
+              <Link to="/productos">Productos</Link>
+              {" / "}
+              <span aria-current="page">{producto.nombre}</span>
+            </nav>
+
+            <Link to="/productos" className="detalle-volver texto-titulo-cta">
+              <ArrowLeft size={16} aria-hidden="true" />
+              Ir al catálogo
+            </Link>
+          </div>
+
+          <article className="row g-4 g-lg-5">
+            <div className="col-12 col-lg-7">
+              <figure className="detalle-figura mb-0">
+                <img className="detalle-imagen" src={producto.imagen} alt={producto.nombre} />
+              </figure>
+            </div>
+
+            <div className="col-12 col-lg-5">
+              <p className="detalle-categoria texto-secundario-leyenda mb-2">
+                {producto.categoria}
+              </p>
+
+              <h1 className="texto-titulo-elegante detalle-nombre">{producto.nombre}</h1>
+
+              <p className="detalle-precio texto-enfasis-editorial">
+                {producto.precio > 0
+                  ? `$${producto.precio.toLocaleString("es-AR")}`
+                  : "Precio a confirmar"}
+              </p>
+
+              <p className="texto-principal detalle-descripcion">{producto.descripcion}</p>
+
+              {onAgregarAlCarrito && (
+                <button
+                  type="button"
+                  className="btn btn-marca-primario texto-titulo-cta rounded-0 w-100 py-3 d-flex align-items-center justify-content-center gap-2 mt-2"
+                  onClick={() => onAgregarAlCarrito(producto)}
+                >
+                  <ShoppingCart size={18} aria-hidden="true" />
+                  Añadir al carrito
+                </button>
+              )}
+            </div>
+
+            <div className="col-12">
+              <section className="detalle-specs mt-2 mt-lg-4">
+                <h2 className="texto-titulo-elegante detalle-specs-titulo mb-3">
+                  Detalles de fabricación
+                </h2>
+                <div className="table-responsive">
+                  <table className="table detalle-tabla">
+                    <caption className="visually-hidden">
+                        Especificaciones técnicas de {producto.nombre}
+                    </caption>
+                    <tbody>
+                        <tr>
+                          <th scope="row">Medidas</th>
+                          <td>{producto.medidas}</td>
+                        </tr>
+                        <tr>
+                          <th scope="row">Materiales</th>
+                          <td>{producto.materiales}</td>
+                        </tr>
+                        {Object.entries(producto.especificaciones || {}).map(
+                          ([nombre, valor]) => (
+                            <tr key={nombre}>
+                              <th scope="row">{nombre}</th>
+                              <td>{valor}</td>
+                            </tr>
+                          )
+                        )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </article>
+        </div>
+      </section>
+  );
+}
+
+export default DetalleProducto;

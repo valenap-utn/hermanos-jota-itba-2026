@@ -1,0 +1,126 @@
+.detalle-breadcrumb {
+    font-family: var(--font-primary);
+    font-size: var(--caption-size);
+    letter-spacing: var(--caption-letter-spacing);
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.detalle-breadcrumb a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.detalle-breadcrumb a:hover,
+.detalle-breadcrumb a:focus {
+    text-decoration: underline;
+}
+
+.detalle-figura {
+    background-color: var(--color-white);
+    border: 1px solid var(--border-soft);
+    overflow: hidden;
+}
+
+.detalle-imagen {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+    padding: 1rem;
+}
+
+.detalle-categoria {
+    color: var(--color-primary);
+    text-transform: uppercase;
+}
+
+.detalle-nombre {
+    color: var(--color-text-titles);
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.detalle-precio {
+    color: var(--color-primary);
+    font-size: 1.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.detalle-descripcion {
+    margin-bottom: 1.75rem;
+}
+
+.detalle-specs-titulo {
+    color: var(--color-text-titles);
+    font-size: 1.25rem;
+}
+
+.detalle-tabla {
+    --bs-table-bg: transparent;
+    --bs-table-color: inherit;
+    width: 100%;
+    margin: 0;
+}
+
+.detalle-tabla th,
+.detalle-tabla td {
+    border-bottom: 1px solid var(--border-soft);
+    padding: 0.75rem 0;
+    vertical-align: top;
+}
+
+.detalle-tabla th {
+    font-weight: var(--font-medium);
+    color: var(--color-primary);
+    width: 40%;
+}
+
+.detalle-btn-volver {
+  display: inline-block;
+  padding: 0.85rem 1.5rem;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: 2px solid var(--color-primary);
+  border-radius: 0;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.detalle-btn-volver:hover {
+  color: var(--color-white);
+  opacity: 0.85;
+}
+
+.detalle-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.detalle-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-block: 0.5rem;
+  color: var(--color-primary);
+  font-size: var(--caption-size);
+  text-decoration: none;
+}
+
+.detalle-volver:hover {
+  text-decoration: underline;
+}
+
+@media (min-width: 992px) {
+    .detalle-nombre {
+        font-size: 2.5rem;
+    }
+
+    .detalle-tabla th {
+        width: 25%;
+    }
+}
