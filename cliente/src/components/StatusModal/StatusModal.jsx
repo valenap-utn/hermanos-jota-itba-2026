@@ -2,7 +2,7 @@ import {useEffect, useRef} from 'react';
 import {CircleCheck} from "lucide-react";
 import "./StatusModal.styles.css";
 
-function StatusModal({show, title, message, onClose}) {
+function StatusModal({ show, title, message, actionLabel = "Entendido", onClose }) {
 
     const modalRef = useRef(null);
     const closeButtonRef = useRef(null);
@@ -65,6 +65,11 @@ function StatusModal({show, title, message, onClose}) {
                 aria-modal="true"
                 aria-labelledby="status-modal-title"
                 aria-describedby="status-modal-description"
+                onClick={(e) => {
+                    if (e.target === modalRef.current) {
+                        onClose();
+                    }
+                }}
             >
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content modal-marca rounded-0">
@@ -101,14 +106,14 @@ function StatusModal({show, title, message, onClose}) {
                                 className="texto-titulo-cta btn-marca-primario rounded-0 status-modal__action"
                                 onClick={onClose}
                             >
-                                Entendido
+                                {actionLabel}
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="modal-backdrop fade show"/>
+            <div className="modal-backdrop fade show" onClick={onClose} />
         </>
     );
 }

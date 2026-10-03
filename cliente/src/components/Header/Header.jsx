@@ -1,9 +1,26 @@
+import { useState, useEffect, useRef } from "react";
 import "./Header.styles.css";
 import Logo from "../Logo/Logo";
 import { ShoppingCart } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 
 function Header({ cartCount = 0 }) {
+    const [isBumping, setIsBumping] = useState(false);
+    const prevCountRef = useRef(cartCount);
+
+    useEffect(() => {
+        if (cartCount > 0 && cartCount !== prevCountRef.current) {
+            setIsBumping(true);
+            const timer = setTimeout(() => setIsBumping(false), 350);
+            prevCountRef.current = cartCount;
+            return () => clearTimeout(timer);
+        }
+        prevCountRef.current = cartCount;
+    }, [cartCount]);
+
+    const MAX_BADGE_COUNT = 99;
+    const displayCount = cartCount > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : cartCount;
+
     const cartLabel = `Carrito, ${cartCount} ${
         cartCount === 1 ? "producto" : "productos"
     }`;
@@ -48,10 +65,10 @@ function Header({ cartCount = 0 }) {
                                 />
 
                                 <span
-                                    className="cart-count"
+                                    className={`cart-count${isBumping ? " cart-count--bump" : ""}`}
                                     aria-hidden="true"
                                 >
-                                    {cartCount}
+                                    {displayCount}
                                 </span>
                             </Link>
 
@@ -127,10 +144,10 @@ function Header({ cartCount = 0 }) {
                                             aria-hidden="true"
                                         />
                                         <span
-                                            className="cart-count"
+                                            className={`cart-count${isBumping ? " cart-count--bump" : ""}`}
                                             aria-hidden="true"
                                         >
-                                            {cartCount}
+                                            {displayCount}
                                         </span>
                                     </Link>
                                 </li>

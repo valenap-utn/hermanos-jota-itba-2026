@@ -164,7 +164,7 @@
 /* Modal personalizado con el fondo alabastro y bordes terracota corporativos */
 .modal-marca {
     background-color: var(--color-background);
-    border: 1px solid var(--color-primary) !important;
+    border: 1px solid var(--color-primary);
 }
 
 /* Filtro sepia para el botón de cierre (X) del modal para que combine con la paleta cálida */

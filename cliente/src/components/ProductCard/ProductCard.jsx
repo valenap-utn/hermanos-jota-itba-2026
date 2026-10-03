@@ -13,9 +13,15 @@ function ProductCard({ producto, onAgregarAlCarrito }) {
     };
   }, []);
 
-  const handleAgregar = () => {
+  const handleAgregar = (e) => {
     onAgregarAlCarrito(producto);
     setAgregado(true);
+
+    // Si fue un clic de puntero, liberamos el foco para evitar el anillo visual persistente
+    if (e?.detail > 0) {
+      e.currentTarget.blur();
+    }
+
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       setAgregado(false);
@@ -25,6 +31,10 @@ function ProductCard({ producto, onAgregarAlCarrito }) {
   const precio = producto.precio > 0
     ? `$${producto.precio.toLocaleString('es-AR')}`
     : 'Consultar precio';
+
+  const labelBoton = agregado
+    ? `${producto.nombre} añadido al carrito`
+    : `Añadir ${producto.nombre} al carrito`;
 
   return (
     <article className="product-card">
@@ -53,9 +63,11 @@ function ProductCard({ producto, onAgregarAlCarrito }) {
           {onAgregarAlCarrito && (
             <button
               type="button"
-              className="btn btn-marca-primario product-card-btn-carrito"
-              aria-label={`Añadir ${producto.nombre} al carrito`}
-              title="Añadir al carrito"
+              className={`btn btn-marca-primario product-card-btn-carrito ${
+                agregado ? "product-card-btn-carrito--agregado" : ""
+              }`}
+              aria-label={labelBoton}
+              title={labelBoton}
               onClick={handleAgregar}
             >
               {agregado ? (
@@ -67,7 +79,7 @@ function ProductCard({ producto, onAgregarAlCarrito }) {
           )}
 
           <span role="status" className="visually-hidden">
-            {agregado ? "Añadido al carrito" : ""}
+            {agregado ? `${producto.nombre} se añadió a tu carrito` : ""}
           </span>
         </div>
 
