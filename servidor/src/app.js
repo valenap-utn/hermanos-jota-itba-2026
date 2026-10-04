@@ -27,9 +27,9 @@ app.use(express.json());
 app.use('/api', router);
 app.use('/api', notFoundHandler);
 
-app.use(express.static(path.join(__dirname, '../cliente/dist')));
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../cliente/dist/index.html'));
+app.use(express.static(path.join(__dirname, '../../cliente/build')));
+app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(__dirname, '../../cliente/build/index.html'));
 });
 
 app.use(errorHandler);
