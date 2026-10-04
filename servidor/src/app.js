@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const router = require('./routes/router');
 const requestLogger = require('./middlewares/requestLogger');
 const notFoundHandler = require('./middlewares/notFoundHandler');
@@ -24,7 +25,13 @@ app.use(express.json());
 
 // Todas las rutas de la API se agrupan bajo el prefijo /api
 app.use('/api', router);
-app.use(notFoundHandler);
+app.use('/api', notFoundHandler);
+
+app.use(express.static(path.join(__dirname, '../../cliente/build')));
+app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(__dirname, '../../cliente/build/index.html'));
+});
+
 app.use(errorHandler);
 
 // Exporta la app para poder iniciar el servidor desde `server.js`

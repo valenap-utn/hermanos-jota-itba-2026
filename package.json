@@ -1,0 +1,7 @@
+{
+  "name": "hermanos-jota-deploy",
+  "scripts": {
+    "build": "npm install --prefix servidor && npm install --prefix cliente && npm run build --prefix cliente",
+    "start": "npm start --prefix servidor"
+  }
+}
