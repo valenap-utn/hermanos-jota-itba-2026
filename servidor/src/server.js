@@ -1,20 +1,22 @@
 require('dotenv').config();
 
 const app = require('./app');
+const connectDB = require('./config/db');
 
-// Usa el puerto definido por el `.env` o 3001 por defecto
+// Puerto del .env o 3001 por defecto
 const port = process.env.PORT || 3001;
 
-// Inicia el servidor
+// Iniciamos el servidor
 const start = async () => {
     try {
+        await connectDB();
         app.listen(port, () => {
             console.log(`Servidor corriendo en http://localhost:${port}`);
-        })
+        });
     } catch (e) {
-        console.error(e);
+        console.error('Error al iniciar el servidor:', e.message);
         process.exit(1);
     }
-}
+};
 
 start();

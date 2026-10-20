@@ -29,7 +29,7 @@ app.use('/api', notFoundHandler);
 
 app.use(express.static(path.join(__dirname, '../../cliente/build')));
 app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(__dirname, '../../cliente/build/index.html'));
+  res.sendFile(path.join(__dirname, '../../cliente/build/index.html'));
 });
 
 app.use(errorHandler);
