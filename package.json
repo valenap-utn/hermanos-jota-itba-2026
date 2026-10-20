@@ -3,5 +3,9 @@
   "scripts": {
     "build": "npm install --prefix servidor && npm install --prefix cliente && npm run build --prefix cliente",
     "start": "npm start --prefix servidor"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.8",
+    "mongoose": "^9.11.2"
   }
 }
