@@ -8,6 +8,12 @@ const errorHandler = (err, req, res, next) => {
     message = `El formato del id '${err.value}' no es válido`;
   }
 
+  // Manejo de errores de validación de Mongoose (campos requeridos, tipos o validaciones de schema)
+  if (err.name === 'ValidationError') {
+    statusCode = 400;
+    message = err.message;
+  }
+
   console.error(`[${req.method} ${req.url}] (${err.name}): ${message}`);
 
   res.status(statusCode).json({
