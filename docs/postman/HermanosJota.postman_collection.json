@@ -98,6 +98,172 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Mesa Ratona Alerce\",\n  \"descripcion\": \"Mesa ratona en madera de alerce con terminación mate.\",\n  \"precio\": 450000,\n  \"stock\": 15,\n  \"imagenUrl\": \"/assets/img/mesa-alerce.png\",\n  \"categoria\": \"living\"\n}"
+            },
+            "url": {
+              "raw": "{{servidorUrl}}/productos",
+              "host": [
+                "{{servidorUrl}}"
+              ],
+              "path": [
+                "productos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto inválido (faltan requeridos)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Falta nombre y precio\"\n}"
+            },
+            "url": {
+              "raw": "{{servidorUrl}}/productos",
+              "host": [
+                "{{servidorUrl}}"
+              ],
+              "path": [
+                "productos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar producto por id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"precio\": 490000,\n  \"stock\": 12\n}"
+            },
+            "url": {
+              "raw": "{{servidorUrl}}/productos/:id",
+              "host": [
+                "{{servidorUrl}}"
+              ],
+              "path": [
+                "productos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "670d8a1b0000000000000001"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar producto con id inexistente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"precio\": 500000\n}"
+            },
+            "url": {
+              "raw": "{{servidorUrl}}/productos/:id",
+              "host": [
+                "{{servidorUrl}}"
+              ],
+              "path": [
+                "productos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "670d8a1b0000000000000099"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar producto por id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{servidorUrl}}/productos/:id",
+              "host": [
+                "{{servidorUrl}}"
+              ],
+              "path": [
+                "productos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "670d8a1b0000000000000001"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar producto con id inexistente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{servidorUrl}}/productos/:id",
+              "host": [
+                "{{servidorUrl}}"
+              ],
+              "path": [
+                "productos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "670d8a1b0000000000000099"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
