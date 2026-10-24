@@ -1,16 +1,15 @@
-import {
-    createContext,
-    useContext,
-    useState,
-    useEffect,
-    useCallback,
-    useMemo
-} from "react";
-import { obtenerProductos } from "../services/productosService";
+import {createContext, useCallback, useContext, useEffect, useMemo, useState} from "react";
+import {obtenerProductos} from "../services/productosService";
 
 const CARRITO_STORAGE_KEY = "hermanosJotaCarrito";
 
 const CartContext = createContext(null);
+
+const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
+
+function esIdValido(id) {
+    return typeof id === "string" && OBJECT_ID_REGEX.test(id);
+}
 
 /*
 Lee del localStorage el array de referencias mínimas [{ id, cantidad }].
@@ -24,10 +23,16 @@ function cargarReferenciasLocales() {
         if (!Array.isArray(parsed)) return [];
 
         return parsed
-            .filter((item) => item && typeof item.id !== "undefined" && Number(item.cantidad) > 0)
-            .map((item) => ({
-                id: Number(item.id),
-                cantidad: Number(item.cantidad)
+            .filter(
+                (item) =>
+                    item &&
+                    esIdValido(item.id) &&
+                    Number.isInteger(item.cantidad) &&
+                    item.cantidad > 0
+            )
+            .map(({id, cantidad}) => ({
+                id,
+                cantidad
             }));
     } catch {
         return [];
@@ -40,17 +45,24 @@ No almacena información comercial sensible (precios, nombres, etc.).
 */
 function guardarReferenciasLocales(referencias) {
     try {
-        const dataMinima = referencias.map(({ id, cantidad }) => ({
-            id: Number(id),
-            cantidad: Number(cantidad)
-        }));
+        const dataMinima = referencias
+            .filter(
+                ({id, cantidad}) =>
+                    esIdValido(id) &&
+                    Number.isInteger(cantidad) &&
+                    cantidad > 0
+            )
+            .map(({id, cantidad}) => ({
+                id,
+                cantidad
+            }));
         localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify(dataMinima));
     } catch {
         // En caso de exceso o modo incógnito restringido
     }
 }
 
-export function CartProvider({ children }) {
+export function CartProvider({children}) {
     // Referencias previamente explicadas
     const [referencias, setReferencias] = useState(() => cargarReferenciasLocales());
 
@@ -94,20 +106,40 @@ export function CartProvider({ children }) {
         guardarReferenciasLocales(referencias);
     }, [referencias]);
 
+    // Descartar referencias a productos inexistentes tras cargar el catálogo
+    useEffect(() => {
+        if (cargando || error) return;
+
+        const idsDisponibles = new Set(
+            catalogo.map((producto) => producto._id)
+        );
+
+        setReferencias((prev) => {
+            const referenciasValidas = prev.filter((ref) =>
+                idsDisponibles.has(ref.id)
+            );
+
+            return referenciasValidas.length === prev.length
+                ? prev
+                : referenciasValidas;
+        });
+    }, [catalogo, cargando, error]);
+
     // Cruza las cantidades de las referencias con los datos del back
     const carrito = useMemo(() => {
-        if (!catalogo || catalogo.length === 0) return [];
+        if (catalogo.length === 0) return [];
 
         return referencias
             .map((ref) => {
-                const productoReal = catalogo.find((p) => p.id === ref.id);
-                if (!productoReal) return null; // Si ya no existe en el catálogo, se descarta
+                const productoReal = catalogo.find((p) => p._id === ref.id);
+
+                if (!productoReal) return null;
 
                 return {
-                    id: productoReal.id,
+                    id: productoReal._id,
                     nombre: productoReal.nombre,
                     precio: productoReal.precio,
-                    imagen: productoReal.imagen,
+                    imagen: productoReal.imagenUrl,
                     categoria: productoReal.categoria,
                     cantidad: ref.cantidad
                 };
@@ -117,8 +149,8 @@ export function CartProvider({ children }) {
 
     // Contador de unidades en el carrito
     const cartCount = useMemo(() => {
-        return referencias.reduce((acc, item) => acc + item.cantidad, 0);
-    }, [referencias]);
+        return carrito.reduce((acc, item) => acc + item.cantidad, 0);
+    }, [carrito]);
 
     // Total general calculado sobre los precios
     const totalGeneral = useMemo(() => {
@@ -127,47 +159,57 @@ export function CartProvider({ children }) {
 
     // Acciones del carrito
     const agregarAlCarrito = useCallback((productoOId, cantidad = 1) => {
-        const id = typeof productoOId === "object" ? Number(productoOId.id) : Number(productoOId);
-        if (!id) return;
+        const esProducto = productoOId !== null && typeof productoOId === "object";
+        const id = esProducto ? productoOId._id : productoOId;
 
-        // Si se entra directo a un producto, lo sumamos al catálogo en memoria de forma no persistente
-        if (typeof productoOId === "object" && productoOId.nombre && productoOId.precio !== undefined) {
+        if (!esIdValido(id) || !Number.isInteger(cantidad) || cantidad <= 0) return;
+
+        // Si se recibe el producto completo, incorporarlo al catálogo en memoria.
+        if (esProducto && productoOId.nombre && productoOId.precio !== undefined) {
             setCatalogo((prev) => {
-                if (prev.some((p) => p.id === id)) return prev;
+                if (prev.some((p) => p._id === id)) return prev;
                 return [...prev, productoOId];
             });
         }
 
         setReferencias((prev) => {
             const index = prev.findIndex((item) => item.id === id);
+
             if (index !== -1) {
                 return prev.map((item, idx) =>
                     idx === index
-                        ? { id: item.id, cantidad: item.cantidad + cantidad }
+                        ? {id: item.id, cantidad: item.cantidad + cantidad}
                         : item
                 );
             }
-            return [...prev, { id, cantidad }];
+
+            return [...prev, {id, cantidad}];
         });
     }, []);
 
     const actualizarCantidad = useCallback((id, nuevaCantidad) => {
-        const idNum = Number(id);
+        if (!esIdValido(id) || !Number.isInteger(nuevaCantidad)) return;
+
         if (nuevaCantidad <= 0) {
-            setReferencias((prev) => prev.filter((item) => item.id !== idNum));
+            setReferencias((prev) => prev.filter((item) => item.id !== id));
             return;
         }
 
         setReferencias((prev) =>
             prev.map((item) =>
-                item.id === idNum ? { id: item.id, cantidad: nuevaCantidad } : item
+                item.id === id
+                    ? {id: item.id, cantidad: nuevaCantidad}
+                    : item
             )
         );
     }, []);
 
     const eliminarDelCarrito = useCallback((id) => {
-        const idNum = Number(id);
-        setReferencias((prev) => prev.filter((item) => item.id !== idNum));
+        if (!esIdValido(id)) return;
+
+        setReferencias((prev) =>
+            prev.filter((item) => item.id !== id)
+        );
     }, []);
 
     const vaciarCarrito = useCallback(() => {
