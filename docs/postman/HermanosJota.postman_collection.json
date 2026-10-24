@@ -44,7 +44,55 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "3"
+                  "value": "670d8a1b0000000000000001"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener producto por id inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{servidorUrl}}/productos/:id",
+              "host": [
+                "{{servidorUrl}}"
+              ],
+              "path": [
+                "productos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "670d8a1b0000000000000099"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener producto con id inválido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{servidorUrl}}/productos/:id",
+              "host": [
+                "{{servidorUrl}}"
+              ],
+              "path": [
+                "productos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "id-invalido"
                 }
               ]
             }
