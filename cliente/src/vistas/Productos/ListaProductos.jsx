@@ -157,7 +157,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
         {!cargando && !error && productosPaginados.length > 0 && (
           <div className="row g-4">
             {productosPaginados.map((producto) => (
-              <div key={producto.id} className="col-12 col-sm-6 col-lg-4">
+              <div key={producto._id} className="col-12 col-sm-6 col-lg-4">
                 <ProductCard
                   producto={producto}
                   onAgregarAlCarrito={onAgregarAlCarrito}

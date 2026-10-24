@@ -15,8 +15,11 @@ export async function obtenerProductos() {
 export async function obtenerProductoPorId(id) {
   const response = await fetch(`${API_URL}/productos/${id}`);
 
-  if (!response.ok)
-    throw new Error(`Error al obtener el producto: ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(`Error al obtener el producto: ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
 
   const { data } = await response.json();
   return data;

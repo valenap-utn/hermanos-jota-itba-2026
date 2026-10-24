@@ -128,18 +128,18 @@ function Home() {
 
                         {!cargando && destacados.map((producto) => (
                             <article
-                                key={producto.id}
+                                key={producto._id}
                                 className="col-12 col-sm-6 col-lg-3"
                             >
                                 <Link
-                                    to={`/productos/${producto.id}`}
+                                    to={`/productos/${producto._id}`}
                                     className="home-producto-card"
                                     aria-label={`Ver detalle de ${producto.nombre}`}
                                 >
                                     <figure className="home-producto-figure">
                                         <img
                                             className="home-producto-image"
-                                            src={producto.imagen}
+                                            src={producto.imagenUrl}
                                             alt={producto.nombre}
                                             loading="lazy"
                                         />

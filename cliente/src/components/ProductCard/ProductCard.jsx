@@ -41,7 +41,7 @@ function ProductCard({ producto, onAgregarAlCarrito }) {
       <figure className="product-card-figure">
         <img
           className="product-card-image"
-          src={producto.imagen}
+          src={producto.imagenUrl}
           alt={producto.nombre}
         />
       </figure>
@@ -84,7 +84,7 @@ function ProductCard({ producto, onAgregarAlCarrito }) {
         </div>
 
         <Link
-          to={`/productos/${producto.id}`}
+          to={`/productos/${producto._id}`}
           className="product-card-link texto-titulo-cta"
           aria-label={`Ver detalle de ${producto.nombre}`}
         >
