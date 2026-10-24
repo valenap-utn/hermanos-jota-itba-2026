@@ -28,4 +28,53 @@ const obtenerProductoPorId = asyncHandler(async (req, res) => {
   successResponse(res, { data: producto });
 });
 
-module.exports = { listarProductos, obtenerProductoPorId };
+// Crea y persiste un nuevo producto en MongoDB
+const crearProducto = asyncHandler(async (req, res) => {
+  const nuevoProducto = await Product.create(req.body);
+  successResponse(res, { data: nuevoProducto, statusCode: 201 });
+});
+
+// Actualiza un producto existente en MongoDB según su _id
+const actualizarProducto = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!OBJECT_ID_REGEX.test(id)) {
+    throw createError.BadRequest(`El id '${id}' no es válido`);
+  }
+
+  const productoActualizado = await Product.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true
+  });
+
+  if (!productoActualizado) {
+    throw createError.NotFound(`No se encontró ningún producto con id ${id}`);
+  }
+
+  successResponse(res, { data: productoActualizado });
+});
+
+// Elimina un producto de MongoDB según su _id
+const eliminarProducto = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!OBJECT_ID_REGEX.test(id)) {
+    throw createError.BadRequest(`El id '${id}' no es válido`);
+  }
+
+  const productoEliminado = await Product.findByIdAndDelete(id);
+
+  if (!productoEliminado) {
+    throw createError.NotFound(`No se encontró ningún producto con id ${id}`);
+  }
+
+  successResponse(res, { data: productoEliminado });
+});
+
+module.exports = {
+  listarProductos,
+  obtenerProductoPorId,
+  crearProducto,
+  actualizarProducto,
+  eliminarProducto
+};
