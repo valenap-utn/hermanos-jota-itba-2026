@@ -10,6 +10,7 @@ import Contacto from "./vistas/Contacto/Contacto";
 import Carrito from "./vistas/Carrito/Carrito";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import { useCart } from "./context/CartContext";
+import CrearProducto from "./vistas/CrearProducto/CrearProducto";
 
 function App() {
     const {
@@ -69,6 +70,13 @@ function App() {
                             />
                         }
                     />
+
+                    <Route
+                        path="/admin/crear-producto"
+                        element={<CrearProducto/>}
+                        >
+                    </Route>
+
                 </Routes>
             </main>
 
