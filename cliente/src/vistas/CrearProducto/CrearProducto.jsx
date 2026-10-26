@@ -34,6 +34,7 @@ function CrearProducto() {
     const [enviando, setEnviando] = useState(false);
     const [errorEnvio, setErrorEnvio] = useState("");
     const [categoriaCreada, setCategoriaCreada] = useState(null);
+    const [imagenSubida, setImagenSubida] = useState(null);
 
     const manejarCambio = (event) => {
         const {name, value, type, checked} = event.target;
@@ -74,6 +75,10 @@ function CrearProducto() {
             Number(formulario.stock) < 0
         ) {
             nuevosErrores.stock = "Ingresá un stock entero, mayor o igual a 0.";
+        }
+
+        if (!formulario.categoria) {
+            nuevosErrores.categoria = "Seleccioná una categoría.";
         }
 
         if (
@@ -124,7 +129,21 @@ function CrearProducto() {
                 }
             }
 
-            const imagenUrl = await subirImagenProducto(imagen);
+            let imagenUrl;
+
+            if (imagenSubida?.archivo === imagen) {
+                // Reutilizamos la URL si el archivo no cambió
+                imagenUrl = imagenSubida.url;
+            } else {
+                // Subimos la imagen por primera vez
+                imagenUrl = await subirImagenProducto(imagen);
+
+                // Guardamos la URL para posibles reintentos
+                setImagenSubida({
+                    archivo: imagen,
+                    url: imagenUrl,
+                });
+            }
 
             const datosProducto = {
                 nombre: formulario.nombre.trim(),
@@ -314,6 +333,10 @@ function CrearProducto() {
                                     value={formulario.categoria}
                                     onChange={manejarCambio}
                                     disabled={cargandoCategorias || Boolean(errorCategorias)}
+                                    aria-invalid={Boolean(errores.categoria)}
+                                    aria-describedby={
+                                        errores.categoria ? "error-categoria" : undefined
+                                    }
                                 >
                                     <option value="">
                                         {cargandoCategorias
@@ -331,6 +354,16 @@ function CrearProducto() {
                                         + Otra categoría...
                                     </option>
                                 </select>
+
+                                {errores.categoria && (
+                                    <p
+                                        id="error-categoria"
+                                        className="crear-producto__error"
+                                        role="alert"
+                                    >
+                                        {errores.categoria}
+                                    </p>
+                                )}
 
                                 {errorCategorias && (
                                     <p className="crear-producto__error" role="alert">
@@ -403,7 +436,11 @@ function CrearProducto() {
                             accept="image/jpeg,image/png,image/webp"
                             className="crear-producto__input form-control rounded-0 p-3 bg-light border-0 texto-principal"
                             onChange={(event) => {
-                                setImagen(event.target.files?.[0] ?? null);
+                                const nuevoArchivo = event.target.files?.[0] ?? null;
+
+                                setImagen(nuevoArchivo);
+                                setImagenSubida(null);
+
                                 setErrores((prev) => ({
                                     ...prev,
                                     imagen: undefined,
