@@ -24,3 +24,9 @@ realizadas en los distintos issues del backend.
 - **Obtener producto por id** — `GET /api/productos/:id` → 200 con el producto correspondiente buscando por su `_id` de MongoDB.
 - **Obtener producto por id inexistente** — `GET /api/productos/:id` con un `_id` con formato válido que no existe en la base de datos → 404.
 - **Obtener producto con id inválido** — `GET /api/productos/:id` con un formato de identificador inválido → 400.
+- **Crear producto** — `POST /api/productos` con body JSON válido → 201 y el objeto persistido con su `_id`.
+- **Crear producto inválido** — `POST /api/productos` con campos obligatorios faltantes → 400.
+- **Actualizar producto** — `PUT /api/productos/:id` con campos a modificar → 200 con el producto actualizado.
+- **Actualizar producto inexistente** — `PUT /api/productos/:id` con `_id` que no existe → 404.
+- **Eliminar producto** — `DELETE /api/productos/:id` con `_id` existente → 200 con el producto eliminado.
+- **Eliminar producto inexistente** — `DELETE /api/productos/:id` con `_id` que no existe → 404.
