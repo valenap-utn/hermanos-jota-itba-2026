@@ -1,7 +1,8 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {crearCategoria, obtenerCategorias} from "../../services/categoriasService";
 import {crearProducto, subirImagenProducto} from "../../services/productosService";
+import {ImagePlus, UploadCloud, X} from "lucide-react";
 import "./CrearProducto.styles.css";
 
 const estadoInicial = {
@@ -36,6 +37,10 @@ function CrearProducto() {
     const [categoriaCreada, setCategoriaCreada] = useState(null);
     const [imagenSubida, setImagenSubida] = useState(null);
 
+    const inputImagenRef = useRef(null);
+    const [arrastrandoImagen, setArrastrandoImagen] = useState(false);
+    const [vistaPrevia, setVistaPrevia] = useState(null);
+
     const manejarCambio = (event) => {
         const {name, value, type, checked} = event.target;
 
@@ -48,6 +53,71 @@ function CrearProducto() {
             ...prev,
             [name]: undefined,
         }));
+    };
+
+    const seleccionarImagen = (archivo) => {
+        if (enviando) return;
+
+        setErrores((prev) => ({
+            ...prev,
+            imagen: undefined,
+        }));
+
+        if (!archivo) return;
+
+        const tiposPermitidos = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+        ];
+
+        if (!tiposPermitidos.includes(archivo.type)) {
+            setErrores((prev) => ({
+                ...prev,
+                imagen: "La imagen debe ser JPG, JPEG, PNG o WebP.",
+            }));
+            return;
+        }
+
+        if (archivo.size > 5 * 1024 * 1024) {
+            setErrores((prev) => ({
+                ...prev,
+                imagen: "La imagen no puede superar los 5 MB.",
+            }));
+            return;
+        }
+
+        setImagen(archivo);
+        setImagenSubida(null);
+    };
+
+    const quitarImagen = () => {
+        if (enviando) return;
+
+        setImagen(null);
+        setImagenSubida(null);
+        setErrores((prev) => ({
+            ...prev,
+            imagen: undefined,
+        }));
+
+        if (inputImagenRef.current) {
+            inputImagenRef.current.value = "";
+        }
+    };
+
+    const manejarDrop = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setArrastrandoImagen(false);
+
+        if (enviando) return;
+
+        const archivo = event.dataTransfer.files?.[0];
+
+        if (archivo) {
+            seleccionarImagen(archivo);
+        }
     };
 
     const validarFormulario = () => {
@@ -198,6 +268,17 @@ function CrearProducto() {
         };
     }, []);
 
+    useEffect(() => {
+        if (!imagen) {
+            setVistaPrevia(null);
+            return;
+        }
+
+        const url = URL.createObjectURL(imagen);
+        setVistaPrevia(url);
+
+        return () => URL.revokeObjectURL(url);
+    }, [imagen]);
 
     return (
         <section className="crear-producto container">
@@ -425,35 +506,123 @@ function CrearProducto() {
                         </div>
                     </fieldset>
 
-                    <div className="col-12">
+                    <div className="crear-producto__imagen-seccion">
                         <label htmlFor="imagen" className="crear-producto__label">
                             Imagen del producto *
                         </label>
 
-                        <input
-                            id="imagen"
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            className="crear-producto__input form-control rounded-0 p-3 bg-light border-0 texto-principal"
-                            onChange={(event) => {
-                                const nuevoArchivo = event.target.files?.[0] ?? null;
+                        <div
+                            className={`crear-producto__dropzone ${
+                                arrastrandoImagen ? "crear-producto__dropzone--activo" : ""
+                            } ${errores.imagen ? "crear-producto__dropzone--error" : ""}`}
+                            onDragEnter={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
 
-                                setImagen(nuevoArchivo);
-                                setImagenSubida(null);
-
-                                setErrores((prev) => ({
-                                    ...prev,
-                                    imagen: undefined,
-                                }));
+                                if (!enviando) setArrastrandoImagen(true);
                             }}
-                            aria-invalid={Boolean(errores.imagen)}
-                            aria-describedby={errores.imagen ? "error-imagen" : undefined}
-                        />
+                            onDragOver={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+
+                                if (event.dataTransfer) {
+                                    event.dataTransfer.dropEffect = enviando ? "none" : "copy";
+                                }
+                            }}
+                            onDragLeave={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+
+                                if (!event.currentTarget.contains(event.relatedTarget)) {
+                                    setArrastrandoImagen(false);
+                                }
+                            }}
+                            onDrop={manejarDrop}
+                        >
+                            <input
+                                ref={inputImagenRef}
+                                id="imagen"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                className="crear-producto__file-input"
+                                disabled={enviando}
+                                onChange={(event) => {
+                                    const archivo = event.target.files?.[0];
+                                    seleccionarImagen(archivo);
+
+                                    // Permite seleccionar nuevamente el mismo archivo.
+                                    event.target.value = "";
+                                }}
+                                aria-invalid={Boolean(errores.imagen)}
+                                aria-describedby="imagen-ayuda error-imagen"
+                            />
+
+                            <div className="crear-producto__dropzone-contenido">
+                                <UploadCloud size={34} strokeWidth={1.5} aria-hidden="true"/>
+
+                                <p className="crear-producto__dropzone-titulo">
+                                    Arrastrá una imagen hasta acá
+                                </p>
+
+                                <p className="crear-producto__dropzone-subtitulo">
+                                    o seleccioná un archivo desde tu dispositivo
+                                </p>
+
+                                <button
+                                    type="button"
+                                    className="crear-producto__seleccionar"
+                                    onClick={() => inputImagenRef.current?.click()}
+                                    disabled={enviando}
+                                >
+                                    <ImagePlus size={18} aria-hidden="true"/>
+                                    Seleccionar imagen
+                                </button>
+
+                                <p id="imagen-ayuda" className="crear-producto__dropzone-ayuda">
+                                    JPG, PNG o WebP · Máximo 5 MB
+                                </p>
+                            </div>
+                        </div>
 
                         {errores.imagen && (
-                            <p id="error-imagen" className="crear-producto__error" role="alert">
+                            <p
+                                id="error-imagen"
+                                className="crear-producto__error"
+                                role="alert"
+                            >
                                 {errores.imagen}
                             </p>
+                        )}
+
+                        {imagen && vistaPrevia && (
+                            <div className="crear-producto__preview">
+                                <img
+                                    src={vistaPrevia}
+                                    alt="Vista previa de la imagen seleccionada"
+                                    className="crear-producto__preview-imagen"
+                                />
+
+                                <div className="crear-producto__preview-info">
+                                    <p className="crear-producto__preview-nombre">
+                                        {imagen.name}
+                                    </p>
+
+                                    <p className="crear-producto__preview-tamano">
+                                        {(imagen.size / (1024 * 1024)).toFixed(2)} MB
+                                    </p>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="crear-producto__preview-eliminar"
+                                    onClick={quitarImagen}
+                                    disabled={enviando}
+                                    aria-label={`Quitar imagen ${imagen.name}`}
+                                    title="Quitar imagen"
+                                >
+                                    <X size={20} aria-hidden="true"/>
+                                </button>
+                            </div>
                         )}
                     </div>
 
