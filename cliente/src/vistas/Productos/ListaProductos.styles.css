@@ -3,7 +3,7 @@
 }
 
 .productos-header {
-    max-width: 650px;
+    max-width: 100%;
 }
 
 .productos-header h1 {
@@ -67,37 +67,144 @@
     color: var(--color-text-titles);
 }
 
-.pagination {
-    --bs-pagination-color: var(--color-primary);
-    --bs-pagination-bg: var(--color-white);
-    --bs-pagination-border-color: var(--border-field);
-    --bs-pagination-hover-color: var(--color-white);
-    --bs-pagination-hover-bg: var(--color-primary);
-    --bs-pagination-hover-border-color: var(--color-primary);
-    --bs-pagination-active-color: var(--color-white);
-    --bs-pagination-active-bg: var(--color-primary);
-    --bs-pagination-active-border-color: var(--color-primary);
-    --bs-pagination-disabled-color: var(--color-gray);
-}
-
-.page-link {
-    font-family: var(--font-primary);
-    border-radius: 0;
-    margin: 0 2px;
-    
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0.5rem 1rem;
-    
+.productos-crear-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    gap: 0.6rem;
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+
+    background-color: var(--color-primary);
+    color: var(--color-white);
+
+    font-family: var(--font-primary);
+    font-size: 0.85rem;
+    text-decoration: none;
+
+    transition: background-color 0.25s ease;
 }
 
-@media (max-width: 575.98px) {
-    .page-link {
-        padding: 0.5rem;
+.productos-crear-link svg {
+    transition: transform 0.3s ease;
+}
+
+@media (hover: hover) {
+    .productos-crear-link:hover {
+        background-color: var(--color-text-titles);
+        color: var(--color-white);
+    }
+
+    .productos-crear-link:hover svg {
+        transform: rotate(90deg);
+    }
+}
+
+.productos-crear-link:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .productos-crear-link,
+    .productos-crear-link svg {
+        transition: none;
+    }
+}
+
+/* Paginación del catálogo */
+
+.productos-paginacion {
+    display: flex;
+    justify-content: center;
+}
+
+.productos-paginacion__lista {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.productos-paginacion__boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.5rem;
+
+    border: 1px solid transparent;
+    border-radius: 0;
+
+    background-color: transparent;
+    color: var(--color-primary);
+
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+}
+
+/* Página actual */
+
+.productos-paginacion__boton--activo {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+/* Flechas sin contenedor visible */
+
+.productos-paginacion__boton:has(svg) {
+    border: none;
+    background-color: transparent;
+    color: var(--color-primary);
+}
+
+/* Hover */
+
+@media (hover: hover) {
+    .productos-paginacion__boton:not(:disabled):not(
+        .productos-paginacion__boton--activo
+    ):hover {
+        color: var(--color-text-titles);
+        background-color: var(--border-soft);
+    }
+
+    .productos-paginacion__boton:has(svg):not(:disabled):hover {
+        background-color: transparent;
+        color: var(--color-text-titles);
+    }
+}
+
+/* Estados deshabilitados */
+
+.productos-paginacion__boton:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* Accesibilidad */
+
+.productos-paginacion__boton:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .productos-paginacion__boton {
+        transition: none;
     }
 }
