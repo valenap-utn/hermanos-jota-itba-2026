@@ -1,4 +1,5 @@
 import {useEffect, useMemo, useState} from "react";
+import {Link} from "react-router-dom";
 import "./ListaProductos.styles.css";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import {obtenerProductos} from "../../services/productosService";
@@ -6,6 +7,7 @@ import {obtenerCategorias} from "../../services/categoriasService";
 import {
     Search,
     PackageOpen,
+    Plus,
     ChevronLeft,
     ChevronRight
 } from "lucide-react";
@@ -142,6 +144,14 @@ function ListaProductos({onAgregarAlCarrito}) {
                                 y objetos de diseño.
                             </p>
                         </div>
+
+                        <Link
+                            to="/admin/crear-producto"
+                            className="productos-crear-link"
+                        >
+                            <Plus size={18} aria-hidden="true"/>
+                            <span>Agregar producto</span>
+                        </Link>
                     </div>
                 </div>
 
