@@ -18,9 +18,9 @@ const upload = multer({
 
     fileFilter: (req, file, cb) => {
         if (!TIPOS_PERMITIDOS.includes(file.mimetype)) {
-            return cb(
-                new Error('Formato no permitido. Utilizá JPG, PNG o WebP.')
-            );
+            const error = new Error('Formato no permitido. Utilizá JPG, PNG o WebP.');
+            error.status = 400;
+            return cb(error);
         }
 
         cb(null, true);
