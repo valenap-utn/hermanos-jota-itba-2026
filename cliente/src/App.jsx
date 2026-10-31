@@ -74,8 +74,7 @@ function App() {
                     <Route
                         path="/admin/crear-producto"
                         element={<CrearProducto/>}
-                        >
-                    </Route>
+                    />
 
                 </Routes>
             </main>
