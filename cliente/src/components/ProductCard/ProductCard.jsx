@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import "./ProductCard.styles.css";
-import { ArrowRight, ShoppingCart, Check, Pencil } from "lucide-react";
+import { ArrowRight, ShoppingCart, Check, Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-function ProductCard({ producto, onAgregarAlCarrito, mostrarEditar }) {
+function ProductCard({ producto, onAgregarAlCarrito, mostrarEditar, onEliminar }) {
   const [agregado, setAgregado] = useState(false);
   const timeoutRef = useRef(null);
 
@@ -61,11 +61,24 @@ function ProductCard({ producto, onAgregarAlCarrito, mostrarEditar }) {
           </p>
 
           <div className="product-card-acciones">
+            {onEliminar && (
+              <button
+                type="button"
+                className="product-card-btn-admin product-card-btn-admin--eliminar"
+                aria-label={`Eliminar ${producto.nombre}`}
+                title={`Eliminar ${producto.nombre}`}
+                onClick={() => onEliminar(producto)}
+              >
+                <Trash2 size={20} aria-hidden="true" />
+              </button>
+            )}
+
             {mostrarEditar && (
               <Link
                 to={`/admin/editar-producto/${producto._id}`}
                 className="product-card-btn-admin"
                 aria-label={`Editar ${producto.nombre}`}
+                title={`Editar ${producto.nombre}`}
               >
                 <Pencil size={20} aria-hidden="true" />
               </Link>

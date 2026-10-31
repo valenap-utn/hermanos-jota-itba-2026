@@ -1,8 +1,10 @@
 import {useEffect, useRef, useState} from "react";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import "./DetalleProducto.styles.css";
-import {obtenerProductoPorId} from "../../services/productosService";
-import {ArrowLeft, Check, Minus, Pencil, Plus, ShoppingCart} from "lucide-react";
+import {obtenerProductoPorId, eliminarProducto} from "../../services/productosService";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
+import {useCart} from "../../context/CartContext";
+import {ArrowLeft, Check, Minus, Pencil, Plus, ShoppingCart, Trash2} from "lucide-react";
 
 function DetalleProducto({onAgregarAlCarrito}) {
     const {id} = useParams();
@@ -14,6 +16,10 @@ function DetalleProducto({onAgregarAlCarrito}) {
     const [cantidad, setCantidad] = useState(1);
     const [agregado, setAgregado] = useState(false);
     const timeoutRef = useRef(null);
+    const {sincronizarProducto} = useCart();
+    const [modalVisible, setModalVisible] = useState(false);
+    const [eliminando, setEliminando] = useState(false);
+    const [errorEliminar, setErrorEliminar] = useState("");
 
     useEffect(() => {
         return () => {
@@ -27,6 +33,22 @@ function DetalleProducto({onAgregarAlCarrito}) {
 
     const incrementarCantidad = () => {
         setCantidad((prev) => Math.min(99, prev + 1));
+    };
+
+    const handleEliminar = async () => {
+        setEliminando(true);
+        setErrorEliminar("");
+
+        try {
+            await eliminarProducto(id);
+            sincronizarProducto(id, {eliminado: true});
+            navigate("/productos");
+        } catch (err) {
+            setModalVisible(false);
+            setErrorEliminar(err.message || "No se pudo eliminar el producto. Intentá nuevamente.");
+        } finally {
+            setEliminando(false);
+        }
     };
 
     const handleAgregar = (e) => {
@@ -234,7 +256,26 @@ function DetalleProducto({onAgregarAlCarrito}) {
                                 <Pencil size={18} aria-hidden="true" />
                                 Editar producto
                             </Link>
+
+                            <button
+                                type="button"
+                                className="detalle-btn-eliminar texto-titulo-cta"
+                                onClick={() => {
+                                    setErrorEliminar("");
+                                    setModalVisible(true);
+                                }}
+                                disabled={eliminando}
+                            >
+                                <Trash2 size={18} aria-hidden="true" />
+                                Eliminar producto
+                            </button>
                         </div>
+
+                        {errorEliminar && (
+                            <div className="detalle-error-operacion mt-3" role="alert">
+                                <p className="mb-0">{errorEliminar}</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="col-12">
@@ -270,6 +311,16 @@ function DetalleProducto({onAgregarAlCarrito}) {
                         </section>
                     </div>
                 </article>
+
+                <ConfirmModal
+                    show={modalVisible}
+                    title="Eliminar producto"
+                    message={`¿Confirmás que querés eliminar "${producto.nombre}"? Esta acción no se puede deshacer.`}
+                    actionLabel="Eliminar definitivamente"
+                    onConfirmar={handleEliminar}
+                    onCancelar={() => setModalVisible(false)}
+                    procesando={eliminando}
+                />
             </div>
         </section>
     );

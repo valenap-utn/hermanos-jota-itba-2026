@@ -154,6 +154,15 @@
     outline-offset: 2px;
 }
 
+.product-card-btn-admin--eliminar {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.product-card-btn-admin--eliminar:focus-visible {
+    outline-color: var(--color-error);
+}
+
 .product-card-btn-carrito {
     position: relative;
     z-index: 2;

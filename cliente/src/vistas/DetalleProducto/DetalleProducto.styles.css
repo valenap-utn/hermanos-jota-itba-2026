@@ -215,7 +215,8 @@
     border-top: 1px solid var(--border-soft);
 }
 
-.detalle-btn-editar {
+.detalle-btn-editar,
+.detalle-btn-eliminar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -227,12 +228,23 @@
     background-color: transparent;
     color: var(--color-primary);
     text-decoration: none;
+    cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.detalle-btn-eliminar {
+    border-color: var(--color-error);
+    color: var(--color-error);
 }
 
 @media (hover: hover) {
     .detalle-btn-editar:hover {
         background-color: var(--color-primary);
+        color: var(--color-background);
+    }
+
+    .detalle-btn-eliminar:hover:not(:disabled) {
+        background-color: var(--color-error);
         color: var(--color-background);
     }
 }
@@ -242,14 +254,40 @@
     outline-offset: 3px;
 }
 
+.detalle-btn-eliminar:focus-visible {
+    outline: 2px solid var(--color-error);
+    outline-offset: 3px;
+}
+
+.detalle-btn-eliminar:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.detalle-error-operacion {
+    padding: 0.85rem 1rem;
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid var(--color-error);
+    color: var(--color-error);
+    font-size: 0.9rem;
+}
+
 @media (min-width: 576px) {
-    .detalle-btn-editar {
+    .detalle-admin-acciones {
+        flex-direction: row;
+    }
+
+    .detalle-btn-editar,
+    .detalle-btn-eliminar {
+        flex: 1;
         width: auto;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .detalle-btn-editar {
+    .detalle-btn-editar,
+    .detalle-btn-eliminar {
         transition: none;
     }
 }
