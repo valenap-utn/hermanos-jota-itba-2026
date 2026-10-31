@@ -1,7 +1,9 @@
 import {useEffect, useMemo, useState} from "react";
 import "./ListaProductos.styles.css";
 import ProductCard from "../../components/ProductCard/ProductCard";
-import {obtenerProductos} from "../../services/productosService";
+import {obtenerProductos, eliminarProducto} from "../../services/productosService";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
+import {useCart} from "../../context/CartContext";
 import {
     Search,
     PackageOpen,
@@ -27,6 +29,10 @@ function ListaProductos({onAgregarAlCarrito}) {
     const [productos, setProductos] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
+    const {sincronizarProducto} = useCart();
+    const [productoAEliminar, setProductoAEliminar] = useState(null);
+    const [eliminando, setEliminando] = useState(false);
+    const [errorEliminar, setErrorEliminar] = useState("");
 
     const [busqueda, setBusqueda] = useState("");
     const [categoria, setCategoria] = useState("todos");
@@ -79,6 +85,34 @@ function ListaProductos({onAgregarAlCarrito}) {
             return coincideCategoria && coincideBusqueda;
         });
     }, [productos, busqueda, categoria]);
+
+    const handleConfirmarEliminar = async () => {
+        if (!productoAEliminar) return;
+        const id = productoAEliminar._id;
+        setEliminando(true);
+        setErrorEliminar("");
+
+        try {
+            await eliminarProducto(id);
+            sincronizarProducto(id, {eliminado: true});
+
+            const nuevosProductos = productos.filter((p) => p._id !== id);
+            setProductos(nuevosProductos);
+
+            const nuevosFiltrados = productosFiltrados.filter((p) => p._id !== id);
+            const nuevoTotalPaginas = Math.ceil(nuevosFiltrados.length / productosPorPagina) || 1;
+            if (paginaActual > nuevoTotalPaginas) {
+                setPaginaActual(nuevoTotalPaginas);
+            }
+            setProductoAEliminar(null);
+        } catch (err) {
+            setProductoAEliminar(null);
+            setErrorEliminar(err.message || "No se pudo eliminar el producto. Intentá nuevamente.");
+            window.scrollTo({ top: 0 });
+        } finally {
+            setEliminando(false);
+        }
+    };
 
     const indiceUltimoProducto = paginaActual * productosPorPagina;
     const indicePrimerProducto = indiceUltimoProducto - productosPorPagina;
@@ -156,6 +190,12 @@ function ListaProductos({onAgregarAlCarrito}) {
                     </div>
                 </div>
 
+                {errorEliminar && (
+                    <div className="productos-error-operacion" role="alert">
+                        <p className="mb-0">{errorEliminar}</p>
+                    </div>
+                )}
+
                 {cargando && (
                     <div className="text-center my-5" role="status" aria-live="polite">
                         <div className="spinner-border" aria-hidden="true"/>
@@ -190,6 +230,11 @@ function ListaProductos({onAgregarAlCarrito}) {
                                 <ProductCard
                                     producto={producto}
                                     onAgregarAlCarrito={onAgregarAlCarrito}
+                                    mostrarEditar
+                                    onEliminar={(prod) => {
+                                        setErrorEliminar("");
+                                        setProductoAEliminar(prod);
+                                    }}
                                 />
                             </div>
                         ))}
@@ -252,6 +297,16 @@ function ListaProductos({onAgregarAlCarrito}) {
                         </ul>
                     </nav>
                 )}
+
+                <ConfirmModal
+                    show={Boolean(productoAEliminar)}
+                    title="Eliminar producto"
+                    message={`¿Confirmás que querés eliminar "${productoAEliminar?.nombre || ""}"? Esta acción no se puede deshacer.`}
+                    actionLabel="Eliminar definitivamente"
+                    onConfirmar={handleConfirmarEliminar}
+                    onCancelar={() => setProductoAEliminar(null)}
+                    procesando={eliminando}
+                />
             </div>
         </section>
     );

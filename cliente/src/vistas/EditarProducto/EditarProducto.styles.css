@@ -1,0 +1,108 @@
+.editar-producto {
+  padding-top: 3rem;
+  padding-bottom: 4rem;
+}
+
+.editar-producto__contenedor {
+  width: 100%;
+  max-width: 960px;
+  margin-inline: auto;
+}
+
+.editar-producto__encabezado {
+  margin-bottom: 2.5rem;
+}
+
+.editar-producto__encabezado h1 {
+  margin-bottom: 0.5rem;
+}
+
+.editar-producto__encabezado p {
+  color: var(--color-gray);
+}
+
+.editar-producto__btn-cancelar {
+  padding: 0.6rem 1.25rem;
+  border: 1px solid var(--border-field);
+  background-color: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .editar-producto__btn-cancelar:not(:disabled):hover {
+    background-color: var(--color-surface-hover);
+  }
+}
+
+.editar-producto__btn-cancelar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.editar-producto__btn-cancelar:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.editar-producto__error-operacion {
+  padding: 0.85rem 1rem;
+  background-color: var(--color-surface-light);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--color-error);
+  color: var(--color-error);
+  font-size: 0.9rem;
+}
+
+.editar-producto__zona-peligro {
+  display: flex;
+  justify-content: flex-start;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-field);
+}
+
+.editar-producto__btn-eliminar {
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--color-error);
+  background: transparent;
+  color: var(--color-error);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@media (hover: hover) {
+  .editar-producto__btn-eliminar:not(:disabled):hover {
+    background-color: var(--color-error);
+    color: var(--color-white);
+  }
+}
+
+.editar-producto__btn-eliminar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.editar-producto__btn-eliminar:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+@media (max-width: 575px) {
+  .editar-producto {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+  }
+
+  .editar-producto__btn-eliminar {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editar-producto__btn-eliminar {
+    transition: none;
+  }
+}
+

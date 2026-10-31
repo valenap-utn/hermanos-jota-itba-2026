@@ -70,3 +70,45 @@ export async function crearProducto(datos) {
 
   return resultado.data;
 }
+
+// Actualiza un producto existente en MongoDB mediante PUT /api/productos/:id
+export async function actualizarProducto(id, datos) {
+  const response = await fetch(`${API_URL}/productos/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(datos),
+  });
+
+  const resultado = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(
+      resultado.message || "No se pudo actualizar el producto."
+    );
+    error.status = response.status;
+    throw error;
+  }
+
+  return resultado.data;
+}
+
+// Elimina un producto de MongoDB mediante DELETE /api/productos/:id
+export async function eliminarProducto(id) {
+  const response = await fetch(`${API_URL}/productos/${id}`, {
+    method: "DELETE",
+  });
+
+  const resultado = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(
+      resultado.message || "No se pudo eliminar el producto."
+    );
+    error.status = response.status;
+    throw error;
+  }
+
+  return resultado.data;
+}
