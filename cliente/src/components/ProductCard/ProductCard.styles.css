@@ -70,6 +70,7 @@
 .product-card-precio-row {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: 0.75rem;
     margin-bottom: 1rem;
@@ -113,6 +114,44 @@
 
 .product-card:hover .product-card-link span {
     background-size: 100% 1px;
+}
+
+/* ===== GRUPO DE ACCIONES (editar + carrito) ===== */
+
+.product-card-acciones {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.product-card-btn-admin {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--color-primary);
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+@media (hover: hover) {
+    .product-card-btn-admin:hover {
+        background-color: var(--color-surface-hover);
+    }
+}
+
+.product-card-btn-admin:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
 }
 
 .product-card-btn-carrito {
@@ -162,7 +201,8 @@
     .product-card-link i,
     .product-card-link svg,
     .product-card-link span,
-    .product-card-btn-carrito {
+    .product-card-btn-carrito,
+    .product-card-btn-admin {
         transition: none;
     }
 }

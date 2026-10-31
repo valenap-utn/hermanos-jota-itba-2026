@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import "./ProductCard.styles.css";
-import { ArrowRight, ShoppingCart, Check } from "lucide-react";
+import { ArrowRight, ShoppingCart, Check, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
 
-function ProductCard({ producto, onAgregarAlCarrito }) {
+function ProductCard({ producto, onAgregarAlCarrito, mostrarEditar }) {
   const [agregado, setAgregado] = useState(false);
   const timeoutRef = useRef(null);
 
@@ -60,23 +60,35 @@ function ProductCard({ producto, onAgregarAlCarrito }) {
             {precio}
           </p>
 
-          {onAgregarAlCarrito && (
-            <button
-              type="button"
-              className={`btn btn-marca-primario product-card-btn-carrito ${
-                agregado ? "product-card-btn-carrito--agregado" : ""
-              }`}
-              aria-label={labelBoton}
-              title={labelBoton}
-              onClick={handleAgregar}
-            >
-              {agregado ? (
-                <Check size={20} aria-hidden="true" />
-              ) : (
-                <ShoppingCart size={20} aria-hidden="true" />
-              )}
-            </button>
-          )}
+          <div className="product-card-acciones">
+            {mostrarEditar && (
+              <Link
+                to={`/admin/editar-producto/${producto._id}`}
+                className="product-card-btn-admin"
+                aria-label={`Editar ${producto.nombre}`}
+              >
+                <Pencil size={20} aria-hidden="true" />
+              </Link>
+            )}
+
+            {onAgregarAlCarrito && (
+              <button
+                type="button"
+                className={`btn btn-marca-primario product-card-btn-carrito ${
+                  agregado ? "product-card-btn-carrito--agregado" : ""
+                }`}
+                aria-label={labelBoton}
+                title={labelBoton}
+                onClick={handleAgregar}
+              >
+                {agregado ? (
+                  <Check size={20} aria-hidden="true" />
+                ) : (
+                  <ShoppingCart size={20} aria-hidden="true" />
+                )}
+              </button>
+            )}
+          </div>
 
           <span role="status" className="visually-hidden">
             {agregado ? `${producto.nombre} se añadió a tu carrito` : ""}

@@ -204,3 +204,52 @@
     font-size: 1rem;
     color: var(--color-primary);
 }
+
+/* ===== ACCIONES DE ADMINISTRACIÓN ===== */
+
+.detalle-admin-acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-soft);
+}
+
+.detalle-btn-editar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@media (hover: hover) {
+    .detalle-btn-editar:hover {
+        background-color: var(--color-primary);
+        color: var(--color-background);
+    }
+}
+
+.detalle-btn-editar:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+@media (min-width: 576px) {
+    .detalle-btn-editar {
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .detalle-btn-editar {
+        transition: none;
+    }
+}

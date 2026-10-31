@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import "./DetalleProducto.styles.css";
 import {obtenerProductoPorId} from "../../services/productosService";
-import {ArrowLeft, Check, Minus, Plus, ShoppingCart} from "lucide-react";
+import {ArrowLeft, Check, Minus, Pencil, Plus, ShoppingCart} from "lucide-react";
 
 function DetalleProducto({onAgregarAlCarrito}) {
     const {id} = useParams();
@@ -225,6 +225,16 @@ function DetalleProducto({onAgregarAlCarrito}) {
                   </span>
                             </div>
                         )}
+
+                        <div className="detalle-admin-acciones mt-4">
+                            <Link
+                                to={`/admin/editar-producto/${producto._id}`}
+                                className="detalle-btn-editar texto-titulo-cta"
+                            >
+                                <Pencil size={18} aria-hidden="true" />
+                                Editar producto
+                            </Link>
+                        </div>
                     </div>
 
                     <div className="col-12">

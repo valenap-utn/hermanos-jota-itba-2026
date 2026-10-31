@@ -190,6 +190,7 @@ function ListaProductos({onAgregarAlCarrito}) {
                                 <ProductCard
                                     producto={producto}
                                     onAgregarAlCarrito={onAgregarAlCarrito}
+                                    mostrarEditar
                                 />
                             </div>
                         ))}
