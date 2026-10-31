@@ -16,7 +16,7 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hook que garantiza que nunca se supere el límite de catálogo
+// Garantiza que nunca se supere el límite de catálogo
 // Es para proteger la base de datos y cloudinary mientras no haya autenticación.
 productSchema.pre('save', async function () {
   if (this.isNew) {

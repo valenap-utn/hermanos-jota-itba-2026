@@ -2,14 +2,13 @@ import {useEffect, useMemo, useState} from "react";
 import "./ListaProductos.styles.css";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import {obtenerProductos} from "../../services/productosService";
+import {obtenerCategorias} from "../../services/categoriasService";
 import {
     Search,
     PackageOpen,
-    Plus,
     ChevronLeft,
     ChevronRight
 } from "lucide-react";
-import {Link} from "react-router-dom";
 
 function normalizarTexto(texto) {
     return texto
@@ -25,6 +24,7 @@ function escaparRegExp(texto) {
 
 function ListaProductos({onAgregarAlCarrito}) {
     const [productos, setProductos] = useState([]);
+    const [categorias, setCategorias] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
 
@@ -37,12 +37,18 @@ function ListaProductos({onAgregarAlCarrito}) {
     useEffect(() => {
         let activo = true;
 
-        async function cargarProductos() {
+        async function cargarDatos() {
             try {
                 setCargando(true);
                 setError(null);
-                const data = await obtenerProductos();
-                if (activo) setProductos(data);
+                const [dataProductos, dataCategorias] = await Promise.all([
+                    obtenerProductos(),
+                    obtenerCategorias().catch(() => [])
+                ]);
+                if (activo) {
+                    setProductos(dataProductos);
+                    setCategorias(dataCategorias);
+                }
             } catch (err) {
                 if (activo)
                     setError("No pudimos cargar el catálogo. Intentá nuevamente más tarde.");
@@ -51,7 +57,7 @@ function ListaProductos({onAgregarAlCarrito}) {
             }
         }
 
-        cargarProductos();
+        cargarDatos();
 
         return () => {
             activo = false;
@@ -62,6 +68,28 @@ function ListaProductos({onAgregarAlCarrito}) {
         setPaginaActual(1);
     }, [busqueda, categoria]);
 
+    const categoriasDisponibles = useMemo(() => {
+        const mapa = new Map();
+
+        // Categorías registradas en la API (Single Source of Truth)
+        (categorias || []).forEach((cat) => {
+            const nombre = typeof cat === "string" ? cat : cat.nombre;
+            if (nombre && nombre.trim()) {
+                const normalizado = nombre.trim().toLowerCase();
+                if (!mapa.has(normalizado)) {
+                    mapa.set(normalizado, nombre.trim());
+                }
+            }
+        });
+
+        return Array.from(mapa.entries())
+            .map(([clave, nombreOriginal]) => ({
+                id: clave,
+                label: nombreOriginal.charAt(0).toUpperCase() + nombreOriginal.slice(1)
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label));
+    }, [categorias]);
+
     const productosFiltrados = useMemo(() => {
         const textoBusqueda = normalizarTexto(busqueda);
         const regexBusqueda = textoBusqueda
@@ -70,7 +98,9 @@ function ListaProductos({onAgregarAlCarrito}) {
 
         return productos.filter((producto) => {
             const coincideCategoria =
-                categoria === "todos" || producto.categoria === categoria;
+                categoria === "todos" ||
+                (producto.categoria &&
+                    producto.categoria.trim().toLowerCase() === categoria.toLowerCase());
 
             const coincideBusqueda = regexBusqueda
                 ? regexBusqueda.test(normalizarTexto(producto.nombre))
@@ -112,14 +142,6 @@ function ListaProductos({onAgregarAlCarrito}) {
                                 y objetos de diseño.
                             </p>
                         </div>
-
-                        <Link
-                            to="/admin/crear-producto"
-                            className="productos-crear-link"
-                        >
-                            <Plus size={18} aria-hidden="true"/>
-                            <span>Agregar producto</span>
-                        </Link>
                     </div>
                 </div>
 
@@ -148,10 +170,11 @@ function ListaProductos({onAgregarAlCarrito}) {
                             onChange={(e) => setCategoria(e.target.value)}
                         >
                             <option value="todos">Todas las categorías</option>
-                            <option value="living">Living</option>
-                            <option value="comedor">Comedor</option>
-                            <option value="dormitorio">Dormitorio</option>
-                            <option value="oficina">Oficina</option>
+                            {categoriasDisponibles.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>

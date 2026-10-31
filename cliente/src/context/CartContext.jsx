@@ -63,15 +63,14 @@ function guardarReferenciasLocales(referencias) {
 }
 
 export function CartProvider({children}) {
-    // Referencias previamente explicadas
+    // Referencias guardadas en el navegador
     const [referencias, setReferencias] = useState(() => cargarReferenciasLocales());
 
-    // Catálogo obtenido desde el back
+    // Catálogo obtenido desde el backend
     const [catalogo, setCatalogo] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
 
-    // Hidratación de datos al iniciar el contexto
     useEffect(() => {
         let activo = true;
 
@@ -106,9 +105,10 @@ export function CartProvider({children}) {
         guardarReferenciasLocales(referencias);
     }, [referencias]);
 
-    // Descartar referencias a productos inexistentes tras cargar el catálogo
+    // Descartar referencias a productos inexistentes tras cargar el catálogo.
+    // Exigimos que catalogo.length > 0 para evitar purgar accidentalmente si la BD está vacía momentáneamente.
     useEffect(() => {
-        if (cargando || error) return;
+        if (cargando || error || catalogo.length === 0) return;
 
         const idsDisponibles = new Set(
             catalogo.map((producto) => producto._id)
@@ -125,7 +125,7 @@ export function CartProvider({children}) {
         });
     }, [catalogo, cargando, error]);
 
-    // Cruza las cantidades de las referencias con los datos del back
+    // Cruza las cantidades de las referencias con los datos del backend
     const carrito = useMemo(() => {
         if (catalogo.length === 0) return [];
 
@@ -141,6 +141,7 @@ export function CartProvider({children}) {
                     precio: productoReal.precio,
                     imagen: productoReal.imagenUrl,
                     categoria: productoReal.categoria,
+                    stock: productoReal.stock,
                     cantidad: ref.cantidad
                 };
             })
@@ -149,8 +150,8 @@ export function CartProvider({children}) {
 
     // Contador de unidades en el carrito
     const cartCount = useMemo(() => {
-        return carrito.reduce((acc, item) => acc + item.cantidad, 0);
-    }, [carrito]);
+        return referencias.reduce((acc, item) => acc + item.cantidad, 0);
+    }, [referencias]);
 
     // Total general calculado sobre los precios
     const totalGeneral = useMemo(() => {
@@ -174,18 +175,22 @@ export function CartProvider({children}) {
 
         setReferencias((prev) => {
             const index = prev.findIndex((item) => item.id === id);
+            const prodCatalogo = catalogo.find((p) => p._id === id);
+            const stockDisponible = (esProducto && productoOId.stock !== undefined)
+                ? productoOId.stock
+                : (prodCatalogo?.stock ?? (catalogo.length === 0 ? cantidad : 0));
 
             if (index !== -1) {
                 return prev.map((item, idx) =>
                     idx === index
-                        ? {id: item.id, cantidad: item.cantidad + cantidad}
+                        ? {id: item.id, cantidad: Math.min(stockDisponible, item.cantidad + cantidad)}
                         : item
                 );
             }
 
-            return [...prev, {id, cantidad}];
+            return [...prev, {id, cantidad: Math.min(stockDisponible, cantidad)}];
         });
-    }, []);
+    }, [catalogo]);
 
     const actualizarCantidad = useCallback((id, nuevaCantidad) => {
         if (!esIdValido(id) || !Number.isInteger(nuevaCantidad)) return;
@@ -195,14 +200,19 @@ export function CartProvider({children}) {
             return;
         }
 
+        const prodCatalogo = catalogo.find((p) => p._id === id);
+        const cantidadAjustada = prodCatalogo && prodCatalogo.stock !== undefined
+            ? Math.min(prodCatalogo.stock, nuevaCantidad)
+            : nuevaCantidad;
+
         setReferencias((prev) =>
             prev.map((item) =>
                 item.id === id
-                    ? {id: item.id, cantidad: nuevaCantidad}
+                    ? {id: item.id, cantidad: cantidadAjustada}
                     : item
             )
         );
-    }, []);
+    }, [catalogo]);
 
     const eliminarDelCarrito = useCallback((id) => {
         if (!esIdValido(id)) return;
