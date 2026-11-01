@@ -1,9 +1,10 @@
 const Product = require('../models/Product');
-const Category = require('../models/Category');
 const createError = require('http-errors');
 const asyncHandler = require('../utils/asyncHandler');
 const successResponse = require('../utils/successResponse');
 const { subirACloudinary } = require('../utils/subirACloudinary');
+const resolverCategoria = require('../utils/resolverCategoria');
+const crearRegexInsensible = require('../utils/crearRegexInsensible');
 
 const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
 const MAX_PRODUCTOS = Number(process.env.MAX_PRODUCTOS) || 25;
@@ -19,29 +20,31 @@ function validarImagen(url) {
 
 // Devuelve el catálogo de productos con filtrado y paginación
 const listarProductos = asyncHandler(async (req, res) => {
-  const { categoria, busqueda, search, page, limit } = req.query;
+  const { categoria, busqueda, page, limit } = req.query;
   const filtro = {};
 
-  if (categoria && categoria !== 'todos' && categoria.trim()) {
+  if (typeof categoria === 'string' && categoria !== 'todos' && categoria.trim()) {
     const catEscapada = categoria.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     filtro.categoria = { $regex: new RegExp(`^${catEscapada}$`, 'i') };
   }
 
-  const terminoBusqueda = busqueda || search;
-  if (terminoBusqueda && terminoBusqueda.trim()) {
-    const terminoEscapado = terminoBusqueda.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    filtro.$or = [
-      { nombre: { $regex: terminoEscapado, $options: 'i' } },
-      { descripcion: { $regex: terminoEscapado, $options: 'i' } }
-    ];
+  if (typeof busqueda === 'string' && busqueda.trim()) {
+    const regexBusqueda = crearRegexInsensible(busqueda);
+    if (regexBusqueda) {
+      filtro.$or = [
+        { nombre: { $regex: regexBusqueda } },
+        { descripcion: { $regex: regexBusqueda } }
+      ];
+    }
   }
 
   // Paginación si se especifican parámetros de página o límite
   if (page !== undefined || limit !== undefined) {
     const numPage = Math.max(1, Number(page) || 1);
-    const numLimit = Math.max(1, Number(limit) || 12);
+    const numLimit = Math.min(50, Math.max(1, Number(limit) || 12));
     const total = await Product.countDocuments(filtro);
     const productos = await Product.find(filtro)
+      .sort({ nombre: 1, _id: 1 })
       .skip((numPage - 1) * numLimit)
       .limit(numLimit);
 
@@ -56,7 +59,7 @@ const listarProductos = asyncHandler(async (req, res) => {
     });
   }
 
-  const productos = await Product.find(filtro);
+  const productos = await Product.find(filtro).sort({ nombre: 1, _id: 1 });
   successResponse(res, { data: productos });
 });
 
@@ -109,19 +112,7 @@ const crearProducto = asyncHandler(async (req, res) => {
     );
   }
 
-  // Resolver categoría
-  let categoriaFinal = '';
-  if (categoria && typeof categoria === 'string' && categoria.trim()) {
-    const nombreCategoria = categoria.trim();
-    const cat = await Category.findOneAndUpdate(
-      { nombre: nombreCategoria },
-      { $setOnInsert: { nombre: nombreCategoria } },
-      { upsert: true, new: true, collation: { locale: 'es', strength: 1 } }
-    );
-    categoriaFinal = cat.nombre;
-  }
-
-  // Resolver imagen
+  // Validar y procesar imagen PRIMERO
   let imagenUrlFinal = '';
   if (req.file && req.file.buffer) {
     imagenUrlFinal = await subirACloudinary(req.file.buffer);
@@ -133,6 +124,9 @@ const crearProducto = asyncHandler(async (req, res) => {
   } else {
     throw createError.BadRequest('Debés seleccionar una imagen para el producto.');
   }
+
+  // Resolver categoría
+  const categoriaFinal = await resolverCategoria(categoria);
 
   // Crear el producto en MongoDB
   const nuevoProducto = await Product.create({
@@ -170,13 +164,7 @@ const actualizarProducto = asyncHandler(async (req, res) => {
 
   // Resolver categoría de forma atómica si se actualiza
   if (datosActualizacion.categoria && typeof datosActualizacion.categoria === 'string') {
-    const nombreCat = datosActualizacion.categoria.trim();
-    const cat = await Category.findOneAndUpdate(
-      { nombre: nombreCat },
-      { $setOnInsert: { nombre: nombreCat } },
-      { upsert: true, new: true, collation: { locale: 'es', strength: 1 } }
-    );
-    datosActualizacion.categoria = cat.nombre;
+    datosActualizacion.categoria = await resolverCategoria(datosActualizacion.categoria);
   }
 
   if (datosActualizacion.precio !== undefined) {
