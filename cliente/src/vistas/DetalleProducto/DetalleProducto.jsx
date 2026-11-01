@@ -61,6 +61,7 @@ function DetalleProducto({onAgregarAlCarrito}) {
         if (!onAgregarAlCarrito || !producto || stockDisponible === 0) return;
         onAgregarAlCarrito(producto, cantidad);
         setAgregado(true);
+        setCantidad(1);
 
         if (e?.detail > 0) {
             e.currentTarget.blur();
