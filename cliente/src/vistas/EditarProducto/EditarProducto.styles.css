@@ -56,15 +56,14 @@
   font-size: 0.9rem;
 }
 
-.editar-producto__zona-peligro {
-  display: flex;
-  justify-content: flex-start;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border-field);
-}
+
 
 .editar-producto__btn-eliminar {
-  padding: 0.75rem 2rem;
+  padding: 0.85rem 2rem;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--color-error);
   background: transparent;
   color: var(--color-error);

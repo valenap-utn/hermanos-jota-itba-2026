@@ -7,17 +7,21 @@ import {
 } from "../../services/productosService";
 import ProductoForm from "../../components/ProductoForm/ProductoForm";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
+import ErrorState from "../../components/ErrorState/ErrorState";
 import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
 import "./EditarProducto.styles.css";
 
 function EditarProducto() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { sincronizarProducto } = useCart();
+  const { mostrarToast } = useToast();
 
   const [producto, setProducto] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
+  const [recarga, setRecarga] = useState(0);
 
   const [guardando, setGuardando] = useState(false);
   const [procesandoForm, setProcesandoForm] = useState(false);
@@ -69,7 +73,7 @@ function EditarProducto() {
     return () => {
       cicloCargaRef.current += 1;
     };
-  }, [id]);
+  }, [id, recarga]);
 
   const handleCancelar = () => {
     if (operacionEnCurso) return;
@@ -89,12 +93,13 @@ function EditarProducto() {
       sincronizarProducto(productoActualizado);
       if (cicloCargaRef.current !== cicloActual) return;
 
+      mostrarToast("Producto actualizado correctamente.", "success");
       navigate(`/productos/${id}`);
     } catch (err) {
       if (cicloCargaRef.current !== cicloActual) return;
-      setErrorOperacion(
-        err.message || "No se pudo actualizar el producto. Intentá nuevamente."
-      );
+      const msg = err.message || "No se pudo actualizar el producto. Intentá nuevamente.";
+      setErrorOperacion(msg);
+      mostrarToast(msg, "error");
     } finally {
       if (cicloCargaRef.current === cicloActual) {
         setGuardando(false);
@@ -115,13 +120,14 @@ function EditarProducto() {
       sincronizarProducto(id, { eliminado: true });
       if (cicloCargaRef.current !== cicloActual) return;
 
+      mostrarToast(`"${producto?.nombre || "Producto"}" fue eliminado correctamente.`, "success");
       navigate("/productos");
     } catch (err) {
       if (cicloCargaRef.current !== cicloActual) return;
       setModalVisible(false);
-      setErrorOperacion(
-        err.message || "No se pudo eliminar el producto. Intentá nuevamente."
-      );
+      const msg = err.message || "No se pudo eliminar el producto. Intentá nuevamente.";
+      setErrorOperacion(msg);
+      mostrarToast(msg, "error");
     } finally {
       if (cicloCargaRef.current === cicloActual) {
         setEliminando(false);
@@ -144,20 +150,15 @@ function EditarProducto() {
     const esNoEncontrado = errorCarga?.tipo === "no_encontrado";
     return (
       <section className="editar-producto container">
-        <div className="text-center my-5" role="alert">
-          <h1 className="texto-titulo-elegante texto-marca-primario">
-            {esNoEncontrado ? "Producto no encontrado" : "No pudimos cargar el producto"}
-          </h1>
-          <p className="texto-principal mb-4">
-            {errorCarga?.mensaje || "El producto que buscás no existe o no está disponible."}
-          </p>
-          <button
-            type="button"
-            className="texto-titulo-cta py-3 px-5 rounded-0 btn-marca-primario"
-            onClick={() => navigate("/productos")}
-          >
-            Volver al catálogo
-          </button>
+        <div className="container text-center my-5">
+          <ErrorState
+            titulo={esNoEncontrado ? "Producto no encontrado" : "No pudimos cargar el producto"}
+            mensaje={errorCarga?.mensaje || "El producto que buscás no existe o no está disponible."}
+            textoBoton={esNoEncontrado ? "Volver al catálogo" : "Reintentar"}
+            onAccion={esNoEncontrado ? () => navigate("/productos") : () => setRecarga((n) => n + 1)}
+            textoSecundario={!esNoEncontrado ? "Volver al catálogo" : undefined}
+            onAccionSecundaria={!esNoEncontrado ? () => navigate("/productos") : undefined}
+          />
         </div>
       </section>
     );
@@ -170,7 +171,7 @@ function EditarProducto() {
     <section className="editar-producto container">
       <div className="editar-producto__contenedor">
         <header className="editar-producto__encabezado">
-          <div className="d-flex justify-content-between align-items-start gap-3 mb-2">
+          <div className="d-flex justify-content-between align-items-center gap-3">
             <h1 className="texto-titulo-elegante texto-marca-primario mb-0">
               Editar producto
             </h1>
@@ -183,13 +184,16 @@ function EditarProducto() {
               Cancelar
             </button>
           </div>
-          <p className="texto-principal">{producto.nombre}</p>
         </header>
 
         <ProductoForm
           key={id}
           initialValues={producto}
           onSubmit={handleGuardar}
+          onEliminar={() => {
+            setErrorOperacion("");
+            setModalVisible(true);
+          }}
           cargando={operacionEnCurso}
           onProcesandoChange={setProcesandoForm}
         />
@@ -199,20 +203,6 @@ function EditarProducto() {
             <p className="mb-0">{errorOperacion}</p>
           </div>
         )}
-
-        <div className="editar-producto__zona-peligro mt-4">
-          <button
-            type="button"
-            className="texto-titulo-cta editar-producto__btn-eliminar"
-            onClick={() => {
-              setErrorOperacion("");
-              setModalVisible(true);
-            }}
-            disabled={operacionEnCurso}
-          >
-            Eliminar producto
-          </button>
-        </div>
       </div>
 
       <ConfirmModal
@@ -229,4 +219,3 @@ function EditarProducto() {
 }
 
 export default EditarProducto;
-

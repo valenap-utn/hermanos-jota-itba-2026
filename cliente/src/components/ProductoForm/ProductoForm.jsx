@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { crearCategoria, obtenerCategorias } from "../../services/categoriasService";
 import { subirImagenProducto } from "../../services/productosService";
 import SelectorImagenProducto from "./SelectorImagenProducto";
+import { useToast } from "../../context/ToastContext";
 import {
   OTRA_CATEGORIA,
   construirPayload,
@@ -13,10 +14,12 @@ import "./ProductoForm.styles.css";
 function ProductoForm({
   initialValues = {},
   onSubmit,
+  onEliminar,
   cargando = false,
   onProcesandoChange,
 }) {
   const montadoRef = useRef(true);
+  const { mostrarToast } = useToast();
 
   useEffect(() => {
     montadoRef.current = true;
@@ -63,7 +66,7 @@ function ProductoForm({
         if (activo) {
           setCategorias(data || []);
         }
-      } catch (err) {
+      } catch {
         if (activo) {
           setErrorCategorias("No se pudieron cargar las categorías.");
         }
@@ -154,7 +157,6 @@ function ProductoForm({
       }
     );
 
-    // Derivar setCustomValidity del resultado de validación centralizado
     if (form.nombre) form.nombre.setCustomValidity(nuevosErrores.nombre || "");
     if (form.descripcion) {
       form.descripcion.setCustomValidity(nuevosErrores.descripcion || "");
@@ -174,8 +176,20 @@ function ProductoForm({
     setErrores(nuevosErrores);
 
     if (!esValido || !form.checkValidity()) {
-      const primerInvalido = form.querySelector(":invalid");
-      primerInvalido?.focus();
+      const keysConError = Object.keys(nuevosErrores);
+      const primerCampo =
+        keysConError.length > 0
+          ? form.elements[keysConError[0]]
+          : form.querySelector(":invalid");
+
+      if (primerCampo) {
+        primerCampo.scrollIntoView({ behavior: "smooth", block: "center" });
+        primerCampo.focus({ preventScroll: true });
+      }
+
+      const msg = "Completá los campos obligatorios para guardar el producto.";
+      setErrorEnvio(msg);
+      mostrarToast("Hay campos obligatorios incompletos. Revisá el formulario.", "error");
       return;
     }
 
@@ -202,37 +216,30 @@ function ProductoForm({
         } else {
           const urlSubida = await subirImagenProducto(archivoImagen);
           if (!montadoRef.current) return;
+          setImagenSubida({ archivo: archivoImagen, url: urlSubida });
           urlFinal = urlSubida;
-          setImagenSubida({ archivo: archivoImagen, url: urlFinal });
         }
       }
 
-      if (!montadoRef.current) return;
-
       const payload = construirPayload(valoresLimpios, {
         categoriaFinal,
-        imagenUrlFinal: urlFinal,
+        urlFinal,
       });
 
-      if (onSubmit) {
-        await onSubmit(payload);
-      }
+      await onSubmit?.(payload);
     } catch (err) {
-      if (montadoRef.current) {
-        setErrorEnvio(err.message || "Ocurrió un error al procesar el producto.");
-      }
+      if (!montadoRef.current) return;
+      setErrorEnvio(
+        err.message || "Ocurrió un error al procesar el formulario."
+      );
     } finally {
-      if (montadoRef.current) {
-        notificarProcesando(false);
-      }
+      notificarProcesando(false);
     }
   };
 
   return (
     <form
-      className={`producto-form needs-validation ${
-        wasValidated ? "was-validated" : ""
-      }`}
+      className="producto-form"
       noValidate
       onSubmit={manejarSubmit}
     >
@@ -255,11 +262,15 @@ function ProductoForm({
               value={formulario.nombre}
               onChange={manejarCambio}
               disabled={procesando}
+              aria-invalid={Boolean(wasValidated && errores.nombre)}
+              aria-describedby={wasValidated && errores.nombre ? "error-nombre" : undefined}
               required
             />
-            <div className="invalid-feedback">
-              {errores.nombre || "El nombre es obligatorio."}
-            </div>
+            {wasValidated && errores.nombre && (
+              <p id="error-nombre" className="producto-form__error" role="alert">
+                {errores.nombre}
+              </p>
+            )}
           </div>
 
           <div className="col-12">
@@ -275,11 +286,15 @@ function ProductoForm({
               value={formulario.descripcion}
               onChange={manejarCambio}
               disabled={procesando}
+              aria-invalid={Boolean(wasValidated && errores.descripcion)}
+              aria-describedby={wasValidated && errores.descripcion ? "error-descripcion" : undefined}
               required
             />
-            <div className="invalid-feedback">
-              {errores.descripcion || "La descripción es obligatoria."}
-            </div>
+            {wasValidated && errores.descripcion && (
+              <p id="error-descripcion" className="producto-form__error" role="alert">
+                {errores.descripcion}
+              </p>
+            )}
           </div>
 
           <div className="col-12 col-md-6">
@@ -297,11 +312,15 @@ function ProductoForm({
               value={formulario.precio}
               onChange={manejarCambio}
               disabled={procesando}
+              aria-invalid={Boolean(wasValidated && errores.precio)}
+              aria-describedby={wasValidated && errores.precio ? "error-precio" : undefined}
               required
             />
-            <div className="invalid-feedback">
-              {errores.precio || "Ingresá un precio válido mayor o igual a 0."}
-            </div>
+            {wasValidated && errores.precio && (
+              <p id="error-precio" className="producto-form__error" role="alert">
+                {errores.precio}
+              </p>
+            )}
           </div>
 
           <div className="col-12 col-md-6">
@@ -319,11 +338,15 @@ function ProductoForm({
               value={formulario.stock}
               onChange={manejarCambio}
               disabled={procesando}
+              aria-invalid={Boolean(wasValidated && errores.stock)}
+              aria-describedby={wasValidated && errores.stock ? "error-stock" : undefined}
               required
             />
-            <div className="invalid-feedback">
-              {errores.stock || "Ingresá un stock entero mayor o igual a 0."}
-            </div>
+            {wasValidated && errores.stock && (
+              <p id="error-stock" className="producto-form__error" role="alert">
+                {errores.stock}
+              </p>
+            )}
           </div>
         </div>
       </fieldset>
@@ -347,6 +370,8 @@ function ProductoForm({
               disabled={
                 procesando || cargandoCategorias || Boolean(errorCategorias)
               }
+              aria-invalid={Boolean(wasValidated && errores.categoria)}
+              aria-describedby={wasValidated && errores.categoria ? "error-categoria" : undefined}
               required
             >
               <option value="">
@@ -371,9 +396,11 @@ function ProductoForm({
 
               <option value={OTRA_CATEGORIA}>+ Otra categoría...</option>
             </select>
-            <div className="invalid-feedback">
-              {errores.categoria || "Seleccioná una categoría."}
-            </div>
+            {wasValidated && errores.categoria && (
+              <p id="error-categoria" className="producto-form__error" role="alert">
+                {errores.categoria}
+              </p>
+            )}
             {errorCategorias && (
               <p className="producto-form__error" role="alert">
                 {errorCategorias}
@@ -395,12 +422,15 @@ function ProductoForm({
                 value={nuevaCategoria}
                 onChange={manejarCambioNuevaCategoria}
                 disabled={procesando}
+                aria-invalid={Boolean(wasValidated && errores.nuevaCategoria)}
+                aria-describedby={wasValidated && errores.nuevaCategoria ? "error-nuevaCategoria" : undefined}
                 required
               />
-              <div className="invalid-feedback">
-                {errores.nuevaCategoria ||
-                  "Ingresá el nombre de la nueva categoría."}
-              </div>
+              {wasValidated && errores.nuevaCategoria && (
+                <p id="error-nuevaCategoria" className="producto-form__error" role="alert">
+                  {errores.nuevaCategoria}
+                </p>
+              )}
             </div>
           )}
 
@@ -458,11 +488,15 @@ function ProductoForm({
               value={formulario.imagenUrl}
               onChange={manejarCambio}
               disabled={procesando}
+              aria-invalid={Boolean(wasValidated && errores.imagenUrl)}
+              aria-describedby={wasValidated && errores.imagenUrl ? "error-imagenUrl" : undefined}
               required={!archivoImagen}
             />
-            <div className="invalid-feedback">
-              {errores.imagenUrl || "La imagen es obligatoria."}
-            </div>
+            {wasValidated && errores.imagenUrl && (
+              <p id="error-imagenUrl" className="producto-form__error" role="alert">
+                {errores.imagenUrl}
+              </p>
+            )}
           </div>
 
           <div className="col-12">
@@ -506,6 +540,17 @@ function ProductoForm({
       )}
 
       <div className="producto-form__acciones">
+        {onEliminar && (
+          <button
+            type="button"
+            className="texto-titulo-cta editar-producto__btn-eliminar rounded-0"
+            onClick={onEliminar}
+            disabled={procesando}
+          >
+            Eliminar producto
+          </button>
+        )}
+
         <button
           type="submit"
           className="texto-titulo-cta py-3 px-5 rounded-0 btn-marca-primario producto-form__submit"

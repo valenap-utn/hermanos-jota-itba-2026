@@ -25,6 +25,19 @@
   box-shadow: 0 0 0 0.2rem var(--border-medium);
 }
 
+.producto-form input[aria-invalid="true"],
+.producto-form select[aria-invalid="true"],
+.producto-form textarea[aria-invalid="true"] {
+  outline: 1px solid var(--color-error);
+}
+
+.producto-form input[aria-invalid="true"]:focus,
+.producto-form select[aria-invalid="true"]:focus,
+.producto-form textarea[aria-invalid="true"]:focus {
+  border-color: var(--color-error) !important;
+  box-shadow: 0 0 0 0.2rem rgba(163, 32, 32, 0.25) !important;
+}
+
 .producto-form__checkbox {
   display: inline-flex;
   align-items: center;
@@ -174,10 +187,10 @@
 
 .producto-form__acciones {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: stretch;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 2.5rem;
 }
 
 .producto-form__submit {
@@ -187,12 +200,13 @@
 @media (min-width: 576px) {
   .producto-form__acciones {
     flex-direction: row;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .producto-form__submit {
     width: auto;
     min-width: 220px;
+    margin-left: auto;
   }
 }
-
