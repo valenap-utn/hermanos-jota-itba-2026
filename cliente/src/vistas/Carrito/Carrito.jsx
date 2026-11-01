@@ -1,17 +1,22 @@
 import { useState, useRef } from "react";
+import PropTypes from "prop-types";
+import { AlertCircle } from "lucide-react";
 import "./Carrito.styles.css";
 import CarritoVacio from "./components/CarritoVacio";
 import CarritoItem from "./components/CarritoItem";
 import CarritoResumen from "./components/CarritoResumen";
 import ModalEliminarProducto from "./components/ModalEliminarProducto";
 import StatusModal from "../../components/StatusModal/StatusModal";
+import ErrorState from "../../components/ErrorState/ErrorState";
 
 function Carrito({
     carrito = [],
     onActualizarCantidad,
     onEliminarDelCarrito,
     onVaciarCarrito,
-    cargando = false
+    cargando = false,
+    error = null,
+    onReintentar
 }) {
     const [productoPendienteEliminar, setProductoPendienteEliminar] = useState(null);
     const [modalCompraVisible, setModalCompraVisible] = useState(false);
@@ -76,7 +81,6 @@ function Carrito({
 
     return (
         <section className="carrito-main">
-            {/* Live region para lectores de pantalla */}
             <div
                 id="carrito-status"
                 className="visually-hidden"
@@ -91,6 +95,16 @@ function Carrito({
                     <div className="text-center my-5 py-5" role="status" aria-live="polite">
                         <div className="spinner-border text-primary" style={{ color: "var(--color-primary)" }} aria-hidden="true" />
                         <p className="texto-principal mt-3">Sincronizando carrito...</p>
+                    </div>
+                ) : error ? (
+                    <div className="py-5">
+                        <ErrorState
+                            icono={AlertCircle}
+                            titulo="No pudimos sincronizar tu carrito"
+                            mensaje={error}
+                            textoBoton="Reintentar"
+                            onAccion={onReintentar}
+                        />
                     </div>
                 ) : carrito.length === 0 ? (
                     <CarritoVacio exploreRef={exploreButtonRef} />
@@ -126,7 +140,6 @@ function Carrito({
                 )}
             </div>
 
-            {/* Modal de confirmación de eliminación */}
             <ModalEliminarProducto
                 show={Boolean(productoPendienteEliminar)}
                 producto={productoPendienteEliminar}
@@ -134,7 +147,6 @@ function Carrito({
                 onCancelar={handleCancelarEliminar}
             />
 
-            {/* Modal de confirmación de compra simulada */}
             <StatusModal
                 show={modalCompraVisible}
                 title="¡Gracias por tu compra!"
@@ -145,5 +157,15 @@ function Carrito({
         </section>
     );
 }
+
+Carrito.propTypes = {
+    carrito: PropTypes.array,
+    onActualizarCantidad: PropTypes.func,
+    onEliminarDelCarrito: PropTypes.func,
+    onVaciarCarrito: PropTypes.func,
+    cargando: PropTypes.bool,
+    error: PropTypes.string,
+    onReintentar: PropTypes.func
+};
 
 export default Carrito;

@@ -23,7 +23,9 @@ function App() {
         actualizarCantidad,
         eliminarDelCarrito,
         vaciarCarrito,
-        cargando
+        cargando,
+        error: errorCarrito,
+        reintentarSincronizacion
     } = useCart();
 
     return (
@@ -71,6 +73,8 @@ function App() {
                                     onEliminarDelCarrito={eliminarDelCarrito}
                                     onVaciarCarrito={vaciarCarrito}
                                     cargando={cargando}
+                                    error={errorCarrito}
+                                    onReintentar={reintentarSincronizacion}
                                 />
                             }
                         />

@@ -11,10 +11,6 @@ function esIdValido(id) {
     return typeof id === "string" && OBJECT_ID_REGEX.test(id);
 }
 
-/*
-Lee del localStorage el array de referencias mínimas [{ id, cantidad }].
-Repara cualquier dato residual garantizando que ningún precio, nombre o descripción persista en el cliente.
-*/
 function cargarReferenciasLocales() {
     try {
         const raw = localStorage.getItem(CARRITO_STORAGE_KEY);
@@ -39,10 +35,6 @@ function cargarReferenciasLocales() {
     }
 }
 
-/*
-Guarda estrictamente el array [{ id, cantidad }].
-No almacena información comercial sensible (precios, nombres, etc.).
-*/
 function guardarReferenciasLocales(referencias) {
     try {
         const dataMinima = referencias
@@ -58,19 +50,16 @@ function guardarReferenciasLocales(referencias) {
             }));
         localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify(dataMinima));
     } catch {
-        // En caso de exceso o modo incógnito restringido
+        // Ignora fallos de storage
     }
 }
 
 export function CartProvider({children}) {
-    // Referencias guardadas en el navegador
     const [referencias, setReferencias] = useState(() => cargarReferenciasLocales());
-
-    // Catálogo obtenido desde el backend
     const [catalogo, setCatalogo] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
-    // Conserva las mutaciones confirmadas mientras termina el GET inicial.
+    const [recarga, setRecarga] = useState(0);
     const cambiosDuranteCargaRef = useRef(new Map());
 
     useEffect(() => {
@@ -80,16 +69,17 @@ export function CartProvider({children}) {
             try {
                 setCargando(true);
                 setError(null);
-                const { productos: productosFresco } = await obtenerProductos();
+                const res = await obtenerProductos();
+                const items = Array.isArray(res) ? res : res?.productos || [];
                 if (activo) {
-                    const productos = new Map(productosFresco.map((p) => [p._id, p]));
+                    const productos = new Map(items.map((p) => [p._id, p]));
                     cambiosDuranteCargaRef.current?.forEach((producto, id) => {
                         if (producto === null) productos.delete(id);
                         else productos.set(id, producto);
                     });
                     setCatalogo([...productos.values()]);
                 }
-            } catch (err) {
+            } catch {
                 if (activo) {
                     setError("No se pudo sincronizar el catálogo de productos.");
                 }
@@ -106,15 +96,12 @@ export function CartProvider({children}) {
         return () => {
             activo = false;
         };
-    }, []);
+    }, [recarga]);
 
-    // Sincronizar referencias con localStorage
     useEffect(() => {
         guardarReferenciasLocales(referencias);
     }, [referencias]);
 
-    // Descartar referencias a productos inexistentes tras cargar el catálogo.
-    // Exigimos que catalogo.length > 0 para evitar purgar accidentalmente si la BD está vacía momentáneamente.
     useEffect(() => {
         if (cargando || error) return;
 
@@ -133,7 +120,6 @@ export function CartProvider({children}) {
         });
     }, [catalogo, cargando, error]);
 
-    // Cruza las cantidades de las referencias con los datos del backend
     const carrito = useMemo(() => {
         if (catalogo.length === 0) return [];
 
@@ -156,24 +142,24 @@ export function CartProvider({children}) {
             .filter(Boolean);
     }, [referencias, catalogo]);
 
-    // Contador de unidades en el carrito
     const cartCount = useMemo(() => {
         return referencias.reduce((acc, item) => acc + item.cantidad, 0);
     }, [referencias]);
 
-    // Total general calculado sobre los precios
     const totalGeneral = useMemo(() => {
         return carrito.reduce((acc, item) => acc + (item.precio || 0) * item.cantidad, 0);
     }, [carrito]);
 
-    // Acciones del carrito
+    const reintentarSincronizacion = useCallback(() => {
+        setRecarga((n) => n + 1);
+    }, []);
+
     const agregarAlCarrito = useCallback((productoOId, cantidad = 1) => {
         const esProducto = productoOId !== null && typeof productoOId === "object";
         const id = esProducto ? productoOId._id : productoOId;
 
         if (!esIdValido(id) || !Number.isInteger(cantidad) || cantidad <= 0) return;
 
-        // Si se recibe el producto completo, incorporarlo al catálogo en memoria.
         if (esProducto && productoOId.nombre && productoOId.precio !== undefined) {
             setCatalogo((prev) => {
                 if (prev.some((p) => p._id === id)) return prev;
@@ -259,6 +245,7 @@ export function CartProvider({children}) {
         totalGeneral,
         cargando,
         error,
+        reintentarSincronizacion,
         agregarAlCarrito,
         actualizarCantidad,
         eliminarDelCarrito,
