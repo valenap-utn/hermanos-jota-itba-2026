@@ -11,6 +11,7 @@ import Carrito from "./vistas/Carrito/Carrito";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import { useCart } from "./context/CartContext";
 import CrearProducto from "./vistas/CrearProducto/CrearProducto";
+import EditarProducto from "./vistas/EditarProducto/EditarProducto";
 
 function App() {
     const {
@@ -74,6 +75,11 @@ function App() {
                     <Route
                         path="/admin/crear-producto"
                         element={<CrearProducto/>}
+                    />
+
+                    <Route
+                        path="/admin/editar-producto/:id"
+                        element={<EditarProducto />}
                     />
 
                 </Routes>

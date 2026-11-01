@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "./ListaProductos.styles.css";
 import ProductCard from "../../components/ProductCard/ProductCard";
-import { obtenerProductos } from "../../services/productosService";
 import { obtenerCategorias } from "../../services/categoriasService";
+import { obtenerProductos, eliminarProducto } from "../../services/productosService";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
+import { useCart } from "../../context/CartContext";
+
 import {
     Search,
     PackageOpen,
@@ -26,17 +29,25 @@ function ListaProductos({ onAgregarAlCarrito }) {
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
 
-    // Estado local para el input de búsqueda (permite tipear fluido con debounce hacia la URL)
+    const { sincronizarProducto } = useCart();
+    const [productoAEliminar, setProductoAEliminar] = useState(null);
+    const [eliminando, setEliminando] = useState(false);
+    const [errorEliminar, setErrorEliminar] = useState("");
+
+    // Contador que fuerza un refetch del listado (por ejemplo, tras eliminar un producto)
+    const [recarga, setRecarga] = useState(0);
+
+    // permite tipear fluido con debounce hacia la URL
     const [inputBusqueda, setInputBusqueda] = useState(busquedaParam);
 
     const productosPorPagina = 6;
 
-    // Sincroniza el input local si la URL cambia por historial (botones Atrás / Adelante del navegador)
+    // Sincroniza el input local si la URL cambia por historial
     useEffect(() => {
         setInputBusqueda(busquedaParam);
     }, [busquedaParam]);
 
-    // Debounce al escribir: actualiza la URL tras 350 ms de inactividad
+    // Debounce al escribir que actualiza la URL tras 350 ms de inactividad
     useEffect(() => {
         if (inputBusqueda === busquedaParam) return;
 
@@ -75,7 +86,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
         };
     }, []);
 
-    // Consulta de productos paginados y filtrados directamente desde el backend
+    // Consulta de productos paginados y filtrados desde el backend
     useEffect(() => {
         let activo = true;
 
@@ -116,7 +127,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
         return () => {
             activo = false;
         };
-    }, [categoriaParam, busquedaParam, paginaParam]);
+    }, [categoriaParam, busquedaParam, paginaParam, recarga]);
 
     const categoriasDisponibles = useMemo(() => {
         const mapa = new Map();
@@ -159,6 +170,34 @@ function ListaProductos({ onAgregarAlCarrito }) {
         }
         setSearchParams(nuevosParams);
         window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const handleConfirmarEliminar = async () => {
+        if (!productoAEliminar) return;
+        const id = productoAEliminar._id;
+        setEliminando(true);
+        setErrorEliminar("");
+
+        try {
+            await eliminarProducto(id);
+            sincronizarProducto(id, { eliminado: true });
+            setProductoAEliminar(null);
+
+            // Si era el único ítem de la última página, retrocedemos una página
+            // (el cambio de página ya dispara el refetch por paginaParam).
+            // En cualquier otro caso, forzamos el refetch para actualizar listado y totales.
+            if (productos.length === 1 && paginaParam > 1) {
+                handleCambiarPagina(paginaParam - 1);
+            } else {
+                setRecarga((n) => n + 1);
+            }
+        } catch (err) {
+            setProductoAEliminar(null);
+            setErrorEliminar(err.message || "No se pudo eliminar el producto. Intentá nuevamente.");
+            window.scrollTo({ top: 0 });
+        } finally {
+            setEliminando(false);
+        }
     };
 
     return (
@@ -228,6 +267,12 @@ function ListaProductos({ onAgregarAlCarrito }) {
                     </div>
                 </div>
 
+                {errorEliminar && (
+                    <div className="productos-error-operacion" role="alert">
+                        <p className="mb-0">{errorEliminar}</p>
+                    </div>
+                )}
+
                 {cargando && (
                     <div className="text-center my-5" role="status" aria-live="polite">
                         <div className="spinner-border" aria-hidden="true"/>
@@ -262,6 +307,11 @@ function ListaProductos({ onAgregarAlCarrito }) {
                                 <ProductCard
                                     producto={producto}
                                     onAgregarAlCarrito={onAgregarAlCarrito}
+                                    mostrarEditar
+                                    onEliminar={(prod) => {
+                                        setErrorEliminar("");
+                                        setProductoAEliminar(prod);
+                                    }}
                                 />
                             </div>
                         ))}
@@ -324,6 +374,16 @@ function ListaProductos({ onAgregarAlCarrito }) {
                         </ul>
                     </nav>
                 )}
+
+                <ConfirmModal
+                    show={Boolean(productoAEliminar)}
+                    title="Eliminar producto"
+                    message={`¿Confirmás que querés eliminar "${productoAEliminar?.nombre || ""}"? Esta acción no se puede deshacer.`}
+                    actionLabel="Eliminar definitivamente"
+                    onConfirmar={handleConfirmarEliminar}
+                    onCancelar={() => setProductoAEliminar(null)}
+                    procesando={eliminando}
+                />
             </div>
         </section>
     );
