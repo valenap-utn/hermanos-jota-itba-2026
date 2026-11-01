@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import "./DetalleProducto.styles.css";
 import {useCart} from "../../context/CartContext";
+import {useToast} from "../../context/ToastContext";
 import {obtenerProductoPorId, eliminarProducto} from "../../services/productosService";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import ErrorState from "../../components/ErrorState/ErrorState";
@@ -11,6 +12,7 @@ function DetalleProducto({onAgregarAlCarrito}) {
     const {id} = useParams();
     const navigate = useNavigate();
     const {carrito = []} = useCart();
+    const {mostrarToast} = useToast();
 
     const [producto, setProducto] = useState(null);
     const [cargando, setCargando] = useState(true);
@@ -50,10 +52,13 @@ function DetalleProducto({onAgregarAlCarrito}) {
         try {
             await eliminarProducto(id);
             sincronizarProducto(id, {eliminado: true});
+            mostrarToast(`"${producto?.nombre || "Producto"}" fue eliminado correctamente.`, "success");
             navigate("/productos");
         } catch (err) {
             setModalVisible(false);
-            setErrorEliminar(err.message || "No se pudo eliminar el producto. Intentá nuevamente.");
+            const msg = err.message || "No se pudo eliminar el producto. Intentá nuevamente.";
+            setErrorEliminar(msg);
+            mostrarToast(msg, "error");
         } finally {
             setEliminando(false);
         }

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "./ListaProductos.styles.css";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { obtenerCategorias } from "../../services/categoriasService";
 import { obtenerProductos, eliminarProducto } from "../../services/productosService";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
 import ErrorState from "../../components/ErrorState/ErrorState";
 
 import {
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 function ListaProductos({ onAgregarAlCarrito }) {
+    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const categoriaParam = searchParams.get("categoria") || "todos";
     const busquedaParam = searchParams.get("busqueda") || "";
@@ -24,6 +26,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
 
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
+    const [errorCategorias, setErrorCategorias] = useState(false);
     const [totalPaginas, setTotalPaginas] = useState(1);
     const [totalProductos, setTotalProductos] = useState(0);
 
@@ -31,24 +34,19 @@ function ListaProductos({ onAgregarAlCarrito }) {
     const [error, setError] = useState(null);
 
     const { sincronizarProducto } = useCart();
+    const { mostrarToast } = useToast();
     const [productoAEliminar, setProductoAEliminar] = useState(null);
     const [eliminando, setEliminando] = useState(false);
-    const [errorEliminar, setErrorEliminar] = useState("");
 
-    // Contador que fuerza un refetch del listado (por ejemplo, tras eliminar un producto)
     const [recarga, setRecarga] = useState(0);
-
-    // permite tipear fluido con debounce hacia la URL
     const [inputBusqueda, setInputBusqueda] = useState(busquedaParam);
 
     const productosPorPagina = 6;
 
-    // Sincroniza el input local si la URL cambia por historial
     useEffect(() => {
         setInputBusqueda(busquedaParam);
     }, [busquedaParam]);
 
-    // Debounce al escribir que actualiza la URL tras 350 ms de inactividad
     useEffect(() => {
         if (inputBusqueda.trim() === busquedaParam) return;
 
@@ -60,23 +58,28 @@ function ListaProductos({ onAgregarAlCarrito }) {
             } else {
                 nuevosParams.delete("busqueda");
             }
-            nuevosParams.delete("page"); // Resetea a página 1 al iniciar una búsqueda
+            nuevosParams.delete("page");
             setSearchParams(nuevosParams, { replace: true });
         }, 350);
 
         return () => clearTimeout(timer);
     }, [inputBusqueda, busquedaParam, searchParams, setSearchParams]);
 
-    // Carga de categorías una única vez al montar el componente
     useEffect(() => {
         let activo = true;
 
         async function cargarCategorias() {
             try {
-                const data = await obtenerCategorias().catch(() => []);
-                if (activo) setCategorias(data);
+                const data = await obtenerCategorias();
+                if (activo) {
+                    setCategorias(data);
+                    setErrorCategorias(false);
+                }
             } catch {
-                // Si falla, categoriasDisponibles queda vacío
+                if (activo) {
+                    setErrorCategorias(true);
+                    setCategorias([]);
+                }
             }
         }
 
@@ -87,7 +90,6 @@ function ListaProductos({ onAgregarAlCarrito }) {
         };
     }, []);
 
-    // Consulta de productos paginados y filtrados desde el backend
     useEffect(() => {
         let activo = true;
 
@@ -96,19 +98,22 @@ function ListaProductos({ onAgregarAlCarrito }) {
                 setCargando(true);
                 setError(null);
 
-                const { productos: lista, meta } = await obtenerProductos({
+                const res = await obtenerProductos({
                     page: paginaParam,
                     limit: productosPorPagina,
                     categoria: categoriaParam,
                     busqueda: busquedaParam
                 });
 
+                const lista = Array.isArray(res) ? res : res.productos || [];
+                const meta = res.meta;
+
                 if (activo) {
                     setProductos(lista);
                     setTotalPaginas(meta?.totalPages || 1);
                     setTotalProductos(meta?.total || 0);
                 }
-            } catch (err) {
+            } catch {
                 if (activo) {
                     setError("No pudimos cargar el catálogo. Intentá nuevamente más tarde.");
                 }
@@ -152,7 +157,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
         } else {
             nuevosParams.delete("categoria");
         }
-        nuevosParams.delete("page"); // Resetea a página 1 al cambiar de categoría
+        nuevosParams.delete("page");
         setSearchParams(nuevosParams);
     };
 
@@ -161,7 +166,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
         if (nuevaPagina > 1) {
             nuevosParams.set("page", String(nuevaPagina));
         } else {
-            nuevosParams.delete("page"); // Página 1 limpia la URL
+            nuevosParams.delete("page");
         }
         setSearchParams(nuevosParams);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -170,17 +175,15 @@ function ListaProductos({ onAgregarAlCarrito }) {
     const handleConfirmarEliminar = async () => {
         if (!productoAEliminar) return;
         const id = productoAEliminar._id;
+        const nombre = productoAEliminar.nombre;
         setEliminando(true);
-        setErrorEliminar("");
 
         try {
             await eliminarProducto(id);
             sincronizarProducto(id, { eliminado: true });
             setProductoAEliminar(null);
+            mostrarToast(`"${nombre}" fue eliminado correctamente.`, "success");
 
-            // Si era el único ítem de la última página, retrocedemos una página
-            // (el cambio de página ya dispara el refetch por paginaParam).
-            // En cualquier otro caso, forzamos el refetch para actualizar listado y totales.
             if (productos.length === 1 && paginaParam > 1) {
                 handleCambiarPagina(paginaParam - 1);
             } else {
@@ -188,8 +191,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
             }
         } catch (err) {
             setProductoAEliminar(null);
-            setErrorEliminar(err.message || "No se pudo eliminar el producto. Intentá nuevamente.");
-            window.scrollTo({ top: 0 });
+            mostrarToast(err.message || "No se pudo eliminar el producto. Intentá nuevamente.", "error");
         } finally {
             setEliminando(false);
         }
@@ -251,8 +253,11 @@ function ListaProductos({ onAgregarAlCarrito }) {
                             aria-label="Filtrar por categoría"
                             value={categoriaParam}
                             onChange={(e) => handleCambiarCategoria(e.target.value)}
+                            disabled={errorCategorias}
                         >
-                            <option value="todos">Todas las categorías</option>
+                            <option value="todos">
+                                {errorCategorias ? "Categorías no disponibles" : "Todas las categorías"}
+                            </option>
                             {categoriasDisponibles.map((cat) => (
                                 <option key={cat.id} value={cat.id}>
                                     {cat.label}
@@ -261,12 +266,6 @@ function ListaProductos({ onAgregarAlCarrito }) {
                         </select>
                     </div>
                 </div>
-
-                {errorEliminar && (
-                    <div className="productos-error-operacion" role="alert">
-                        <p className="mb-0">{errorEliminar}</p>
-                    </div>
-                )}
 
                 {cargando && (
                     <div className="text-center my-5" role="status" aria-live="polite">
@@ -281,6 +280,8 @@ function ListaProductos({ onAgregarAlCarrito }) {
                         mensaje={error}
                         textoBoton="Reintentar"
                         onAccion={() => setRecarga((n) => n + 1)}
+                        textoSecundario="Ir al inicio"
+                        onAccionSecundaria={() => navigate("/")}
                     />
                 )}
 
@@ -306,10 +307,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
                                     producto={producto}
                                     onAgregarAlCarrito={onAgregarAlCarrito}
                                     mostrarEditar
-                                    onEliminar={(prod) => {
-                                        setErrorEliminar("");
-                                        setProductoAEliminar(prod);
-                                    }}
+                                    onEliminar={(prod) => setProductoAEliminar(prod)}
                                 />
                             </div>
                         ))}

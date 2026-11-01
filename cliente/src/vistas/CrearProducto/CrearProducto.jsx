@@ -6,12 +6,16 @@ import { obtenerCategorias } from "../../services/categoriasService";
 import { crearProducto } from "../../services/productosService";
 import { productoSchema } from "../../schemas/productoSchema";
 import ImageDropzone from "../../components/ImageDropzone/ImageDropzone";
+import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
 import "./CrearProducto.styles.css";
 
 const OTRA_CATEGORIA = "__otra__";
 
 function CrearProducto() {
   const navigate = useNavigate();
+  const { sincronizarProducto } = useCart();
+  const { mostrarToast } = useToast();
 
   const [categorias, setCategorias] = useState([]);
   const [cargandoCategorias, setCargandoCategorias] = useState(true);
@@ -90,10 +94,28 @@ function CrearProducto() {
       formData.append("imagen", data.imagen);
 
       const producto = await crearProducto(formData);
+      sincronizarProducto(producto);
+      mostrarToast(`"${producto.nombre}" fue creado exitosamente.`, "success");
       navigate(`/productos/${producto._id}`);
     } catch (error) {
-      setErrorEnvio(error.message || "Ocurrió un error al crear el producto.");
+      const msg = error.message || "Ocurrió un error al crear el producto.";
+      setErrorEnvio(msg);
+      mostrarToast(msg, "error");
     }
+  };
+
+  const onValidationError = (formErrors) => {
+    const errorKeys = Object.keys(formErrors);
+    if (errorKeys.length > 0) {
+      const primerElemento = document.getElementById(errorKeys[0]);
+      if (primerElemento) {
+        primerElemento.scrollIntoView({ behavior: "smooth", block: "center" });
+        primerElemento.focus({ preventScroll: true });
+      }
+    }
+    const msg = "Completá los campos obligatorios para crear el producto.";
+    setErrorEnvio(msg);
+    mostrarToast(msg, "error");
   };
 
   return (
@@ -109,7 +131,7 @@ function CrearProducto() {
           </p>
         </header>
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form onSubmit={handleSubmit(onSubmit, onValidationError)} noValidate>
           <fieldset className="crear-producto__seccion">
             <legend className="texto-titulo-elegante fs-4 texto-marca-primario contacto-section-title">
               Información principal
