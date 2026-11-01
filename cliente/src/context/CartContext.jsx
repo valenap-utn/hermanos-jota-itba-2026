@@ -116,7 +116,7 @@ export function CartProvider({children}) {
     // Descartar referencias a productos inexistentes tras cargar el catálogo.
     // Exigimos que catalogo.length > 0 para evitar purgar accidentalmente si la BD está vacía momentáneamente.
     useEffect(() => {
-        if (cargando || error || catalogo.length === 0) return;
+        if (cargando || error) return;
 
         const idsDisponibles = new Set(
             catalogo.map((producto) => producto._id)
@@ -184,9 +184,8 @@ export function CartProvider({children}) {
         setReferencias((prev) => {
             const index = prev.findIndex((item) => item.id === id);
             const prodCatalogo = catalogo.find((p) => p._id === id);
-            const stockDisponible = (esProducto && productoOId.stock !== undefined)
-                ? productoOId.stock
-                : (prodCatalogo?.stock ?? (catalogo.length === 0 ? cantidad : 0));
+            const stockDisponible = (esProducto && productoOId.stock !== undefined) ? productoOId.stock : (prodCatalogo?.stock ?? 0);
+            if (stockDisponible <= 0) return prev;
 
             if (index !== -1) {
                 return prev.map((item, idx) =>
