@@ -229,7 +229,7 @@ npm run seed:reset
 
 ## Despliegue
 
-El repositorio contiene un script raíz de compilación que instala las dependencias de `/servidor` y `/cliente` y construye el frontend. Además, Express está configurado para servir los archivos generados en `client/build` y resolver las rutas del frontend.
+El repositorio contiene un script raíz de compilación que instala las dependencias de `/backend` y `/client` y construye el frontend. Además, Express está configurado para servir los archivos generados en `client/build` y resolver las rutas del frontend.
 
 La configuración final de hosting debe comprobarse en el proveedor de despliegue; la presencia de scripts no confirma que una versión específica esté publicada.
 
