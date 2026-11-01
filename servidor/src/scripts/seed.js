@@ -52,6 +52,9 @@ async function seed() {
     console.log(`[Upsert] Sincronizadas ${categoriasBase.length} categorías base.`);
   }
 
+  await Category.syncIndexes();
+  console.log('[Indexes] Índices de Category sincronizados.');
+
   await mongoose.disconnect();
 }
 
