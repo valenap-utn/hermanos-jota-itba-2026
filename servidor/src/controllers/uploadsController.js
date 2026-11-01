@@ -1,26 +1,22 @@
+const createError = require('http-errors');
+const asyncHandler = require('../utils/asyncHandler');
+const successResponse = require('../utils/successResponse');
 const { subirACloudinary } = require('../utils/subirACloudinary');
 
-const subirImagenProducto = async (req, res, next) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'Debés seleccionar una imagen.',
-            });
-        }
-
-        const imagenUrl = await subirACloudinary(req.file.buffer);
-
-        return res.status(201).json({
-            status: 'success',
-            data: {
-                imagenUrl,
-            },
-        });
-    } catch (error) {
-        next(error);
+const subirImagenProducto = asyncHandler(async (req, res) => {
+    if (!req.file) {
+        throw createError.BadRequest('Debés seleccionar una imagen.');
     }
-};
+
+    const imagenUrl = await subirACloudinary(req.file.buffer);
+
+    successResponse(res, {
+        data: {
+            imagenUrl,
+        },
+        statusCode: 201,
+    });
+});
 
 module.exports = {
     subirImagenProducto,

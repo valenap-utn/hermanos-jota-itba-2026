@@ -27,6 +27,14 @@ const errorHandler = (err, req, res, next) => {
     message = err.message;
   }
 
+  // Manejo de claves duplicadas en MongoDB (E11000)
+  if (err.code === 11000) {
+    statusCode = 409;
+    const keySource = err.keyPattern ?? err.keyValue ?? {};
+    const campo = Object.keys(keySource)[0] || 'recurso';
+    message = 'Ya existe un registro con ese ' + campo + '.';
+  }
+
   console.error(`[${req.method} ${req.url}] (${err.name}): ${message}`);
 
   res.status(statusCode).json({

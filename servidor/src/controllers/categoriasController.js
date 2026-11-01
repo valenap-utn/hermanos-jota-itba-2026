@@ -1,86 +1,53 @@
 const mongoose = require('mongoose');
+const createError = require('http-errors');
 const Category = require('../models/Category');
+const asyncHandler = require('../utils/asyncHandler');
+const successResponse = require('../utils/successResponse');
 
 // GET /api/categorias
-const obtenerCategorias = async (req, res, next) => {
-    try {
-        const categorias = await Category.find()
-            .collation({ locale: 'es', strength: 2 })
-            .sort({ nombre: 1 });
+const obtenerCategorias = asyncHandler(async (req, res) => {
+    const categorias = await Category.find()
+        .collation({ locale: 'es', strength: 2 })
+        .sort({ nombre: 1 });
 
-        res.status(200).json({
-            status: 'success',
-            data: categorias,
-        });
-    } catch (error) {
-        next(error);
-    }
-};
+    successResponse(res, { data: categorias });
+});
 
 // POST /api/categorias
-const crearCategoria = async (req, res, next) => {
-    try {
-        const nombre = req.body.nombre;
+const crearCategoria = asyncHandler(async (req, res) => {
+    const nombre = req.body.nombre;
 
-        if (typeof nombre !== 'string' || !nombre.trim()) {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'El nombre de la categoría es obligatorio.',
-            });
-        }
-
-        const nombreNormalizado = nombre.trim();
-
-        // Confiamos en el índice único de MongoDB con collation para garantizar atomicidad y prevenir condiciones de carrera
-        const categoria = await Category.create({
-            nombre: nombreNormalizado,
-        });
-
-        res.status(201).json({
-            status: 'success',
-            data: categoria,
-        });
-    } catch (error) {
-        if (error.code === 11000) {
-            return res.status(409).json({
-                status: 'fail',
-                message: 'Ya existe una categoría con ese nombre.',
-            });
-        }
-
-        next(error);
+    if (typeof nombre !== 'string' || !nombre.trim()) {
+        throw createError.BadRequest('El nombre de la categoría es obligatorio.');
     }
-};
+
+    const nombreNormalizado = nombre.trim();
+
+    // Confiamos en el índice único de MongoDB con collation para garantizar atomicidad y prevenir condiciones de carrera.
+    // El middleware errorHandler global captura el error 11000 y responde con 409.
+    const categoria = await Category.create({
+        nombre: nombreNormalizado,
+    });
+
+    successResponse(res, { data: categoria, statusCode: 201 });
+});
 
 // DELETE /api/categorias/:id
-const eliminarCategoria = async (req, res, next) => {
-    try {
-        const {id} = req.params;
+const eliminarCategoria = asyncHandler(async (req, res) => {
+    const { id } = req.params;
 
-        if (!mongoose.isValidObjectId(id)) {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'El identificador de categoría no es válido.',
-            });
-        }
-
-        const categoria = await Category.findByIdAndDelete(id);
-
-        if (!categoria) {
-            return res.status(404).json({
-                status: 'fail',
-                message: 'La categoría no existe.',
-            });
-        }
-
-        res.status(200).json({
-            status: 'success',
-            data: categoria,
-        });
-    } catch (error) {
-        next(error);
+    if (!mongoose.isValidObjectId(id)) {
+        throw createError.BadRequest('El identificador de categoría no es válido.');
     }
-};
+
+    const categoria = await Category.findByIdAndDelete(id);
+
+    if (!categoria) {
+        throw createError.NotFound('La categoría no existe.');
+    }
+
+    successResponse(res, { data: categoria });
+});
 
 module.exports = {
     obtenerCategorias,
