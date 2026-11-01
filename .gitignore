@@ -23,6 +23,7 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+!.env.example
 
 .DS_Store
 Thumbs.db
@@ -30,3 +31,4 @@ Thumbs.db
 
 # Archivos de contexto local o notas
 CONTEXT.md
+

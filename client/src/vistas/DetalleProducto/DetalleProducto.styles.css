@@ -1,0 +1,293 @@
+.detalle-breadcrumb {
+    font-family: var(--font-primary);
+    font-size: var(--caption-size);
+    letter-spacing: var(--caption-letter-spacing);
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.detalle-breadcrumb a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.detalle-breadcrumb a:hover,
+.detalle-breadcrumb a:focus {
+    text-decoration: underline;
+}
+
+.detalle-figura {
+    background-color: var(--color-white);
+    border: 1px solid var(--border-soft);
+    overflow: hidden;
+}
+
+.detalle-imagen {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+    padding: 1rem;
+}
+
+.detalle-categoria {
+    color: var(--color-primary);
+    text-transform: uppercase;
+}
+
+.detalle-nombre {
+    color: var(--color-text-titles);
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.detalle-precio {
+    color: var(--color-primary);
+    font-size: 1.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.detalle-descripcion {
+    margin-bottom: 1.75rem;
+}
+
+.detalle-specs-titulo {
+    color: var(--color-text-titles);
+    font-size: 1.25rem;
+}
+
+.detalle-tabla {
+    --bs-table-bg: transparent;
+    --bs-table-color: inherit;
+    width: 100%;
+    margin: 0;
+}
+
+.detalle-tabla th,
+.detalle-tabla td {
+    border-bottom: 1px solid var(--border-soft);
+    padding: 0.75rem 0;
+    vertical-align: top;
+}
+
+.detalle-tabla th {
+    font-weight: var(--font-medium);
+    color: var(--color-primary);
+    width: 40%;
+}
+
+.detalle-btn-volver {
+  display: inline-block;
+  padding: 0.85rem 1.5rem;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: 2px solid var(--color-primary);
+  border-radius: 0;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.detalle-btn-volver:hover {
+  color: var(--color-white);
+  opacity: 0.85;
+}
+
+.detalle-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.detalle-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-block: 0.5rem;
+  color: var(--color-primary);
+  font-size: var(--caption-size);
+  text-decoration: none;
+}
+
+.detalle-volver:hover {
+  text-decoration: underline;
+}
+
+@media (min-width: 992px) {
+    .detalle-nombre {
+        font-size: 2.5rem;
+    }
+
+    .detalle-tabla th {
+        width: 25%;
+    }
+}
+
+/* ===== BOTÓN AÑADIR AL CARRITO ===== */
+
+.detalle-btn-agregar {
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.2s ease,
+        box-shadow 0.25s ease;
+}
+
+.detalle-btn-agregar:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+.btn.detalle-btn-agregar.detalle-btn-agregar--agregado,
+.btn.detalle-btn-agregar.detalle-btn-agregar--agregado:hover,
+.btn.detalle-btn-agregar.detalle-btn-agregar--agregado:active,
+.btn.detalle-btn-agregar.detalle-btn-agregar--agregado:focus {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-white);
+}
+
+/* ===== SELECTOR DE CANTIDAD ===== */
+
+.detalle-comprar-bloque {
+    padding-top: 0.5rem;
+}
+
+.detalle-cantidad-label {
+    text-transform: uppercase;
+    color: var(--color-primary);
+    font-weight: var(--font-medium);
+}
+
+.detalle-cantidad-selector {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-emphasis);
+    border-radius: 2px;
+    background-color: var(--color-surface-input);
+}
+
+.detalle-btn-cantidad {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    color: var(--color-primary);
+    background-color: transparent;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.detalle-btn-cantidad:hover:not(:disabled) {
+    background-color: var(--color-surface-hover-subtle);
+}
+
+.detalle-btn-cantidad:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+}
+
+.detalle-btn-cantidad:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.detalle-cantidad-valor {
+    min-width: 42px;
+    text-align: center;
+    font-family: var(--font-primary);
+    font-weight: var(--font-medium);
+    font-size: 1rem;
+    color: var(--color-primary);
+}
+
+/* ===== ACCIONES DE ADMINISTRACIÓN ===== */
+
+.detalle-admin-acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-soft);
+}
+
+.detalle-btn-editar,
+.detalle-btn-eliminar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--color-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.detalle-btn-eliminar {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+@media (hover: hover) {
+    .detalle-btn-editar:hover {
+        background-color: var(--color-primary);
+        color: var(--color-background);
+    }
+
+    .detalle-btn-eliminar:hover:not(:disabled) {
+        background-color: var(--color-error);
+        color: var(--color-background);
+    }
+}
+
+.detalle-btn-editar:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+.detalle-btn-eliminar:focus-visible {
+    outline: 2px solid var(--color-error);
+    outline-offset: 3px;
+}
+
+.detalle-btn-eliminar:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.detalle-error-operacion {
+    padding: 0.85rem 1rem;
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid var(--color-error);
+    color: var(--color-error);
+    font-size: 0.9rem;
+}
+
+@media (min-width: 576px) {
+    .detalle-admin-acciones {
+        flex-direction: row;
+    }
+
+    .detalle-btn-editar,
+    .detalle-btn-eliminar {
+        flex: 1;
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .detalle-btn-editar,
+    .detalle-btn-eliminar {
+        transition: none;
+    }
+}

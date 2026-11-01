@@ -1,0 +1,118 @@
+.app-toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1090;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 420px;
+  width: calc(100% - 3rem);
+  pointer-events: none;
+}
+
+.app-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background-color: #FFFFFF;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-toast {
+    transition: none;
+  }
+}
+
+.app-toast--error {
+  background-color: #FDF2F2;
+  border-left: 4px solid var(--color-error, #A32020);
+  border-top: 1px solid rgba(163, 32, 32, 0.2);
+  border-right: 1px solid rgba(163, 32, 32, 0.2);
+  border-bottom: 1px solid rgba(163, 32, 32, 0.2);
+  color: #5C1D1D;
+}
+
+.app-toast--error .app-toast__icon {
+  color: var(--color-error, #A32020);
+}
+
+.app-toast--success {
+  background-color: #F0FDF4;
+  border-left: 4px solid #166534;
+  border-top: 1px solid rgba(22, 101, 52, 0.2);
+  border-right: 1px solid rgba(22, 101, 52, 0.2);
+  border-bottom: 1px solid rgba(22, 101, 52, 0.2);
+  color: #14532D;
+}
+
+.app-toast--success .app-toast__icon {
+  color: #166534;
+}
+
+.app-toast--info {
+  background-color: #FAF6F0;
+  border-left: 4px solid var(--color-primary, #A0522D);
+  border-top: 1px solid rgba(160, 82, 45, 0.2);
+  border-right: 1px solid rgba(160, 82, 45, 0.2);
+  border-bottom: 1px solid rgba(160, 82, 45, 0.2);
+  color: #4A2311;
+}
+
+.app-toast--info .app-toast__icon {
+  color: var(--color-primary, #A0522D);
+}
+
+.app-toast__icon-wrapper {
+  display: flex;
+  align-items: center;
+  padding-top: 0.125rem;
+}
+
+.app-toast__content {
+  flex: 1;
+}
+
+.app-toast__mensaje {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.app-toast__btn-cerrar {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.75;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.app-toast__btn-cerrar:hover {
+  opacity: 1;
+}
+
+.app-toast__btn-cerrar:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+@media (max-width: 576px) {
+  .app-toast-container {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+  }
+}
