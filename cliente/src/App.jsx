@@ -75,8 +75,7 @@ function App() {
                     <Route
                         path="/admin/crear-producto"
                         element={<CrearProducto/>}
-                        >
-                    </Route>
+                    />
 
                     <Route
                         path="/admin/editar-producto/:id"

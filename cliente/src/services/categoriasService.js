@@ -10,7 +10,6 @@ export async function obtenerCategorias() {
     }
 
     const { data } = await response.json();
-
     return data;
 }
 
@@ -35,4 +34,3 @@ export async function crearCategoria(nombre) {
 
     return resultado.data;
 }
-

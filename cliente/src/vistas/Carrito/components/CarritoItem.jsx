@@ -6,6 +6,8 @@ function CarritoItem({ item, onActualizarCantidad, onSolicitarEliminar, itemRef 
         ? `$${item.precio.toLocaleString("es-AR")}`
         : "Precio a confirmar";
 
+    const maxAlcanzado = item.stock !== undefined && item.cantidad >= item.stock;
+
     return (
         <li className="carrito-item" ref={itemRef}>
             <Link
@@ -30,6 +32,11 @@ function CarritoItem({ item, onActualizarCantidad, onSolicitarEliminar, itemRef 
                 <p className="carrito-item-precio">
                     {precioUnitario}
                 </p>
+                {item.stock !== undefined && item.stock <= 5 && (
+                    <p className="text-muted small mb-0">
+                        {item.stock === 0 ? "Sin stock disponible" : `Stock disponible: ${item.stock}`}
+                    </p>
+                )}
             </div>
 
             <div className="carrito-item-actions">
@@ -55,6 +62,7 @@ function CarritoItem({ item, onActualizarCantidad, onSolicitarEliminar, itemRef 
                     <button
                         type="button"
                         className="btn-cantidad"
+                        disabled={maxAlcanzado}
                         onClick={() => onActualizarCantidad(item.id, item.cantidad + 1)}
                         aria-label={`Aumentar cantidad de ${item.nombre}`}
                     >

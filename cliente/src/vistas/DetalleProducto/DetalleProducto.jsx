@@ -1,18 +1,19 @@
 import {useEffect, useRef, useState} from "react";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import "./DetalleProducto.styles.css";
+import {useCart} from "../../context/CartContext";
 import {obtenerProductoPorId, eliminarProducto} from "../../services/productosService";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
-import {useCart} from "../../context/CartContext";
 import {ArrowLeft, Check, Minus, Pencil, Plus, ShoppingCart, Trash2} from "lucide-react";
 
 function DetalleProducto({onAgregarAlCarrito}) {
     const {id} = useParams();
     const navigate = useNavigate();
+    const {carrito = []} = useCart();
 
     const [producto, setProducto] = useState(null);
     const [cargando, setCargando] = useState(true);
-    const [error, setError] = useState(null);
+    const [tipoError, setTipoError] = useState(null); // 'NOT_FOUND' | 'SERVER_ERROR' | null
     const [cantidad, setCantidad] = useState(1);
     const [agregado, setAgregado] = useState(false);
     const timeoutRef = useRef(null);
@@ -27,12 +28,17 @@ function DetalleProducto({onAgregarAlCarrito}) {
         };
     }, []);
 
+    const unidadesEnCarrito =
+        carrito.find((item) => item.id === (producto?._id || id))?.cantidad || 0;
+    const stockTotal = producto?.stock !== undefined ? producto.stock : 0;
+    const stockDisponible = Math.max(0, stockTotal - unidadesEnCarrito);
+
     const decrementarCantidad = () => {
         setCantidad((prev) => Math.max(1, prev - 1));
     };
 
     const incrementarCantidad = () => {
-        setCantidad((prev) => Math.min(99, prev + 1));
+        setCantidad((prev) => Math.min(stockDisponible, prev + 1));
     };
 
     const handleEliminar = async () => {
@@ -52,7 +58,7 @@ function DetalleProducto({onAgregarAlCarrito}) {
     };
 
     const handleAgregar = (e) => {
-        if (!onAgregarAlCarrito || !producto) return;
+        if (!onAgregarAlCarrito || !producto || stockDisponible === 0) return;
         onAgregarAlCarrito(producto, cantidad);
         setAgregado(true);
 
@@ -72,18 +78,14 @@ function DetalleProducto({onAgregarAlCarrito}) {
         async function cargarProducto() {
             try {
                 setCargando(true);
-                setError(null);
+                setTipoError(null);
+                setProducto(null); // Evita mostrar datos residuales del producto anterior al cambiar de :id
                 const data = await obtenerProductoPorId(id);
                 if (activo) setProducto(data);
             } catch (err) {
                 if (activo) {
                     const noEncontrado = err.status === 400 || err.status === 404;
-
-                    setError(
-                        noEncontrado
-                            ? "No pudimos encontrar este producto. Puede que ya no esté disponible."
-                            : "No pudimos cargar el producto. Intentá nuevamente más tarde."
-                    );
+                    setTipoError(noEncontrado ? "NOT_FOUND" : "SERVER_ERROR");
                 }
             } finally {
                 if (activo) setCargando(false);
@@ -108,18 +110,19 @@ function DetalleProducto({onAgregarAlCarrito}) {
         );
     }
 
-    const noEncontrado = !error ||
-        error === "No pudimos encontrar este producto. Puede que ya no esté disponible.";
+    if (tipoError || !producto) {
+        const esNoEncontrado = tipoError === "NOT_FOUND" || (!tipoError && !producto);
 
-    if (error || !producto) {
         return (
             <section className="detalle-section">
                 <div className="container text-center my-5" role="alert">
                     <h1 className="texto-titulo-elegante detalle-nombre">
-                        {noEncontrado ? "Producto no encontrado" : "No pudimos cargar el producto"}
+                        {esNoEncontrado ? "Producto no encontrado" : "No pudimos cargar el producto"}
                     </h1>
                     <p className="texto-principal mb-4">
-                        {error || "El producto que buscás no existe o no está disponible."}
+                        {esNoEncontrado
+                            ? "No pudimos encontrar este producto. Puede que ya no esté disponible."
+                            : "No pudimos cargar el producto. Intentá nuevamente más tarde."}
                     </p>
                     <button
                         type="button"
@@ -132,6 +135,10 @@ function DetalleProducto({onAgregarAlCarrito}) {
             </section>
         );
     }
+
+    const sinStockTotal = stockTotal === 0;
+    const alcanzoMaximoCarrito = stockTotal > 0 && stockDisponible === 0;
+    const noSePuedeAgregar = stockDisponible === 0;
 
     return (
         <section className="detalle-section">
@@ -174,9 +181,9 @@ function DetalleProducto({onAgregarAlCarrito}) {
                         {onAgregarAlCarrito && (
                             <div className="detalle-comprar-bloque mt-4">
                                 <div className="d-flex align-items-center gap-3 mb-3">
-                    <span className="detalle-cantidad-label texto-secundario-leyenda">
-                      Cantidad:
-                    </span>
+                                    <span className="detalle-cantidad-label texto-secundario-leyenda">
+                                        Cantidad:
+                                    </span>
 
                                     <div
                                         className="detalle-cantidad-selector"
@@ -187,7 +194,7 @@ function DetalleProducto({onAgregarAlCarrito}) {
                                             type="button"
                                             className="detalle-btn-cantidad"
                                             onClick={decrementarCantidad}
-                                            disabled={cantidad <= 1}
+                                            disabled={cantidad <= 1 || noSePuedeAgregar}
                                             aria-label="Disminuir cantidad"
                                         >
                                             <Minus size={16} aria-hidden="true"/>
@@ -198,19 +205,31 @@ function DetalleProducto({onAgregarAlCarrito}) {
                                             aria-live="polite"
                                             aria-atomic="true"
                                         >
-                        {cantidad}
-                      </span>
+                                            {noSePuedeAgregar ? 0 : cantidad}
+                                        </span>
 
                                         <button
                                             type="button"
                                             className="detalle-btn-cantidad"
                                             onClick={incrementarCantidad}
-                                            disabled={cantidad >= 99}
+                                            disabled={cantidad >= stockDisponible || noSePuedeAgregar}
                                             aria-label="Aumentar cantidad"
                                         >
                                             <Plus size={16} aria-hidden="true"/>
                                         </button>
                                     </div>
+
+                                    {unidadesEnCarrito > 0 && stockDisponible > 0 && (
+                                        <span className="text-muted small">
+                                            ({unidadesEnCarrito} en carrito, quedan {stockDisponible})
+                                        </span>
+                                    )}
+
+                                    {unidadesEnCarrito === 0 && stockTotal <= 5 && stockTotal > 0 && (
+                                        <span className="text-muted small">
+                                            (Últimas {stockTotal} unidades)
+                                        </span>
+                                    )}
                                 </div>
 
                                 <button
@@ -218,19 +237,28 @@ function DetalleProducto({onAgregarAlCarrito}) {
                                     className={`btn btn-marca-primario texto-titulo-cta rounded-0 w-100 py-3 d-flex align-items-center justify-content-center gap-2 detalle-btn-agregar ${
                                         agregado ? "detalle-btn-agregar--agregado" : ""
                                     }`}
+                                    disabled={noSePuedeAgregar}
                                     aria-label={
-                                        agregado
+                                        sinStockTotal
+                                            ? "Sin stock disponible"
+                                            : alcanzoMaximoCarrito
+                                            ? "Alcanzaste el stock máximo en tu carrito"
+                                            : agregado
                                             ? `${cantidad} ${cantidad === 1 ? "unidad" : "unidades"} de ${producto.nombre} añadidas al carrito`
                                             : `Añadir ${cantidad} ${cantidad === 1 ? "unidad" : "unidades"} de ${producto.nombre} al carrito`
                                     }
                                     onClick={handleAgregar}
                                 >
-                                    {agregado ? (
+                                    {sinStockTotal ? (
+                                        <span>Sin stock disponible</span>
+                                    ) : alcanzoMaximoCarrito ? (
+                                        <span>Alcanzaste el stock máximo en tu carrito</span>
+                                    ) : agregado ? (
                                         <>
                                             <Check size={18} aria-hidden="true"/>
                                             <span>
-                          ¡{cantidad} {cantidad === 1 ? "unidad añadida" : "unidades añadidas"}!
-                        </span>
+                                                ¡{cantidad} {cantidad === 1 ? "unidad añadida" : "unidades añadidas"}!
+                                            </span>
                                         </>
                                     ) : (
                                         <>
@@ -241,10 +269,10 @@ function DetalleProducto({onAgregarAlCarrito}) {
                                 </button>
 
                                 <span role="status" className="visually-hidden">
-                    {agregado
-                        ? `Se ${cantidad === 1 ? "añadió 1 unidad" : `añadieron ${cantidad} unidades`} de ${producto.nombre} al carrito`
-                        : ""}
-                  </span>
+                                    {agregado
+                                        ? `Se ${cantidad === 1 ? "añadió 1 unidad" : `añadieron ${cantidad} unidades`} de ${producto.nombre} al carrito`
+                                        : ""}
+                                </span>
                             </div>
                         )}
 

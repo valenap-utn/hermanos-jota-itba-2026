@@ -1,5 +1,4 @@
 const express = require('express');
-
 const {
     obtenerCategorias,
     crearCategoria,
