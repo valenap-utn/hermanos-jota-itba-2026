@@ -235,8 +235,8 @@ La configuración final de hosting debe comprobarse en el proveedor de despliegu
 
 | Servicio | URL pública |
 | --- | --- |
-| Frontend | **Pendiente de confirmar tras el despliegue** |
-| Backend / API | **Pendiente de confirmar tras el despliegue** |
+| Frontend | **https://hermanos-jota-itba-2026.vercel.app/** |
+| Backend / API | **https://hermanos-jota-itba-2026.onrender.com/api** |
 
 Si se utiliza Render, verificar el directorio de trabajo y los comandos de build/inicio, las variables de entorno, la conexión con MongoDB Atlas y el acceso a los endpoints públicos. Si el frontend se despliega en otro origen, comprobar CORS desde esa URL.
 
