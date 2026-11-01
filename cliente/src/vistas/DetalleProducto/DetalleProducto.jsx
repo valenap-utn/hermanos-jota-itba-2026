@@ -4,6 +4,7 @@ import "./DetalleProducto.styles.css";
 import {useCart} from "../../context/CartContext";
 import {obtenerProductoPorId, eliminarProducto} from "../../services/productosService";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
+import ErrorState from "../../components/ErrorState/ErrorState";
 import {ArrowLeft, Check, Minus, Pencil, Plus, ShoppingCart, Trash2} from "lucide-react";
 
 function DetalleProducto({onAgregarAlCarrito}) {
@@ -21,6 +22,7 @@ function DetalleProducto({onAgregarAlCarrito}) {
     const [modalVisible, setModalVisible] = useState(false);
     const [eliminando, setEliminando] = useState(false);
     const [errorEliminar, setErrorEliminar] = useState("");
+    const [recarga, setRecarga] = useState(0);
 
     useEffect(() => {
         return () => {
@@ -98,7 +100,7 @@ function DetalleProducto({onAgregarAlCarrito}) {
         return () => {
             activo = false;
         };
-    }, [id]);
+    }, [id, recarga]);
 
     if (cargando) {
         return (
@@ -116,22 +118,17 @@ function DetalleProducto({onAgregarAlCarrito}) {
 
         return (
             <section className="detalle-section">
-                <div className="container text-center my-5" role="alert">
-                    <h1 className="texto-titulo-elegante detalle-nombre">
-                        {esNoEncontrado ? "Producto no encontrado" : "No pudimos cargar el producto"}
-                    </h1>
-                    <p className="texto-principal mb-4">
-                        {esNoEncontrado
-                            ? "No pudimos encontrar este producto. Puede que ya no esté disponible."
-                            : "No pudimos cargar el producto. Intentá nuevamente más tarde."}
-                    </p>
-                    <button
-                        type="button"
-                        className="detalle-btn-volver texto-titulo-cta"
-                        onClick={() => navigate("/productos")}
-                    >
-                        Volver al catálogo
-                    </button>
+                <div className="container text-center my-5">
+                    <ErrorState
+                        titulo={esNoEncontrado ? "Producto no encontrado" : "No pudimos cargar el producto"}
+                        mensaje={
+                            esNoEncontrado
+                                ? "No pudimos encontrar este producto. Puede que ya no esté disponible."
+                                : "No pudimos cargar el producto. Intentá nuevamente más tarde."
+                        }
+                        textoBoton={esNoEncontrado ? "Volver al catálogo" : "Reintentar"}
+                        onAccion={esNoEncontrado ? () => navigate("/productos") : () => setRecarga((n) => n + 1)}
+                    />
                 </div>
             </section>
         );

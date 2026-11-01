@@ -6,6 +6,7 @@ import { obtenerCategorias } from "../../services/categoriasService";
 import { obtenerProductos, eliminarProducto } from "../../services/productosService";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import { useCart } from "../../context/CartContext";
+import ErrorState from "../../components/ErrorState/ErrorState";
 
 import {
     Search,
@@ -275,9 +276,12 @@ function ListaProductos({ onAgregarAlCarrito }) {
                 )}
 
                 {!cargando && error && (
-                    <div className="text-center my-5" role="alert">
-                        <p className="texto-principal">{error}</p>
-                    </div>
+                    <ErrorState
+                        titulo="No pudimos cargar el catálogo"
+                        mensaje={error}
+                        textoBoton="Reintentar"
+                        onAccion={() => setRecarga((n) => n + 1)}
+                    />
                 )}
 
                 {!cargando && !error && productos.length === 0 && (
