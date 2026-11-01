@@ -49,7 +49,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
 
     // Debounce al escribir que actualiza la URL tras 350 ms de inactividad
     useEffect(() => {
-        if (inputBusqueda === busquedaParam) return;
+        if (inputBusqueda.trim() === busquedaParam) return;
 
         const timer = setTimeout(() => {
             const nuevosParams = new URLSearchParams(searchParams);
@@ -60,7 +60,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
                 nuevosParams.delete("busqueda");
             }
             nuevosParams.delete("page"); // Resetea a página 1 al iniciar una búsqueda
-            setSearchParams(nuevosParams);
+            setSearchParams(nuevosParams, { replace: true });
         }, 350);
 
         return () => clearTimeout(timer);
