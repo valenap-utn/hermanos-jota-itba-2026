@@ -16,6 +16,12 @@ export async function obtenerProductos(params = {}) {
     throw new Error(`Error al obtener productos: ${response.status}`);
 
   const resultado = await response.json();
+  if (resultado.meta) {
+    return {
+      productos: resultado.data,
+      meta: resultado.meta
+    };
+  }
   return resultado.data;
 }
 

@@ -1,9 +1,9 @@
-import {useEffect, useMemo, useState} from "react";
-import {Link} from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import "./ListaProductos.styles.css";
 import ProductCard from "../../components/ProductCard/ProductCard";
-import {obtenerProductos} from "../../services/productosService";
-import {obtenerCategorias} from "../../services/categoriasService";
+import { obtenerProductos } from "../../services/productosService";
+import { obtenerCategorias } from "../../services/categoriasService";
 import {
     Search,
     PackageOpen,
@@ -12,68 +12,115 @@ import {
     ChevronRight
 } from "lucide-react";
 
-function normalizarTexto(texto) {
-    return texto
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
-}
+function ListaProductos({ onAgregarAlCarrito }) {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const categoriaParam = searchParams.get("categoria") || "todos";
+    const busquedaParam = searchParams.get("busqueda") || "";
+    const paginaParam = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
 
-function escaparRegExp(texto) {
-    return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function ListaProductos({onAgregarAlCarrito}) {
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
+    const [totalPaginas, setTotalPaginas] = useState(1);
+    const [totalProductos, setTotalProductos] = useState(0);
+
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
 
-    const [busqueda, setBusqueda] = useState("");
-    const [categoria, setCategoria] = useState("todos");
+    // Estado local para el input de búsqueda (permite tipear fluido con debounce hacia la URL)
+    const [inputBusqueda, setInputBusqueda] = useState(busquedaParam);
 
-    const [paginaActual, setPaginaActual] = useState(1);
     const productosPorPagina = 6;
 
+    // Sincroniza el input local si la URL cambia por historial (botones Atrás / Adelante del navegador)
+    useEffect(() => {
+        setInputBusqueda(busquedaParam);
+    }, [busquedaParam]);
+
+    // Debounce al escribir: actualiza la URL tras 350 ms de inactividad
+    useEffect(() => {
+        if (inputBusqueda === busquedaParam) return;
+
+        const timer = setTimeout(() => {
+            const nuevosParams = new URLSearchParams(searchParams);
+            const trimmed = inputBusqueda.trim();
+            if (trimmed) {
+                nuevosParams.set("busqueda", trimmed);
+            } else {
+                nuevosParams.delete("busqueda");
+            }
+            nuevosParams.delete("page"); // Resetea a página 1 al iniciar una búsqueda
+            setSearchParams(nuevosParams);
+        }, 350);
+
+        return () => clearTimeout(timer);
+    }, [inputBusqueda, busquedaParam, searchParams, setSearchParams]);
+
+    // Carga de categorías una única vez al montar el componente
     useEffect(() => {
         let activo = true;
 
-        async function cargarDatos() {
+        async function cargarCategorias() {
             try {
-                setCargando(true);
-                setError(null);
-                const [dataProductos, dataCategorias] = await Promise.all([
-                    obtenerProductos(),
-                    obtenerCategorias().catch(() => [])
-                ]);
-                if (activo) {
-                    setProductos(dataProductos);
-                    setCategorias(dataCategorias);
-                }
-            } catch (err) {
-                if (activo)
-                    setError("No pudimos cargar el catálogo. Intentá nuevamente más tarde.");
-            } finally {
-                if (activo) setCargando(false);
+                const data = await obtenerCategorias().catch(() => []);
+                if (activo) setCategorias(data);
+            } catch {
+                // Si falla, categoriasDisponibles queda vacío
             }
         }
 
-        cargarDatos();
+        cargarCategorias();
 
         return () => {
             activo = false;
         };
     }, []);
 
+    // Consulta de productos paginados y filtrados directamente desde el backend
     useEffect(() => {
-        setPaginaActual(1);
-    }, [busqueda, categoria]);
+        let activo = true;
+
+        async function cargarProductos() {
+            try {
+                setCargando(true);
+                setError(null);
+
+                const res = await obtenerProductos({
+                    page: paginaParam,
+                    limit: productosPorPagina,
+                    categoria: categoriaParam,
+                    busqueda: busquedaParam
+                });
+
+                if (activo) {
+                    if (res && res.productos !== undefined) {
+                        setProductos(res.productos);
+                        setTotalPaginas(res.meta?.totalPages || 1);
+                        setTotalProductos(res.meta?.total || 0);
+                    } else if (Array.isArray(res)) {
+                        setProductos(res);
+                        setTotalPaginas(Math.ceil(res.length / productosPorPagina) || 1);
+                        setTotalProductos(res.length);
+                    }
+                }
+            } catch (err) {
+                if (activo) {
+                    setError("No pudimos cargar el catálogo. Intentá nuevamente más tarde.");
+                }
+            } finally {
+                if (activo) setCargando(false);
+            }
+        }
+
+        cargarProductos();
+
+        return () => {
+            activo = false;
+        };
+    }, [categoriaParam, busquedaParam, paginaParam]);
 
     const categoriasDisponibles = useMemo(() => {
         const mapa = new Map();
 
-        // Categorías registradas en la API (Single Source of Truth)
         (categorias || []).forEach((cat) => {
             const nombre = typeof cat === "string" ? cat : cat.nombre;
             if (nombre && nombre.trim()) {
@@ -92,35 +139,27 @@ function ListaProductos({onAgregarAlCarrito}) {
             .sort((a, b) => a.label.localeCompare(b.label));
     }, [categorias]);
 
-    const productosFiltrados = useMemo(() => {
-        const textoBusqueda = normalizarTexto(busqueda);
-        const regexBusqueda = textoBusqueda
-            ? new RegExp(`\\b${escaparRegExp(textoBusqueda)}`, "i")
-            : null;
+    const handleCambiarCategoria = (nuevaCat) => {
+        const nuevosParams = new URLSearchParams(searchParams);
+        if (nuevaCat && nuevaCat !== "todos") {
+            nuevosParams.set("categoria", nuevaCat);
+        } else {
+            nuevosParams.delete("categoria");
+        }
+        nuevosParams.delete("page"); // Resetea a página 1 al cambiar de categoría
+        setSearchParams(nuevosParams);
+    };
 
-        return productos.filter((producto) => {
-            const coincideCategoria =
-                categoria === "todos" ||
-                (producto.categoria &&
-                    producto.categoria.trim().toLowerCase() === categoria.toLowerCase());
-
-            const coincideBusqueda = regexBusqueda
-                ? regexBusqueda.test(normalizarTexto(producto.nombre))
-                : true;
-
-            return coincideCategoria && coincideBusqueda;
-        });
-    }, [productos, busqueda, categoria]);
-
-    const indiceUltimoProducto = paginaActual * productosPorPagina;
-    const indicePrimerProducto = indiceUltimoProducto - productosPorPagina;
-
-    const productosPaginados = productosFiltrados.slice(
-        indicePrimerProducto,
-        indiceUltimoProducto
-    );
-
-    const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina);
+    const handleCambiarPagina = (nuevaPagina) => {
+        const nuevosParams = new URLSearchParams(searchParams);
+        if (nuevaPagina > 1) {
+            nuevosParams.set("page", String(nuevaPagina));
+        } else {
+            nuevosParams.delete("page"); // Página 1 limpia la URL
+        }
+        setSearchParams(nuevosParams);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
     return (
         <section className="productos-section" aria-labelledby="productos-title">
@@ -158,16 +197,16 @@ function ListaProductos({onAgregarAlCarrito}) {
                 <div className="productos-filtros row g-3 align-items-center mb-5">
                     <div className="col-12 col-md-7 col-lg-8">
                         <div className="input-group">
-              <span className="input-group-text border-end-0">
-                <Search size={18} aria-hidden="true"/>
-              </span>
+                            <span className="input-group-text border-end-0">
+                                <Search size={18} aria-hidden="true"/>
+                            </span>
                             <input
                                 type="search"
                                 className="form-control border-start-0"
-                                placeholder="Buscar por nombre..."
+                                placeholder="Buscar por nombre o descripción..."
                                 aria-label="Buscar productos"
-                                value={busqueda}
-                                onChange={(e) => setBusqueda(e.target.value)}
+                                value={inputBusqueda}
+                                onChange={(e) => setInputBusqueda(e.target.value)}
                             />
                         </div>
                     </div>
@@ -176,8 +215,8 @@ function ListaProductos({onAgregarAlCarrito}) {
                         <select
                             className="form-select"
                             aria-label="Filtrar por categoría"
-                            value={categoria}
-                            onChange={(e) => setCategoria(e.target.value)}
+                            value={categoriaParam}
+                            onChange={(e) => handleCambiarCategoria(e.target.value)}
                         >
                             <option value="todos">Todas las categorías</option>
                             {categoriasDisponibles.map((cat) => (
@@ -202,7 +241,7 @@ function ListaProductos({onAgregarAlCarrito}) {
                     </div>
                 )}
 
-                {!cargando && !error && productosFiltrados.length === 0 && (
+                {!cargando && !error && productos.length === 0 && (
                     <div className="productos-vacio text-center my-5">
                         <PackageOpen size={48} className="mb-3" aria-hidden="true"/>
                         <h2 className="texto-titulo-elegante h4 mb-2">No se encontraron productos</h2>
@@ -213,12 +252,12 @@ function ListaProductos({onAgregarAlCarrito}) {
                 )}
 
                 <div className="visually-hidden" aria-live="polite" aria-atomic="true">
-                    {!cargando && !error && `Se encontraron ${productosFiltrados.length} productos`}
+                    {!cargando && !error && `Se encontraron ${totalProductos} productos`}
                 </div>
 
-                {!cargando && !error && productosPaginados.length > 0 && (
+                {!cargando && !error && productos.length > 0 && (
                     <div className="row g-4">
-                        {productosPaginados.map((producto) => (
+                        {productos.map((producto) => (
                             <div key={producto._id} className="col-12 col-sm-6 col-lg-4">
                                 <ProductCard
                                     producto={producto}
@@ -239,8 +278,8 @@ function ListaProductos({onAgregarAlCarrito}) {
                                 <button
                                     type="button"
                                     className="productos-paginacion__boton"
-                                    onClick={() => setPaginaActual((prev) => prev - 1)}
-                                    disabled={paginaActual === 1}
+                                    onClick={() => handleCambiarPagina(paginaParam - 1)}
+                                    disabled={paginaParam === 1}
                                     aria-label="Ir a la página anterior"
                                 >
                                     <ChevronLeft size={20} aria-hidden="true" />
@@ -255,14 +294,14 @@ function ListaProductos({onAgregarAlCarrito}) {
                                         <button
                                             type="button"
                                             className={`productos-paginacion__boton ${
-                                                paginaActual === numeroPagina
+                                                paginaParam === numeroPagina
                                                     ? "productos-paginacion__boton--activo"
                                                     : ""
                                             }`}
-                                            onClick={() => setPaginaActual(numeroPagina)}
+                                            onClick={() => handleCambiarPagina(numeroPagina)}
                                             aria-label={`Ir a la página ${numeroPagina}`}
                                             aria-current={
-                                                paginaActual === numeroPagina ? "page" : undefined
+                                                paginaParam === numeroPagina ? "page" : undefined
                                             }
                                         >
                                             {numeroPagina}
@@ -275,8 +314,8 @@ function ListaProductos({onAgregarAlCarrito}) {
                                 <button
                                     type="button"
                                     className="productos-paginacion__boton"
-                                    onClick={() => setPaginaActual((prev) => prev + 1)}
-                                    disabled={paginaActual === totalPaginas}
+                                    onClick={() => handleCambiarPagina(paginaParam + 1)}
+                                    disabled={paginaParam === totalPaginas}
                                     aria-label="Ir a la página siguiente"
                                 >
                                     <ChevronRight size={20} aria-hidden="true" />

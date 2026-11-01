@@ -23,12 +23,17 @@ const listarProductos = asyncHandler(async (req, res) => {
   const filtro = {};
 
   if (categoria && categoria !== 'todos' && categoria.trim()) {
-    filtro.categoria = { $regex: new RegExp(`^${categoria.trim()}$`, 'i') };
+    const catEscapada = categoria.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    filtro.categoria = { $regex: new RegExp(`^${catEscapada}$`, 'i') };
   }
 
   const terminoBusqueda = busqueda || search;
   if (terminoBusqueda && terminoBusqueda.trim()) {
-    filtro.nombre = { $regex: terminoBusqueda.trim(), $options: 'i' };
+    const terminoEscapado = terminoBusqueda.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    filtro.$or = [
+      { nombre: { $regex: terminoEscapado, $options: 'i' } },
+      { descripcion: { $regex: terminoEscapado, $options: 'i' } }
+    ];
   }
 
   // Paginación si se especifican parámetros de página o límite
