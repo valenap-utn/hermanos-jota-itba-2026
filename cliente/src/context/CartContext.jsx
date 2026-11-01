@@ -1,4 +1,4 @@
-import {createContext, useCallback, useContext, useEffect, useMemo, useState} from "react";
+import {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {obtenerProductos} from "../services/productosService";
 
 const CARRITO_STORAGE_KEY = "hermanosJotaCarrito";
@@ -70,6 +70,8 @@ export function CartProvider({children}) {
     const [catalogo, setCatalogo] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
+    // Conserva las mutaciones confirmadas mientras termina el GET inicial.
+    const cambiosDuranteCargaRef = useRef(new Map());
 
     // Hidratación de datos al iniciar el contexto
     useEffect(() => {
@@ -81,7 +83,12 @@ export function CartProvider({children}) {
                 setError(null);
                 const productosFresco = await obtenerProductos();
                 if (activo) {
-                    setCatalogo(productosFresco);
+                    const productos = new Map(productosFresco.map((p) => [p._id, p]));
+                    cambiosDuranteCargaRef.current?.forEach((producto, id) => {
+                        if (producto === null) productos.delete(id);
+                        else productos.set(id, producto);
+                    });
+                    setCatalogo([...productos.values()]);
                 }
             } catch (err) {
                 if (activo) {
@@ -89,6 +96,7 @@ export function CartProvider({children}) {
                 }
             } finally {
                 if (activo) {
+                    cambiosDuranteCargaRef.current = null;
                     setCargando(false);
                 }
             }
@@ -216,6 +224,25 @@ export function CartProvider({children}) {
         setReferencias([]);
     }, []);
 
+    const sincronizarProducto = useCallback((productoOId, {eliminado = false} = {}) => {
+        const producto = productoOId !== null && typeof productoOId === "object"
+            ? productoOId
+            : null;
+        const id = producto ? producto._id : productoOId;
+        if (!esIdValido(id) || (!eliminado && !producto)) return;
+
+        cambiosDuranteCargaRef.current?.set(id, eliminado ? null : producto);
+        if (eliminado) {
+            setCatalogo((prev) => prev.filter((p) => p._id !== id));
+            setReferencias((prev) => prev.filter((ref) => ref.id !== id));
+            return;
+        }
+
+        setCatalogo((prev) => prev.some((p) => p._id === id)
+            ? prev.map((p) => p._id === id ? producto : p)
+            : [...prev, producto]);
+    }, []);
+
     const value = {
         carrito,
         referencias,
@@ -226,7 +253,8 @@ export function CartProvider({children}) {
         agregarAlCarrito,
         actualizarCantidad,
         eliminarDelCarrito,
-        vaciarCarrito
+        vaciarCarrito,
+        sincronizarProducto
     };
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

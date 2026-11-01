@@ -59,6 +59,16 @@
     color: var(--color-primary);
 }
 
+.productos-error-operacion {
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid var(--color-error);
+    color: var(--color-error);
+    font-size: 0.9rem;
+}
+
 .productos-vacio {
     color: var(--color-gray);
 }
