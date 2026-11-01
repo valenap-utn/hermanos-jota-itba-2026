@@ -95,7 +95,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
                 setCargando(true);
                 setError(null);
 
-                const res = await obtenerProductos({
+                const { productos: lista, meta } = await obtenerProductos({
                     page: paginaParam,
                     limit: productosPorPagina,
                     categoria: categoriaParam,
@@ -103,15 +103,9 @@ function ListaProductos({ onAgregarAlCarrito }) {
                 });
 
                 if (activo) {
-                    if (res && res.productos !== undefined) {
-                        setProductos(res.productos);
-                        setTotalPaginas(res.meta?.totalPages || 1);
-                        setTotalProductos(res.meta?.total || 0);
-                    } else if (Array.isArray(res)) {
-                        setProductos(res);
-                        setTotalPaginas(Math.ceil(res.length / productosPorPagina) || 1);
-                        setTotalProductos(res.length);
-                    }
+                    setProductos(lista);
+                    setTotalPaginas(meta?.totalPages || 1);
+                    setTotalProductos(meta?.total || 0);
                 }
             } catch (err) {
                 if (activo) {

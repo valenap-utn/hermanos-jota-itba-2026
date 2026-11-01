@@ -80,7 +80,7 @@ export function CartProvider({children}) {
             try {
                 setCargando(true);
                 setError(null);
-                const productosFresco = await obtenerProductos();
+                const { productos: productosFresco } = await obtenerProductos();
                 if (activo) {
                     const productos = new Map(productosFresco.map((p) => [p._id, p]));
                     cambiosDuranteCargaRef.current?.forEach((producto, id) => {

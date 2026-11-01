@@ -13,7 +13,7 @@ function Home() {
 
         async function cargarDestacados() {
             try {
-                const productos = await obtenerProductos();
+                const { productos } = await obtenerProductos();
 
                 if (activo)
                     setDestacados(productos.filter((p) => p.destacado));
