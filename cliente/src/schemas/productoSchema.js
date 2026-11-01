@@ -81,7 +81,7 @@ export const productoSchema = z
       (!data.nuevaCategoria || !data.nuevaCategoria.trim())
     ) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["nuevaCategoria"],
         message: "Ingresá el nombre de la nueva categoría.",
       });
