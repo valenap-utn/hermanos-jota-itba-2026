@@ -1,8 +1,8 @@
 {
   "name": "hermanos-jota-deploy",
   "scripts": {
-    "build": "npm install --prefix servidor && npm install --prefix cliente && npm run build --prefix cliente",
-    "start": "npm start --prefix servidor & npm start --prefix cliente"
+    "build": "npm install --prefix backend && npm install --prefix client && npm run build --prefix client",
+    "start": "npm start --prefix backend"
   },
   "dependencies": {
     "dotenv": "^18.0.8",

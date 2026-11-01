@@ -6,8 +6,8 @@ Proyecto de e-commerce desarrollado como parte de la formación Full Stack Devel
 
 ```text
 /
-├── cliente/        # Frontend React
-├── servidor/       # Backend Node.js, Express y MongoDB
+├── client/        # Frontend React
+├── backend/       # Backend Node.js, Express y MongoDB
 ├── entrega-1/      # Material de los primeros sprints
 ├── docs/           # Documentación complementaria
 └── README.md
@@ -35,11 +35,11 @@ Clonar el repositorio y abrir **dos terminales**, una para cada aplicación.
 ### 1. Backend (`/servidor`)
 
 ```bash
-cd servidor
+cd backend
 npm install
 ```
 
-Crear `servidor/.env` a partir de `servidor/.env.example` y completar las variables con los datos del entorno propio:
+Crear `backend/.env` a partir de `backend/.env.example` y completar las variables con los datos del entorno propio:
 
 ```dotenv
 PORT=3001
@@ -80,19 +80,29 @@ Por defecto, la API queda disponible en `http://localhost:3001/api`.
 En otra terminal, desde la raíz del repositorio:
 
 ```bash
-cd cliente
+cd client
 npm install
 npm start
 ```
 
 La aplicación de desarrollo se abre normalmente en `http://localhost:3000`.
 
-El frontend debe poder comunicarse con la API. Antes de ejecutar ambos proyectos en distintos orígenes, revisar la URL utilizada por el cliente en sus servicios HTTP y adecuarla al backend correspondiente. El código del backend permite peticiones CORS mediante `cors()` sin una lista de orígenes restringidos.
+El frontend debe poder comunicarse con la API. Opcionalmente, se puede configurar `client/.env` a partir de `client/.env.example`:
+
+```dotenv
+REACT_APP_API_URL=http://localhost:3001/api
+```
+
+| Variable | Uso |
+| --- | --- |
+| `REACT_APP_API_URL` | URL base de la API. Por defecto es `http://localhost:3001/api` en desarrollo y `/api` relativo en producción. Si el frontend se despliega por separado en Vercel o Netlify, configurar esta variable en el hosting con la URL de Render (ej. `https://tu-api.onrender.com/api`). |
+
+El código del backend permite peticiones CORS mediante `cors()` sin una lista de orígenes restringidos.
 
 Para generar una compilación de producción del frontend:
 
 ```bash
-cd cliente
+cd client
 npm run build
 ```
 
@@ -100,7 +110,7 @@ npm run build
 
 **URL base local:** `http://localhost:3001/api`
 
-Las rutas de productos están definidas en `servidor/src/routes/productosRoutes.js`.
+Las rutas de productos están definidas en `backend/src/routes/productosRoutes.js`.
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
@@ -219,7 +229,7 @@ npm run seed:reset
 
 ## Despliegue
 
-El repositorio contiene un script raíz de compilación que instala las dependencias de `/servidor` y `/cliente` y construye el frontend. Además, Express está configurado para servir los archivos generados en `cliente/build` y resolver las rutas del frontend.
+El repositorio contiene un script raíz de compilación que instala las dependencias de `/servidor` y `/cliente` y construye el frontend. Además, Express está configurado para servir los archivos generados en `client/build` y resolver las rutas del frontend.
 
 La configuración final de hosting debe comprobarse en el proveedor de despliegue; la presencia de scripts no confirma que una versión específica esté publicada.
 
@@ -235,7 +245,7 @@ Antes de dar por finalizada la publicación, probar `GET`, `POST`, `PUT` y `DELE
 ## Seguridad y configuración
 
 - No subir archivos `.env` ni credenciales reales al repositorio.
-- Mantener `servidor/.env.example` únicamente con valores de ejemplo.
+- Mantener `backend/.env.example` únicamente con valores de ejemplo.
 - Configurar secretos reales en las variables de entorno del proveedor de hosting.
 - Verificar con Git que ningún `.env` sensible esté rastreado; estar incluido en `.gitignore` no elimina un archivo previamente versionado.
 - El backend actualmente usa `cors()` sin restricción de origen y no se debe considerar que el límite de catálogo sustituye a la autenticación o autorización.
