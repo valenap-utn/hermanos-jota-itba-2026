@@ -14,8 +14,7 @@ export const productoSchema = z
     descripcion: z
       .string()
       .trim()
-      .min(1, "Ingresá una descripción.")
-      .min(10, "La descripción debe tener al menos 10 caracteres."),
+      .optional(),
 
     // Valida que no esté vacío y luego transforma a número positivo o cero
     precio: z
@@ -28,11 +27,12 @@ export const productoSchema = z
           .nonnegative("El precio debe ser mayor o igual a 0.")
       ),
 
-    // Valida que no esté vacío y luego transforma a entero mayor o igual a cero
+    // Valida entero mayor o igual a cero si se proporciona, o default a 0 si está vacío
     stock: z
       .string()
       .trim()
-      .min(1, "Ingresá el stock del producto.")
+      .optional()
+      .transform((val) => (val === "" || val === undefined ? "0" : val))
       .pipe(
         z.coerce
           .number({ message: "Ingresá un stock numérico válido." })
@@ -65,15 +65,18 @@ export const productoSchema = z
       .default(false),
 
     imagen: z
-      .instanceof(File, { message: "Seleccioná una imagen para el producto." })
+      .custom((file) => file === null || file === undefined || file instanceof File, {
+        message: "Archivo no válido.",
+      })
       .refine(
-        (file) => TIPOS_IMAGEN_PERMITIDOS.includes(file.type),
+        (file) => !file || TIPOS_IMAGEN_PERMITIDOS.includes(file.type),
         "La imagen debe ser JPG, JPEG, PNG o WebP."
       )
       .refine(
-        (file) => file.size <= TAMANO_MAXIMO_IMAGEN,
+        (file) => !file || file.size <= TAMANO_MAXIMO_IMAGEN,
         "La imagen no puede superar los 5 MB."
-      ),
+      )
+      .optional(),
   })
   .superRefine((data, ctx) => {
     if (

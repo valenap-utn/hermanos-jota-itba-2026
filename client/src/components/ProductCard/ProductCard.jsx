@@ -41,7 +41,7 @@ function ProductCard({ producto, onAgregarAlCarrito, mostrarEditar, onEliminar }
       <figure className="product-card-figure">
         <img
           className="product-card-image"
-          src={producto.imagenUrl}
+          src={producto.imagenUrl || "/assets/img/placeholder.svg"}
           alt={producto.nombre}
         />
       </figure>

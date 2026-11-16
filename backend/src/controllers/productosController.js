@@ -97,9 +97,6 @@ const crearProducto = asyncHandler(async (req, res) => {
   if (!nombre || !nombre.trim()) {
     throw createError.BadRequest('El nombre del producto es obligatorio.');
   }
-  if (!descripcion || !descripcion.trim()) {
-    throw createError.BadRequest('La descripción del producto es obligatoria.');
-  }
   if (precio === undefined || isNaN(Number(precio)) || Number(precio) < 0) {
     throw createError.BadRequest('El precio debe ser un número válido mayor o igual a 0.');
   }
@@ -112,28 +109,28 @@ const crearProducto = asyncHandler(async (req, res) => {
     );
   }
 
-  // Validar y procesar imagen PRIMERO
+  // Validar y procesar imagen (opcional)
   let imagenUrlFinal = '';
   if (req.file && req.file.buffer) {
     imagenUrlFinal = await subirACloudinary(req.file.buffer);
-  } else if (req.body.imagenUrl) {
-    if (!validarImagen(req.body.imagenUrl)) {
+  } else if (req.body.imagenUrl && req.body.imagenUrl.trim()) {
+    if (!validarImagen(req.body.imagenUrl.trim())) {
       throw createError.BadRequest('La URL de la imagen debe provenir del almacenamiento oficial del proyecto.');
     }
     imagenUrlFinal = req.body.imagenUrl.trim();
-  } else {
-    throw createError.BadRequest('Debés seleccionar una imagen para el producto.');
   }
 
   // Resolver categoría
   const categoriaFinal = await resolverCategoria(categoria);
 
+  const descripcionFinal = typeof descripcion === 'string' ? descripcion.trim() : '';
+
   // Crear el producto en MongoDB
   const nuevoProducto = await Product.create({
     nombre: nombre.trim(),
-    descripcion: descripcion.trim(),
+    descripcion: descripcionFinal,
     precio: Number(precio),
-    stock: stock !== undefined && !isNaN(Number(stock)) ? Math.max(0, Number(stock)) : 0,
+    stock: stock !== undefined && stock !== '' && !isNaN(Number(stock)) ? Math.max(0, Number(stock)) : 0,
     categoria: categoriaFinal,
     materiales: materiales ? materiales.trim() : '',
     medidas: medidas ? medidas.trim() : '',
@@ -158,8 +155,15 @@ const actualizarProducto = asyncHandler(async (req, res) => {
   // Si se envió un archivo nuevo en la actualización
   if (req.file && req.file.buffer) {
     datosActualizacion.imagenUrl = await subirACloudinary(req.file.buffer);
-  } else if (datosActualizacion.imagenUrl && !validarImagen(datosActualizacion.imagenUrl)) {
-    throw createError.BadRequest('La URL de la imagen debe provenir del almacenamiento oficial del proyecto.');
+  } else if (datosActualizacion.imagenUrl && typeof datosActualizacion.imagenUrl === 'string' && datosActualizacion.imagenUrl.trim()) {
+    if (!validarImagen(datosActualizacion.imagenUrl.trim())) {
+      throw createError.BadRequest('La URL de la imagen debe provenir del almacenamiento oficial del proyecto.');
+    }
+    datosActualizacion.imagenUrl = datosActualizacion.imagenUrl.trim();
+  }
+
+  if (typeof datosActualizacion.descripcion === 'string') {
+    datosActualizacion.descripcion = datosActualizacion.descripcion.trim();
   }
 
   // Resolver categoría de forma atómica si se actualiza

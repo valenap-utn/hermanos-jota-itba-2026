@@ -275,7 +275,7 @@ function ProductoForm({
 
           <div className="col-12">
             <label htmlFor="descripcion" className="producto-form__label">
-              Descripción *
+              Descripción
             </label>
             <textarea
               id="descripcion"
@@ -288,7 +288,6 @@ function ProductoForm({
               disabled={procesando}
               aria-invalid={Boolean(wasValidated && errores.descripcion)}
               aria-describedby={wasValidated && errores.descripcion ? "error-descripcion" : undefined}
-              required
             />
             {wasValidated && errores.descripcion && (
               <p id="error-descripcion" className="producto-form__error" role="alert">
@@ -325,7 +324,7 @@ function ProductoForm({
 
           <div className="col-12 col-md-6">
             <label htmlFor="stock" className="producto-form__label">
-              Stock *
+              Stock
             </label>
             <input
               id="stock"
@@ -340,7 +339,6 @@ function ProductoForm({
               disabled={procesando}
               aria-invalid={Boolean(wasValidated && errores.stock)}
               aria-describedby={wasValidated && errores.stock ? "error-stock" : undefined}
-              required
             />
             {wasValidated && errores.stock && (
               <p id="error-stock" className="producto-form__error" role="alert">
@@ -476,8 +474,7 @@ function ProductoForm({
         <div className="row g-3">
           <div className="col-12">
             <label htmlFor="imagenUrl" className="producto-form__label">
-              URL o ruta de imagen{" "}
-              {archivoImagen ? "(opcional si se sube archivo)" : "*"}
+              URL o ruta de imagen (opcional)
             </label>
             <input
               id="imagenUrl"
@@ -490,7 +487,6 @@ function ProductoForm({
               disabled={procesando}
               aria-invalid={Boolean(wasValidated && errores.imagenUrl)}
               aria-describedby={wasValidated && errores.imagenUrl ? "error-imagenUrl" : undefined}
-              required={!archivoImagen}
             />
             {wasValidated && errores.imagenUrl && (
               <p id="error-imagenUrl" className="producto-form__error" role="alert">

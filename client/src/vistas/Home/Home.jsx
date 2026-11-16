@@ -139,7 +139,7 @@ function Home() {
                                     <figure className="home-producto-figure">
                                         <img
                                             className="home-producto-image"
-                                            src={producto.imagenUrl}
+                                            src={producto.imagenUrl || "/assets/img/placeholder.svg"}
                                             alt={producto.nombre}
                                             loading="lazy"
                                         />
