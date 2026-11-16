@@ -51,9 +51,6 @@ export function validarCampos(
   }
 
   const descTrim = (formulario?.descripcion || "").trim();
-  if (!descTrim) {
-    errores.descripcion = "La descripción es obligatoria.";
-  }
 
   const precioTrim = String(formulario?.precio ?? "").trim();
   const precioNum = Number(precioTrim);
@@ -62,8 +59,8 @@ export function validarCampos(
   }
 
   const stockTrim = String(formulario?.stock ?? "").trim();
-  const stockNum = Number(stockTrim);
-  if (stockTrim === "" || !Number.isInteger(stockNum) || stockNum < 0) {
+  const stockNum = stockTrim === "" ? 0 : Number(stockTrim);
+  if (stockTrim !== "" && (!Number.isInteger(stockNum) || stockNum < 0)) {
     errores.stock = "Ingresá un stock entero mayor o igual a 0.";
   }
 
@@ -74,9 +71,6 @@ export function validarCampos(
   }
 
   const imagenUrlTrim = (formulario?.imagenUrl || "").trim();
-  if (!imagenUrlTrim && !archivoImagen) {
-    errores.imagenUrl = "La imagen del producto es obligatoria.";
-  }
 
   if (errorArchivo) {
     errores.archivo = errorArchivo;

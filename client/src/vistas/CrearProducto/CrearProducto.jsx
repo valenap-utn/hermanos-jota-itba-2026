@@ -79,9 +79,9 @@ function CrearProducto() {
     try {
       const formData = new FormData();
       formData.append("nombre", data.nombre.trim());
-      formData.append("descripcion", data.descripcion.trim());
+      formData.append("descripcion", (data.descripcion || "").trim());
       formData.append("precio", data.precio);
-      formData.append("stock", data.stock);
+      formData.append("stock", data.stock !== undefined ? data.stock : "0");
       formData.append("materiales", (data.materiales || "").trim());
       formData.append("medidas", (data.medidas || "").trim());
       formData.append("destacado", data.destacado);
@@ -91,7 +91,9 @@ function CrearProducto() {
           ? data.nuevaCategoria.trim()
           : data.categoria;
       formData.append("categoria", categoriaFinal);
-      formData.append("imagen", data.imagen);
+      if (data.imagen) {
+        formData.append("imagen", data.imagen);
+      }
 
       const producto = await crearProducto(formData);
       sincronizarProducto(producto);
@@ -164,7 +166,7 @@ function CrearProducto() {
 
               <div className="col-12">
                 <label htmlFor="descripcion" className="crear-producto__label">
-                  Descripción *
+                  Descripción
                 </label>
                 <textarea
                   id="descripcion"
@@ -218,7 +220,7 @@ function CrearProducto() {
 
               <div className="col-12 col-md-6">
                 <label htmlFor="stock" className="crear-producto__label">
-                  Stock *
+                  Stock
                 </label>
                 <input
                   id="stock"
