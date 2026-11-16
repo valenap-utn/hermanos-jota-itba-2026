@@ -89,7 +89,7 @@ function SelectorImagenProducto({
                 className="producto-form__label"
             >
                 {esCreacion
-                    ? "Imagen del producto *"
+                    ? "Imagen del producto (opcional)"
                     : "Reemplazar imagen con archivo nuevo (opcional)"}
             </label>
 
@@ -134,7 +134,6 @@ function SelectorImagenProducto({
                     accept="image/jpeg,image/png,image/webp"
                     className="producto-form__file-input"
                     disabled={deshabilitado}
-                    aria-required={esCreacion}
                     aria-invalid={Boolean(error)}
                     aria-describedby={
                         error

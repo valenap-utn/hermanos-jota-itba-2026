@@ -30,7 +30,9 @@ function CrearProducto() {
                     : data.categoria;
 
             formData.append("categoria", categoriaFinal);
-            formData.append("imagen", data.imagen);
+            if (data.imagen) {
+                formData.append("imagen", data.imagen);
+            }
 
             const producto = await crearProducto(formData);
 

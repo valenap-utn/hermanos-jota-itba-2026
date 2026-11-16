@@ -37,8 +37,8 @@ export const crearProductoSchema = (modo = "crear") =>
             descripcion: z
                 .string()
                 .trim()
-                .min(1, "Ingresá una descripción.")
-                .min(10, "La descripción debe tener al menos 10 caracteres."),
+                .optional()
+                .default(""),
 
             precio: z
                 .string()
@@ -54,7 +54,8 @@ export const crearProductoSchema = (modo = "crear") =>
             stock: z
                 .string()
                 .trim()
-                .min(1, "Ingresá el stock del producto.")
+                .optional()
+                .transform((val) => (val === "" || val === undefined ? "0" : val))
                 .pipe(
                     z.coerce
                         .number({message: "Ingresá un stock numérico válido."})
@@ -88,26 +89,6 @@ export const crearProductoSchema = (modo = "crear") =>
                     code: "custom",
                     path: ["nuevaCategoria"],
                     message: "Ingresá el nombre de la nueva categoría.",
-                });
-            }
-
-            if (modo === "crear" && !data.imagen) {
-                ctx.addIssue({
-                    code: "custom",
-                    path: ["imagen"],
-                    message: "Seleccioná una imagen para el producto.",
-                });
-            }
-
-            if (
-                modo === "editar" &&
-                !data.imagen &&
-                !data.imagenUrl
-            ) {
-                ctx.addIssue({
-                    code: "custom",
-                    path: ["imagenUrl"],
-                    message: "La imagen del producto es obligatoria.",
                 });
             }
         });

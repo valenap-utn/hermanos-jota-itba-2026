@@ -55,7 +55,6 @@ function ProductoForm({
     });
 
     const categoriaSeleccionada = watch("categoria");
-    const archivoImagen = watch("imagen");
     const imagenUrl = watch("imagenUrl");
 
     const procesando = cargando || isSubmitting;
@@ -251,7 +250,7 @@ function ProductoForm({
 
                     <div className="col-12">
                         <label htmlFor="descripcion" className="producto-form__label">
-                            Descripción *
+                            Descripción
                         </label>
 
                         <textarea
@@ -265,7 +264,6 @@ function ProductoForm({
                             aria-describedby={
                                 errors.descripcion ? "error-descripcion" : undefined
                             }
-                            required
                         />
 
                         {errors.descripcion && (
@@ -313,7 +311,7 @@ function ProductoForm({
 
                     <div className="col-12 col-md-6">
                         <label htmlFor="stock" className="producto-form__label">
-                            Stock *
+                            Stock
                         </label>
 
                         <input
@@ -329,7 +327,6 @@ function ProductoForm({
                             aria-describedby={
                                 errors.stock ? "error-stock" : undefined
                             }
-                            required
                         />
 
                         {errors.stock && (
@@ -506,10 +503,7 @@ function ProductoForm({
                                 htmlFor="imagenUrl"
                                 className="producto-form__label"
                             >
-                                URL o ruta de imagen{" "}
-                                {archivoImagen
-                                    ? "(opcional si se sube archivo)"
-                                    : "*"}
+                                URL o ruta de imagen (opcional)
                             </label>
 
                             <input
@@ -525,7 +519,6 @@ function ProductoForm({
                                         ? "error-imagenUrl"
                                         : undefined
                                 }
-                                required={!archivoImagen}
                             />
 
                             {errors.imagenUrl && (
