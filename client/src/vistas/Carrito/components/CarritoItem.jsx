@@ -16,7 +16,7 @@ function CarritoItem({ item, onActualizarCantidad, onSolicitarEliminar, itemRef 
                 aria-label={`Ver ${item.nombre}`}
             >
                 <img
-                    src={item.imagen}
+                    src={item.imagen || "/assets/img/placeholder.svg"}
                     alt={item.nombre}
                     className="carrito-item-img"
                 />
