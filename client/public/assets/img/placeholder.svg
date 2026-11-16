@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" fill="none">
+  <rect width="400" height="300" fill="#f8f7f5"/>
+  <g stroke="#b5ada4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(150, 95)">
+    <!-- Minimalist furniture outline -->
+    <path d="M15 65 V25 C15 17 22 10 30 10 H70 C78 10 85 17 85 25 V65" />
+    <path d="M5 45 C5 40 10 35 15 35 H85 C90 35 95 40 95 45 V65 H5 Z" />
+    <line x1="20" y1="65" x2="15" y2="85" />
+    <line x1="80" y1="65" x2="85" y2="85" />
+  </g>
+  <text x="200" y="215" text-anchor="middle" font-family="serif" font-size="14" fill="#8c827a" letter-spacing="1">HERMANOS JOTA</text>
+  <text x="200" y="235" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#b5ada4">Sin imagen disponible</text>
+</svg>

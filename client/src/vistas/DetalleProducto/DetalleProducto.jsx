@@ -162,7 +162,7 @@ function DetalleProducto({onAgregarAlCarrito}) {
                 <article className="row g-4 g-lg-5">
                     <div className="col-12 col-lg-7">
                         <figure className="detalle-figura mb-0">
-                            <img className="detalle-imagen" src={producto.imagenUrl} alt={producto.nombre}/>
+                            <img className="detalle-imagen" src={producto.imagenUrl || "/assets/img/placeholder.svg"} alt={producto.nombre}/>
                         </figure>
                     </div>
 
@@ -179,7 +179,7 @@ function DetalleProducto({onAgregarAlCarrito}) {
                                 : "Precio a confirmar"}
                         </p>
 
-                        <p className="texto-principal detalle-descripcion">{producto.descripcion}</p>
+                        <p className="texto-principal detalle-descripcion">{producto.descripcion || "Sin descripción disponible."}</p>
 
                         {onAgregarAlCarrito && (
                             <div className="detalle-comprar-bloque mt-4">
