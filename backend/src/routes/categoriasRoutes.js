@@ -1,4 +1,5 @@
 const express = require('express');
+const verificarJwt = require('../middlewares/verificarJwt');
 const {
     obtenerCategorias,
     crearCategoria,
@@ -8,7 +9,7 @@ const {
 const router = express.Router();
 
 router.get('/', obtenerCategorias);
-router.post('/', crearCategoria);
-router.delete('/:id', eliminarCategoria);
+router.post('/', verificarJwt, crearCategoria);
+router.delete('/:id', verificarJwt, eliminarCategoria);
 
 module.exports = router;
