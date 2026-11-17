@@ -3,6 +3,7 @@ const healthcheckRoutes = require("./healthcheckRoutes");
 const productosRoutes = require("./productosRoutes");
 const uploadsRoutes = require('./uploadsRoutes');
 const categoriasRoutes = require('./categoriasRoutes');
+const pedidosRoutes = require('./pedidosRoutes');
 
 // Router principal de la API
 // Acá se van a agrupar las distintas rutas de la aplicación
@@ -13,5 +14,6 @@ router.use('/healthcheck', healthcheckRoutes);
 router.use('/productos', productosRoutes);
 router.use('/uploads', uploadsRoutes);
 router.use('/categorias', categoriasRoutes);
+router.use('/pedidos', pedidosRoutes);
 
 module.exports = router;
