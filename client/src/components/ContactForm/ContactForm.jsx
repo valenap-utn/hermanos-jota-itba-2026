@@ -38,6 +38,9 @@ function ContactForm() {
             return;
         }
 
+        // Imprime en consola los datos ingresados según requerimiento de consigna
+        console.log(formData);
+
         // Abre el modal
         setShowStatusModal(true);
 
