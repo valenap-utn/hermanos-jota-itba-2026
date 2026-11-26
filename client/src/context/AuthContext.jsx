@@ -3,25 +3,33 @@ import {createContext, useCallback, useContext, useMemo, useState} from "react";
 const AuthContext = createContext(null);
 
 export function AuthProvider({children}) {
-    const [usuario, setUsuario] = useState(null);
+    const [sesion, setSesion] = useState(null);
 
-    const isAuthenticated = usuario !== null;
+    const usuario = sesion?.usuario ?? null;
+    const token = sesion?.token ?? null;
 
-    const iniciarSesion = useCallback((usuarioAutenticado) => {
-        setUsuario(usuarioAutenticado);
+    const isAuthenticated = usuario !== null && token !== null;
+
+    const iniciarSesion = useCallback((usuarioAutenticado, tokenJWT) => {
+        setSesion({
+            usuario: usuarioAutenticado,
+            token: tokenJWT
+        });
     }, []);
 
     const cerrarSesion = useCallback(() => {
-        setUsuario(null);
+        setSesion(null);
     }, []);
 
     const value = useMemo(() => ({
         usuario,
+        token,
         isAuthenticated,
         iniciarSesion,
         cerrarSesion
     }), [
         usuario,
+        token,
         isAuthenticated,
         iniciarSesion,
         cerrarSesion

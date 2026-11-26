@@ -1,10 +1,21 @@
+import {useNavigate} from "react-router-dom";
 import AuthForm from "../../components/AuthForm/AuthForm";
+import {registrarUsuario} from "../../services/authService";
+import {useToast} from "../../context/ToastContext";
 
 function Registro() {
-    const manejarRegistro = async () => {
-        throw new Error(
-            "El registro de usuarios todavía no está disponible."
+    const navigate = useNavigate();
+    const {mostrarToast} = useToast();
+
+    const manejarRegistro = async (datos) => {
+        await registrarUsuario(datos);
+
+        mostrarToast(
+            "Tu cuenta fue creada correctamente. Ya podés iniciar sesión.",
+            "success"
         );
+
+        navigate("/login", {replace: true});
     };
 
     return (

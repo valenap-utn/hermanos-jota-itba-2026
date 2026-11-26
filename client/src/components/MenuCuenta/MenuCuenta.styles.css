@@ -1,0 +1,197 @@
+/* ===== CONTENEDOR ===== */
+
+.menu-cuenta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+
+/* ===== BOTÓN DE CUENTA AUTENTICADA ===== */
+
+.cuenta-link--autenticado {
+    gap: 0.4rem;
+
+    padding: 0.4rem 0.5rem;
+
+    border: none;
+    background-color: transparent;
+
+    font-family: var(--font-primary);
+    font-weight: var(--font-medium);
+
+    cursor: pointer;
+}
+
+.menu-cuenta__nombre {
+    max-width: 100px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.menu-cuenta__flecha {
+    transition: transform 0.2s ease;
+}
+
+.menu-cuenta__flecha--abierta {
+    transform: rotate(180deg);
+}
+
+
+/* ===== MENÚ DESPLEGABLE ===== */
+
+.menu-cuenta__desplegable {
+    position: absolute;
+
+    top: calc(100% + 0.75rem);
+    right: 0;
+
+    width: 270px;
+    max-width: calc(100vw - 32px);
+
+    background-color: var(--color-white, #ffffff);
+    border: 1px solid var(--border-medium);
+
+    z-index: 1030;
+}
+
+
+/* ===== INFORMACIÓN DEL USUARIO ===== */
+
+.menu-cuenta__usuario {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    padding: 1rem;
+
+    border-bottom: 1px solid var(--border-medium);
+
+    font-family: var(--font-primary);
+}
+
+.menu-cuenta__saludo {
+    color: var(--color-primary);
+
+    font-size: 1rem;
+    font-weight: var(--font-medium);
+}
+
+.menu-cuenta__email {
+    color: var(--color-dark-gray);
+
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+}
+
+.menu-cuenta__rol {
+    color: var(--color-gray);
+
+    font-size: 0.75rem;
+}
+
+
+/* ===== CERRAR SESIÓN ===== */
+
+.menu-cuenta__logout {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+
+    width: 100%;
+    padding: 0.85rem 1rem;
+
+    border: none;
+    background-color: transparent;
+
+    color: var(--color-primary);
+
+    font-family: var(--font-primary);
+    font-size: 0.875rem;
+    font-weight: var(--font-medium);
+
+    text-align: left;
+
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.menu-cuenta__logout:hover {
+    background-color: var(--color-surface-hover);
+}
+
+.menu-cuenta__logout:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -3px;
+}
+
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 991.98px) {
+    .menu-cuenta__nombre {
+        display: none;
+    }
+
+    .cuenta-link--autenticado {
+        padding-inline: 0.25rem;
+    }
+
+    .cuenta-panel-mobile {
+        display: grid;
+        grid-template-rows: 0fr;
+
+        width: 100%;
+
+        background-color: var(--color-white, #ffffff);
+
+        transition: grid-template-rows 0.35s ease;
+    }
+
+    .cuenta-panel-mobile--abierto {
+        grid-template-rows: 1fr;
+    }
+
+    .cuenta-panel-mobile__contenido {
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .cuenta-panel-mobile .menu-cuenta__desplegable {
+        position: static;
+
+        width: 100%;
+        max-width: none;
+
+        border: none;
+    }
+
+    .cuenta-panel-mobile .menu-cuenta__usuario {
+        gap: 0.5rem;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .cuenta-panel-mobile .menu-cuenta__saludo {
+        font-size: 1.125rem;
+    }
+
+    .cuenta-panel-mobile .menu-cuenta__email {
+        font-size: 0.875rem;
+    }
+
+    .cuenta-panel-mobile .menu-cuenta__logout {
+        min-height: 48px;
+        padding: 1rem 1.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cuenta-panel-mobile {
+        transition: none;
+    }
+}

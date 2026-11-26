@@ -1,12 +1,63 @@
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useId, useRef, useState} from "react";
 import "./Header.styles.css";
 import Logo from "../Logo/Logo";
-import {ShoppingCart, UserRound} from "lucide-react";
-import {Link, NavLink} from "react-router-dom";
+import {ShoppingCart} from "lucide-react";
+import MenuCuenta, {PanelCuenta} from "../MenuCuenta/MenuCuenta";
+import {Link, NavLink, useLocation} from "react-router-dom";
+import {useAuth} from "../../context/AuthContext";
 
 function Header({cartCount = 0}) {
     const [isBumping, setIsBumping] = useState(false);
     const prevCountRef = useRef(cartCount);
+
+    const [cuentaMobileAbierta, setCuentaMobileAbierta] = useState(false);
+
+    const {isAuthenticated} = useAuth();
+    const location = useLocation();
+    const panelMobileId = useId();
+    const headerRef = useRef(null);
+
+    useEffect(() => {
+        setCuentaMobileAbierta(false);
+    }, [location.pathname, isAuthenticated]);
+
+    useEffect(() => {
+        if (!cuentaMobileAbierta) return;
+
+        const manejarEscape = (event) => {
+            if (event.key === "Escape") {
+                setCuentaMobileAbierta(false);
+
+                headerRef.current
+                    ?.querySelector(".navbar-actions .cuenta-link")
+                    ?.focus();
+            }
+        };
+
+        const manejarClickExterior = (event) => {
+            if (!headerRef.current?.contains(event.target)) {
+                setCuentaMobileAbierta(false);
+            }
+        };
+
+        const mediaQuery = window.matchMedia("(min-width: 992px)");
+
+        const manejarResize = (event) => {
+            if (event.matches) {
+                setCuentaMobileAbierta(false);
+            }
+        };
+
+        document.addEventListener("keydown", manejarEscape);
+        document.addEventListener("pointerdown", manejarClickExterior);
+        mediaQuery.addEventListener("change", manejarResize);
+
+        return () => {
+            document.removeEventListener("keydown", manejarEscape);
+            document.removeEventListener("pointerdown", manejarClickExterior);
+            mediaQuery.removeEventListener("change", manejarResize);
+        };
+    }, [cuentaMobileAbierta]);
 
     useEffect(() => {
         if (cartCount > 0 && cartCount !== prevCountRef.current) {
@@ -36,7 +87,7 @@ function Header({cartCount = 0}) {
                 Saltar al contenido principal
             </a>
 
-            <header>
+            <header ref={headerRef}>
                 <nav
                     className="navbar navbar-expand-lg navbar-hermanos-jota"
                     aria-label="Navegación principal"
@@ -79,16 +130,14 @@ function Header({cartCount = 0}) {
                                 </span>
                             </Link>
 
-                            <NavLink
-                                to="/login"
-                                className="cuenta-link"
-                                aria-label="Iniciar sesión"
-                            >
-                                <UserRound
-                                    size={20}
-                                    aria-hidden="true"
-                                />
-                            </NavLink>
+                            <MenuCuenta
+                                mobile
+                                abiertoMobile={cuentaMobileAbierta}
+                                onToggleMobile={() =>
+                                    setCuentaMobileAbierta((prev) => !prev)
+                                }
+                                panelMobileId={panelMobileId}
+                            />
 
                             {/* Menú hamburguesa */}
                             <button
@@ -99,6 +148,7 @@ function Header({cartCount = 0}) {
                                 aria-controls="navbarNav"
                                 aria-expanded="false"
                                 aria-label="Abrir menú de navegación"
+                                onClick={() => setCuentaMobileAbierta(false)}
                             >
                                 <span
                                     className="menu-icon"
@@ -154,16 +204,7 @@ function Header({cartCount = 0}) {
 
                                 {/* Cuenta desktop */}
                                 <li className="nav-item d-none d-lg-flex align-items-center ms-lg-3">
-                                    <NavLink
-                                        to="/login"
-                                        className="cuenta-link"
-                                        aria-label="Iniciar sesión"
-                                    >
-                                        <UserRound
-                                            size={20}
-                                            aria-hidden="true"
-                                        />
-                                    </NavLink>
+                                    <MenuCuenta/>
                                 </li>
 
                                 {/* Carrito desktop */}
@@ -191,6 +232,26 @@ function Header({cartCount = 0}) {
                         </div>
                     </div>
                 </nav>
+
+                {isAuthenticated && (
+                    <div
+                        id={panelMobileId}
+                        className={`cuenta-panel-mobile d-lg-none${
+                            cuentaMobileAbierta
+                                ? " cuenta-panel-mobile--abierto"
+                                : ""
+                        }`}
+                        inert={!cuentaMobileAbierta}
+                        aria-hidden={!cuentaMobileAbierta}
+                    >
+                        <div className="cuenta-panel-mobile__contenido">
+                            <PanelCuenta
+                                onCerrar={() => setCuentaMobileAbierta(false)}
+                            />
+                        </div>
+                    </div>
+                )}
+
             </header>
         </>
     );
