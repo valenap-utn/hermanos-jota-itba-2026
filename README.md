@@ -1,7 +1,7 @@
 
 # Mueblería Hermanos Jota
 
-Proyecto de e-commerce desarrollado como parte de la formación Full Stack Developer del ITBA. La aplicación permite explorar un catálogo de muebles, consultar detalles, filtrar productos y gestionar un carrito. También incluye operaciones de administración de productos mediante una API REST y un módulo de autenticación de usuarios en el backend.
+Proyecto de e-commerce desarrollado como parte de la formación Full Stack Developer del ITBA. La aplicación permite explorar un catálogo de muebles, consultar detalles, filtrar productos y gestionar un carrito. También incluye operaciones de administración de productos mediante una API REST y un módulo de autenticación de usuarios Full Stack, con registro, inicio de sesión, persistencia de sesión y cierre de sesión.
 
 ## Estructura del repositorio
 
@@ -24,7 +24,8 @@ El frontend y el backend se desarrollan en directorios separados. El cliente con
 - **Backend:** Node.js, Express 5, Mongoose, MongoDB, Multer y Cloudinary.
 - **Comunicación:** API REST, JSON, `fetch` y CORS.
 - **Persistencia:** MongoDB (se puede configurar MongoDB Atlas mediante la cadena de conexión).
-- **Autenticación:** bcrypt y JSON Web Tokens (JWT).
+- **Autenticación:** bcrypt, JSON Web Tokens (JWT), React Context API y localStorage.
+- **Testing del frontend:** Jest, React Testing Library, Testing Library User Event y Jest DOM.
 - **Testing del backend:** Jest, Supertest y MongoDB Memory Server.
 
 ## Requisitos previos
@@ -166,7 +167,7 @@ El backend implementa autenticación mediante JWT y almacenamiento seguro de con
 
 El registro público no permite crear usuarios con rol `ADMIN`, independientemente del rol enviado en el cuerpo de la solicitud.
 
-La autorización de las operaciones del catálogo según el rol del usuario y la integración de la autenticación con el frontend quedan pendientes de implementación.
+La autenticación se encuentra integrada con el frontend. La autorización de las operaciones del catálogo según el rol del usuario queda pendiente de implementación.
 
 #### Registro de usuarios
 
@@ -370,6 +371,119 @@ Elimina el producto identificado por `:id`. Verificar el identificador antes de 
 
 El backend también expone rutas bajo `/api/categorias` y `/api/uploads`. Las operaciones de productos integran la resolución de categorías y la subida de imágenes, por lo que el formulario de creación puede utilizar una sola solicitud a `POST /api/productos`.
 
+## Autenticación del frontend
+
+El frontend implementa el registro, inicio de sesión, persistencia y cierre de sesión de usuarios mediante React Context API y los endpoints de autenticación del backend.
+
+### Rutas de autenticación
+
+| Ruta | Descripción |
+| --- | --- |
+| `/registro` | Formulario de registro de nuevos usuarios. |
+| `/login` | Formulario de inicio de sesión. |
+
+Ambos formularios utilizan un componente reutilizable (`AuthForm`) y validaciones mediante React Hook Form y Zod.
+
+### Organización del módulo
+
+```text
+client/src/
+├── components/
+│   ├── AuthForm/
+│   └── MenuCuenta/
+├── context/
+│   └── AuthContext.jsx
+├── schemas/
+│   └── authSchema.js
+├── services/
+│   └── authService.js
+├── utils/
+│   └── authStorage.js
+└── vistas/
+    ├── Login/
+    └── Registro/
+```
+
+- `AuthForm`: componente reutilizable para los formularios de registro e inicio de sesión.
+- `MenuCuenta`: interfaz de acceso a la cuenta, información del usuario, cierre de sesión y manejo de advertencias.
+- `AuthContext`: gestión global del estado de autenticación.
+- `authSchema`: esquemas de validación de los formularios.
+- `authService`: comunicación con los endpoints de autenticación mediante `apiClient`.
+- `authStorage`: gestión del almacenamiento local del JWT.
+
+### Estado global de autenticación
+
+El componente `AuthProvider` proporciona el estado de autenticación a toda la aplicación mediante el hook `useAuth()`.
+
+| Propiedad o método | Descripción |
+| --- | --- |
+| `usuario` | Datos del usuario autenticado o `null`. |
+| `token` | JWT de la sesión activa o `null`. |
+| `isAuthenticated` | Indica si existe una sesión autenticada. |
+| `cargandoSesion` | Indica si se está recuperando una sesión almacenada. |
+| `errorSesion` | Información sobre errores de recuperación, persistencia o eliminación de sesión. |
+| `iniciarSesion(usuario, token)` | Actualiza el estado global y almacena el JWT. |
+| `cerrarSesion()` | Elimina el estado de autenticación e intenta eliminar el JWT almacenado. |
+| `restaurarSesion()` | Valida el token almacenado y recupera los datos del usuario. |
+
+### Flujo de registro
+
+1. El usuario completa el formulario de registro.
+2. Se validan los datos y la coincidencia de las contraseñas.
+3. Se envía la solicitud a `POST /api/auth/register`.
+4. Si el registro es exitoso, se muestra una notificación y se redirige al usuario a `/login`.
+5. Si ocurre un error, se informa mediante el formulario.
+
+El registro no inicia sesión automáticamente.
+
+### Flujo de inicio de sesión
+
+1. El usuario ingresa su email y contraseña.
+2. Se validan los datos del formulario.
+3. Se envía la solicitud a `POST /api/auth/login`.
+4. El backend devuelve el JWT y los datos públicos del usuario.
+5. `AuthContext` actualiza el estado global y almacena el token.
+6. Se muestra una notificación de bienvenida y se redirige al usuario al inicio.
+
+El menú de cuenta del encabezado se actualiza automáticamente según el estado de autenticación.
+
+### Persistencia y recuperación de sesión
+
+El JWT se almacena en `localStorage` utilizando la clave `hermanosJotaAuthToken`.
+
+Al iniciar la aplicación o recargar la página, `AuthProvider` verifica si existe un token almacenado. Si existe, realiza una solicitud a `GET /api/auth/me` para validar la sesión y recuperar los datos actuales del usuario.
+
+Los datos del usuario y su rol no se almacenan en `localStorage`.
+
+Durante la recuperación se muestra un indicador no interactivo en el acceso a la cuenta.
+
+El contexto contempla las siguientes situaciones:
+
+| Situación | Comportamiento |
+| --- | --- |
+| Token válido | Recupera la sesión y los datos del usuario. |
+| Token inválido o expirado | Intenta eliminar el token almacenado y mantiene la sesión cerrada. |
+| Error de conexión o del servidor | Conserva el token y permite reintentar la recuperación. |
+| Error al almacenar el token | Mantiene la sesión activa en memoria e informa que no pudo persistirse. |
+| Error al eliminar el token | Limpia el estado en memoria, informa el problema y permite reintentar la eliminación. |
+
+Las operaciones asíncronas de recuperación incluyen un mecanismo de invalidación para evitar que una respuesta anterior sobrescriba una sesión nueva o restaure una sesión después del logout.
+
+### Cierre de sesión
+
+El usuario puede cerrar sesión desde el menú de cuenta disponible en el encabezado, tanto en desktop como en dispositivos móviles.
+
+El cierre de sesión realiza las siguientes operaciones:
+
+1. Invalida las operaciones pendientes de recuperación.
+2. Intenta eliminar el JWT almacenado en `localStorage`.
+3. Limpia los datos de autenticación del contexto.
+4. Actualiza la interfaz.
+5. Muestra una notificación de éxito o error.
+6. Redirige al usuario al inicio.
+
+Si falla la eliminación del token, la interfaz informa que la sesión podría recuperarse al recargar la página y permite reintentar el cierre.
+
 ## Datos iniciales (seed)
 
 ### Productos y categorías
@@ -499,6 +613,102 @@ No es necesario configurar una conexión a MongoDB Atlas para ejecutar estas pru
 
 MongoDB Memory Server puede necesitar descargar el binario de MongoDB durante la primera ejecución, por lo que esta puede demorar más que las siguientes.
 
+## Testing del frontend
+
+El frontend utiliza Jest y React Testing Library para verificar el comportamiento de los componentes, contextos, servicios y utilidades.
+
+### Organización de las pruebas
+
+Las pruebas se encuentran junto a los archivos correspondientes dentro de `client/src/`.
+
+```text
+client/src/
+├── components/
+│   ├── AuthForm/
+│   │   └── AuthForm.test.jsx
+│   └── MenuCuenta/
+│       └── MenuCuenta.test.jsx
+├── context/
+│   └── AuthContext.test.jsx
+├── schemas/
+│   └── authSchema.test.js
+├── services/
+│   └── authService.test.js
+├── utils/
+│   └── authStorage.test.js
+└── vistas/
+    ├── Login/
+    │   └── Login.test.jsx
+    └── Registro/
+        └── Registro.test.jsx
+```
+
+Las pruebas del módulo de autenticación verifican:
+
+- Validación de formularios de registro e inicio de sesión.
+- Comunicación con los servicios de autenticación.
+- Actualización y propagación del estado global.
+- Persistencia y recuperación de sesión.
+- Eliminación de tokens inválidos o expirados.
+- Cierre de sesión.
+- Manejo de errores de conexión y almacenamiento.
+- Protección frente a condiciones de carrera.
+- Comportamiento del menú de cuenta.
+- Notificaciones y redirecciones.
+
+### Ejecutar las pruebas
+
+Desde `client/`, ejecutar todas las pruebas:
+
+```bash
+npm test -- --watchAll=false --runInBand
+```
+
+Para ejecutar las pruebas en modo observación:
+
+```bash
+npm test
+```
+
+Para ejecutar las pruebas de un módulo específico:
+
+```bash
+npm test -- --watchAll=false --runInBand --testPathPattern=AuthContext
+```
+
+### Cobertura de código
+
+Para generar un reporte de cobertura global:
+
+```bash
+npm test -- --watchAll=false --runInBand --coverage
+```
+
+Para obtener la cobertura de un archivo específico:
+
+```bash
+npm test -- --watchAll=false --runInBand \
+  --testPathPattern=AuthContext \
+  --coverage \
+  --collectCoverageFrom=src/context/AuthContext.jsx
+```
+
+El reporte HTML se genera en:
+
+```text
+client/coverage/index.html
+```
+
+El reporte incluye cobertura de sentencias, ramas, funciones y líneas de código.
+
+### Aislamiento del entorno de testing
+
+Las pruebas utilizan credenciales, usuarios y tokens ficticios. Los servicios externos se simulan mediante mocks, por lo que no es necesario iniciar el backend ni disponer de una conexión a MongoDB.
+
+Las pruebas de persistencia utilizan el almacenamiento local del entorno de testing, limpiándolo entre ejecuciones para evitar dependencias entre casos.
+
+Las pruebas de componentes simulan las funciones de navegación de React Router cuando corresponde. No sustituyen las pruebas de navegación real ni las verificaciones manuales de integración Full Stack.
+
 ## Despliegue
 
 El repositorio contiene un script raíz de compilación que instala las dependencias de `/backend` y `/client` y construye el frontend. Además, Express está configurado para servir los archivos generados en `client/build` y resolver las rutas del frontend.
@@ -531,6 +741,11 @@ Antes de dar por finalizada la publicación, probar los endpoints desde la URL p
 - No permitir la asignación del rol `ADMIN` mediante el registro público.
 - El backend actualmente usa `cors()` sin restricción de origen y no se debe considerar que el límite de catálogo sustituye a la autenticación o autorización.
 - Las rutas de escritura del catálogo todavía no cuentan con autorización por roles. No deben considerarse operaciones administrativas protegidas hasta implementar los controles de acceso correspondientes.
+- El frontend almacena únicamente el JWT en `localStorage`, no las contraseñas ni los datos personales del usuario.
+- El almacenamiento de JWT en `localStorage` implica exposición ante posibles vulnerabilidades XSS. Como mejora futura, se puede evaluar una estrategia basada en cookies HttpOnly, Secure y SameSite.
+- El cierre de sesión elimina el token del cliente, pero no revoca el JWT en el servidor. Un token previamente obtenido puede continuar siendo válido hasta su expiración.
+- La sesión se valida contra el backend al recuperar el token almacenado. Actualmente no se implementa renovación automática de tokens, detección inmediata de expiración durante la navegación ni sincronización de sesión entre pestañas.
+- El estado de autenticación y el rol disponible en el frontend no sustituyen los controles de autorización que deben aplicarse en el backend.
 
 ## Integrantes
 

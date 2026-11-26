@@ -12,14 +12,23 @@ function Header({cartCount = 0}) {
 
     const [cuentaMobileAbierta, setCuentaMobileAbierta] = useState(false);
 
-    const {isAuthenticated} = useAuth();
+    const {isAuthenticated, cargandoSesion, errorSesion} = useAuth();
+
+    const tienePanelCuenta =
+        !cargandoSesion &&
+        (isAuthenticated || Boolean(errorSesion));
+
     const location = useLocation();
     const panelMobileId = useId();
     const headerRef = useRef(null);
 
     useEffect(() => {
         setCuentaMobileAbierta(false);
-    }, [location.pathname, isAuthenticated]);
+    }, [
+        location.pathname,
+        isAuthenticated,
+        tienePanelCuenta
+    ]);
 
     useEffect(() => {
         if (!cuentaMobileAbierta) return;
@@ -233,7 +242,7 @@ function Header({cartCount = 0}) {
                     </div>
                 </nav>
 
-                {isAuthenticated && (
+                {tienePanelCuenta && (
                     <div
                         id={panelMobileId}
                         className={`cuenta-panel-mobile d-lg-none${

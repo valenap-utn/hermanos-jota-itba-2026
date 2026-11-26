@@ -131,6 +131,88 @@
 }
 
 
+.cuenta-link--cargando {
+    cursor: default;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cuenta-panel-mobile {
+        transition: none;
+    }
+}
+
+/* ===== AVISOS DE SESIÓN ===== */
+
+.menu-cuenta__indicador-error {
+    color: var(--color-error, #A32020);
+    flex-shrink: 0;
+}
+
+.menu-cuenta__aviso {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    padding: 1rem;
+
+    font-family: var(--font-primary);
+}
+
+.menu-cuenta__usuario + .menu-cuenta__aviso {
+    border-bottom: 1px solid var(--border-medium);
+}
+
+.menu-cuenta__aviso-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    color: var(--color-error, #A32020);
+
+    font-size: 0.875rem;
+    font-weight: var(--font-medium);
+}
+
+.menu-cuenta__aviso-titulo svg {
+    flex-shrink: 0;
+}
+
+.menu-cuenta__aviso-mensaje {
+    margin: 0;
+
+    color: var(--color-dark-gray);
+
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.menu-cuenta__reintentar {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+
+    border-radius: 0;
+
+    font-size: 0.75rem;
+    font-weight: var(--font-medium);
+
+    text-transform: uppercase;
+    letter-spacing: var(--cta-letter-spacing);
+}
+
+.menu-cuenta__login-alternativo {
+    color: var(--color-primary);
+
+    font-size: 0.8rem;
+    text-align: center;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.menu-cuenta__login-alternativo:hover {
+    color: var(--color-dark-gray);
+}
+
 /* ===== RESPONSIVE ===== */
 
 @media (max-width: 991.98px) {
@@ -188,10 +270,20 @@
         min-height: 48px;
         padding: 1rem 1.5rem;
     }
-}
 
-@media (prefers-reduced-motion: reduce) {
-    .cuenta-panel-mobile {
-        transition: none;
+    .menu-cuenta__aviso {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .menu-cuenta__aviso-mensaje {
+        font-size: 0.875rem;
+    }
+
+    .menu-cuenta__reintentar {
+        min-height: 44px;
+    }
+
+    .menu-cuenta__login-alternativo {
+        padding: 0.5rem;
     }
 }

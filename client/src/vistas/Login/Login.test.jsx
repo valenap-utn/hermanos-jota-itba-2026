@@ -6,6 +6,8 @@ import Login from "./Login";
 import {AuthProvider, useAuth} from "../../context/AuthContext";
 import {autenticarUsuario} from "../../services/authService";
 
+import {AUTH_TOKEN_KEY} from "../../utils/authStorage";
+
 const mockNavigate = jest.fn();
 const mockMostrarToast = jest.fn();
 
@@ -19,7 +21,8 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("../../services/authService", () => ({
-    autenticarUsuario: jest.fn()
+    autenticarUsuario: jest.fn(),
+    obtenerUsuarioAutenticado: jest.fn()
 }));
 
 jest.mock("../../context/ToastContext", () => ({
@@ -86,7 +89,12 @@ function completarFormulario() {
 
 describe("Login", () => {
     beforeEach(() => {
+        localStorage.clear();
         jest.resetAllMocks();
+    });
+
+    afterEach(() => {
+        localStorage.clear();
     });
 
     test("inicia sesión, actualiza el contexto, muestra un toast y redirige al Home", async () => {
@@ -121,6 +129,8 @@ describe("Login", () => {
         expect(
             screen.getByTestId("token-sesion")
         ).toHaveTextContent(tokenPrueba);
+
+        expect(localStorage.getItem(AUTH_TOKEN_KEY)).toBe(tokenPrueba);
 
         expect(mockMostrarToast).toHaveBeenCalledWith(
             `¡Bienvenido/a, ${usuarioPrueba.nombre}!`,
@@ -167,6 +177,8 @@ describe("Login", () => {
         expect(
             screen.getByTestId("token-sesion")
         ).toBeEmptyDOMElement();
+
+        expect(localStorage.getItem(AUTH_TOKEN_KEY)).toBeNull();
 
         expect(mockMostrarToast).not.toHaveBeenCalled();
         expect(mockNavigate).not.toHaveBeenCalled();

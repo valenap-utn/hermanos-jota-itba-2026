@@ -1,60 +1,174 @@
 import {useEffect, useId, useRef, useState} from "react";
 import {NavLink, useNavigate} from "react-router-dom";
-import {ChevronDown, LogOut, UserRound} from "lucide-react";
-import {useAuth} from "../../context/AuthContext";
+import {ChevronDown, CircleAlert, LogOut, UserRound} from "lucide-react";
+
+import {CODIGOS_ERROR_SESION, useAuth} from "../../context/AuthContext";
+
 import {useToast} from "../../context/ToastContext";
 import "./MenuCuenta.styles.css";
 
+function AvisoSesion({onCerrar}) {
+    const {
+        errorSesion,
+        restaurarSesion,
+        cerrarSesion
+    } = useAuth();
+
+    const {mostrarToast} = useToast();
+
+    if (!errorSesion) return null;
+
+    const esRecuperacion =
+        errorSesion.codigo === CODIGOS_ERROR_SESION.RECUPERACION;
+
+    const esPersistencia =
+        errorSesion.codigo === CODIGOS_ERROR_SESION.PERSISTENCIA;
+
+    const esEliminacion =
+        errorSesion.codigo === CODIGOS_ERROR_SESION.ELIMINACION;
+
+    const titulo = esRecuperacion
+        ? "No pudimos recuperar tu sesión"
+        : esPersistencia
+            ? "Sesión temporal"
+            : "Cierre de sesión incompleto";
+
+    const reintentarRecuperacion = () => {
+        onCerrar();
+        restaurarSesion();
+    };
+
+    const reintentarEliminacion = () => {
+        const eliminado = cerrarSesion();
+
+        if (eliminado) {
+            onCerrar();
+
+            mostrarToast(
+                "Cerraste sesión correctamente.",
+                "success"
+            );
+        }
+    };
+
+    return (
+        <div className="menu-cuenta__aviso">
+            <div className="menu-cuenta__aviso-titulo">
+                <CircleAlert size={16} aria-hidden="true"/>
+                <span>{titulo}</span>
+            </div>
+
+            <p className="menu-cuenta__aviso-mensaje">
+                {errorSesion.mensaje}
+            </p>
+
+            {esRecuperacion && (
+                <>
+                    <button
+                        type="button"
+                        className="btn-marca-primario menu-cuenta__reintentar"
+                        onClick={reintentarRecuperacion}
+                    >
+                        Reintentar
+                    </button>
+
+                    <NavLink
+                        to="/login"
+                        className="menu-cuenta__login-alternativo"
+                        onClick={onCerrar}
+                    >
+                        Iniciar sesión
+                    </NavLink>
+                </>
+            )}
+
+            {esEliminacion && (
+                <button
+                    type="button"
+                    className="btn-marca-primario menu-cuenta__reintentar"
+                    onClick={reintentarEliminacion}
+                >
+                    Reintentar cierre
+                </button>
+            )}
+        </div>
+    );
+}
+
 export function PanelCuenta({onCerrar, id}) {
-    const {usuario, cerrarSesion} = useAuth();
+    const {
+        usuario,
+        cerrarSesion,
+        errorSesion
+    } = useAuth();
+
     const {mostrarToast} = useToast();
     const navigate = useNavigate();
 
     const manejarLogout = () => {
         onCerrar();
-        cerrarSesion();
 
-        mostrarToast(
-            "Cerraste sesión correctamente.",
-            "success"
-        );
+        const sesionEliminada = cerrarSesion();
+
+        if (sesionEliminada) {
+            mostrarToast(
+                "Cerraste sesión correctamente.",
+                "success"
+            );
+        } else {
+            mostrarToast(
+                "No se pudo eliminar la sesión almacenada. " +
+                "Es posible que se recupere al recargar la página.",
+                "error"
+            );
+        }
 
         navigate("/", {replace: true});
     };
 
-    if (!usuario) return null;
+    if (!usuario && !errorSesion) return null;
 
-    const primerNombre = usuario.nombre.trim().split(/\s+/)[0];
+    const primerNombre = usuario
+        ? usuario.nombre.trim().split(/\s+/)[0]
+        : null;
 
     return (
         <div
             id={id}
             className="menu-cuenta__desplegable"
         >
-            <div className="menu-cuenta__usuario">
-                <span className="menu-cuenta__saludo">
-                    Hola, {primerNombre}
-                </span>
-
-                <span className="menu-cuenta__email">
-                    {usuario.email}
-                </span>
-
-                {usuario.rol === "ADMIN" && (
-                    <span className="menu-cuenta__rol">
-                        Administrador
+            {usuario && (
+                <div className="menu-cuenta__usuario">
+                    <span className="menu-cuenta__saludo">
+                        Hola, {primerNombre}
                     </span>
-                )}
-            </div>
 
-            <button
-                type="button"
-                className="menu-cuenta__logout"
-                onClick={manejarLogout}
-            >
-                <LogOut size={16} aria-hidden="true"/>
-                Cerrar sesión
-            </button>
+                    <span className="menu-cuenta__email">
+                        {usuario.email}
+                    </span>
+
+                    {usuario.rol === "ADMIN" && (
+                        <span className="menu-cuenta__rol">
+                            Administrador
+                        </span>
+                    )}
+                </div>
+            )}
+
+            {errorSesion && (
+                <AvisoSesion onCerrar={onCerrar}/>
+            )}
+
+            {usuario && (
+                <button
+                    type="button"
+                    className="menu-cuenta__logout"
+                    onClick={manejarLogout}
+                >
+                    <LogOut size={16} aria-hidden="true"/>
+                    Cerrar sesión
+                </button>
+            )}
         </div>
     );
 }
@@ -65,7 +179,12 @@ function MenuCuenta({
                         onToggleMobile,
                         panelMobileId
                     }) {
-    const {usuario, isAuthenticated} = useAuth();
+    const {
+        usuario,
+        isAuthenticated,
+        cargandoSesion,
+        errorSesion
+    } = useAuth();
 
     const [abiertoDesktop, setAbiertoDesktop] = useState(false);
 
@@ -73,7 +192,12 @@ function MenuCuenta({
     const botonRef = useRef(null);
     const menuId = useId();
 
-    const abierto = mobile ? abiertoMobile : abiertoDesktop;
+    const abierto = mobile
+        ? abiertoMobile
+        : abiertoDesktop;
+
+    const tienePanel =
+        !cargandoSesion && (isAuthenticated || Boolean(errorSesion));
 
     useEffect(() => {
         if (mobile || !abiertoDesktop) return;
@@ -115,12 +239,27 @@ function MenuCuenta({
     }, [mobile, abiertoDesktop]);
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (!tienePanel) {
             setAbiertoDesktop(false);
         }
-    }, [isAuthenticated]);
+    }, [tienePanel]);
 
-    if (!isAuthenticated) {
+    if (cargandoSesion) {
+        return (
+            <span
+                className="cuenta-link cuenta-link--cargando"
+                role="status"
+                aria-label="Recuperando sesión"
+            >
+                <UserRound
+                    size={20}
+                    aria-hidden="true"
+                />
+            </span>
+        );
+    }
+
+    if (!tienePanel) {
         return (
             <NavLink
                 to="/login"
@@ -132,7 +271,13 @@ function MenuCuenta({
         );
     }
 
-    const primerNombre = usuario.nombre.trim().split(/\s+/)[0];
+    const primerNombre = usuario
+        ? usuario.nombre.trim().split(/\s+/)[0]
+        : null;
+
+    const etiquetaCuenta = usuario
+        ? `Cuenta de ${usuario.nombre}`
+        : "Cuenta";
 
     return (
         <div
@@ -145,7 +290,11 @@ function MenuCuenta({
                 className={`cuenta-link cuenta-link--autenticado${
                     abierto ? " active" : ""
                 }`}
-                aria-label={`Cuenta de ${usuario.nombre}`}
+                aria-label={
+                    errorSesion
+                        ? `${etiquetaCuenta}. Advertencia de sesión`
+                        : etiquetaCuenta
+                }
                 aria-expanded={abierto}
                 aria-controls={
                     abierto
@@ -162,9 +311,19 @@ function MenuCuenta({
             >
                 <UserRound size={20} aria-hidden="true"/>
 
-                <span className="menu-cuenta__nombre">
-                    {primerNombre}
-                </span>
+                {primerNombre && (
+                    <span className="menu-cuenta__nombre">
+                        {primerNombre}
+                    </span>
+                )}
+
+                {errorSesion && (
+                    <CircleAlert
+                        size={14}
+                        className="menu-cuenta__indicador-error"
+                        aria-hidden="true"
+                    />
+                )}
 
                 <ChevronDown
                     size={14}
