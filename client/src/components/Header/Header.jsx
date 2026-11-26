@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import {useEffect, useRef, useState} from "react";
 import "./Header.styles.css";
 import Logo from "../Logo/Logo";
-import { ShoppingCart } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import {ShoppingCart, UserRound} from "lucide-react";
+import {Link, NavLink} from "react-router-dom";
 
-function Header({ cartCount = 0 }) {
+function Header({cartCount = 0}) {
     const [isBumping, setIsBumping] = useState(false);
     const prevCountRef = useRef(cartCount);
 
@@ -15,11 +15,16 @@ function Header({ cartCount = 0 }) {
             prevCountRef.current = cartCount;
             return () => clearTimeout(timer);
         }
+
         prevCountRef.current = cartCount;
     }, [cartCount]);
 
     const MAX_BADGE_COUNT = 99;
-    const displayCount = cartCount > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : cartCount;
+
+    const displayCount =
+        cartCount > MAX_BADGE_COUNT
+            ? `${MAX_BADGE_COUNT}+`
+            : cartCount;
 
     const cartLabel = `Carrito, ${cartCount} ${
         cartCount === 1 ? "producto" : "productos"
@@ -37,6 +42,7 @@ function Header({ cartCount = 0 }) {
                     aria-label="Navegación principal"
                 >
                     <div className="container">
+
                         {/* Logo y nombre */}
                         <div className="d-flex align-items-center marca-container">
                             <Link
@@ -44,7 +50,7 @@ function Header({ cartCount = 0 }) {
                                 to="/"
                                 aria-label="Hermanos Jota - Inicio"
                             >
-                                <Logo className="logo-primary" />
+                                <Logo className="logo-primary"/>
                             </Link>
 
                             <span className="texto-titulo-elegante nombre-marca">
@@ -54,6 +60,7 @@ function Header({ cartCount = 0 }) {
 
                         {/* Acciones mobile */}
                         <div className="d-flex align-items-center ms-auto d-lg-none navbar-actions">
+
                             <Link
                                 to="/carrito"
                                 className="carrito-link"
@@ -72,6 +79,17 @@ function Header({ cartCount = 0 }) {
                                 </span>
                             </Link>
 
+                            <NavLink
+                                to="/login"
+                                className="cuenta-link"
+                                aria-label="Iniciar sesión"
+                            >
+                                <UserRound
+                                    size={20}
+                                    aria-hidden="true"
+                                />
+                            </NavLink>
+
                             {/* Menú hamburguesa */}
                             <button
                                 className="navbar-toggler"
@@ -86,9 +104,9 @@ function Header({ cartCount = 0 }) {
                                     className="menu-icon"
                                     aria-hidden="true"
                                 >
-                                    <span />
-                                    <span />
-                                    <span />
+                                    <span/>
+                                    <span/>
+                                    <span/>
                                 </span>
                             </button>
                         </div>
@@ -99,11 +117,12 @@ function Header({ cartCount = 0 }) {
                             id="navbarNav"
                         >
                             <ul className="navbar-nav ms-auto align-items-lg-center">
+
                                 <li className="nav-item">
                                     <NavLink
                                         to="/"
                                         end
-                                        className={({ isActive }) =>
+                                        className={({isActive}) =>
                                             `nav-link${isActive ? " active" : ""}`
                                         }
                                     >
@@ -114,7 +133,7 @@ function Header({ cartCount = 0 }) {
                                 <li className="nav-item">
                                     <NavLink
                                         to="/productos"
-                                        className={({ isActive }) =>
+                                        className={({isActive}) =>
                                             `nav-link${isActive ? " active" : ""}`
                                         }
                                     >
@@ -125,7 +144,7 @@ function Header({ cartCount = 0 }) {
                                 <li className="nav-item">
                                     <NavLink
                                         to="/contacto"
-                                        className={({ isActive }) =>
+                                        className={({isActive}) =>
                                             `nav-link${isActive ? " active" : ""}`
                                         }
                                     >
@@ -133,6 +152,21 @@ function Header({ cartCount = 0 }) {
                                     </NavLink>
                                 </li>
 
+                                {/* Cuenta desktop */}
+                                <li className="nav-item d-none d-lg-flex align-items-center ms-lg-3">
+                                    <NavLink
+                                        to="/login"
+                                        className="cuenta-link"
+                                        aria-label="Iniciar sesión"
+                                    >
+                                        <UserRound
+                                            size={20}
+                                            aria-hidden="true"
+                                        />
+                                    </NavLink>
+                                </li>
+
+                                {/* Carrito desktop */}
                                 <li className="nav-item d-none d-lg-flex align-items-center ms-lg-3">
                                     <Link
                                         to="/carrito"
@@ -143,6 +177,7 @@ function Header({ cartCount = 0 }) {
                                             size={18}
                                             aria-hidden="true"
                                         />
+
                                         <span
                                             className={`cart-count${isBumping ? " cart-count--bump" : ""}`}
                                             aria-hidden="true"
@@ -151,6 +186,7 @@ function Header({ cartCount = 0 }) {
                                         </span>
                                     </Link>
                                 </li>
+
                             </ul>
                         </div>
                     </div>
