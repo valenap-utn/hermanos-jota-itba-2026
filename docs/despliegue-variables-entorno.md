@@ -12,7 +12,7 @@ Esta guía documenta la configuración necesaria para el despliegue de **Hermano
 
 2. **Acceso a la Base de Datos (Database Access):**
    - Crear un usuario con autenticación por contraseña.
-   - Asignar permisos de lectura y escritura (`readWrite` sobre la base `hermanos-jota` o `readWriteAnyDatabase`).
+   - Asignar permisos de lectura y escritura (`readWrite` únicamente sobre la base `hermanos-jota`).
 
 3. **Acceso de Red (Network Access):**
    - Para permitir la conectividad desde los servidores de Render (cuyas IPs son dinámicas), agregar la entrada:
@@ -36,7 +36,8 @@ En el servicio Web Service de Render, configurar las siguientes variables de ent
 | `NODE_ENV` | Obligatoria | Modo de ejecución de Node.js | `production` |
 | `PORT` | Automática | Puerto asignado por Render | *Asignado por Render* |
 | `MONGODB_URI` | Obligatoria / Secreta | Cadena de conexión a MongoDB Atlas | `mongodb+srv://...` |
-| `JWT_SECRET` | Obligatoria / Secreta | Clave para firma y verificación de JWT | *Cadena criptográfica aleatoria* |
+| `JWT_SECRET` | Obligatoria / Secreta | Clave hexadecimal de 64 caracteres para firma y verificación de JWT | *Generar con `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`* |
+| `JWT_EXPIRES_IN` | Opcional | Duración de validez de los tokens JWT (por defecto `1h`) | `1h` |
 | `MAX_PRODUCTOS` | Opcional | Límite máximo de productos en catálogo | `50` |
 | `CLOUDINARY_CLOUD_NAME` | Opcional | Nombre del cloud en Cloudinary | `tu_cloud_name` |
 | `CLOUDINARY_API_KEY` | Opcional | Clave de API de Cloudinary | `tu_api_key` |

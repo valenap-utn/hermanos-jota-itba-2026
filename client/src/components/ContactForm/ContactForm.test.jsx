@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ContactForm from '../ContactForm';
+import ContactForm from './ContactForm';
 
 describe('ContactForm', () => {
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe('ContactForm', () => {
     console.log.mockRestore();
   });
 
-  test('registra en consola los datos del formulario al enviar con datos válidos (#150)', () => {
+  test('registra en consola los datos del formulario al enviar con datos válidos', () => {
     render(<ContactForm />);
 
     const inputNombre = screen.getByLabelText(/nombre completo/i);

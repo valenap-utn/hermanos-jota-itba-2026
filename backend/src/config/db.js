@@ -1,5 +1,13 @@
 const mongoose = require('mongoose');
 
+function obtenerHostSanitizado(uri) {
+  try {
+    return new URL(uri).host || 'host desconocido';
+  } catch {
+    return 'host desconocido';
+  }
+}
+
 // Establece la conexión a MongoDB (Atlas en producción o local en desarrollo)
 async function connectDB() {
   const uri = process.env.MONGODB_URI;
@@ -14,7 +22,7 @@ async function connectDB() {
     console.log(`MongoDB conectado exitosamente a la base: ${mongoose.connection.name}`);
   } catch (error) {
     // Registro sin exponer contraseñas en el log de consola
-    const hostSanitizado = uri.includes('@') ? uri.split('@')[1] : 'host local/privado';
+    const hostSanitizado = obtenerHostSanitizado(uri);
     console.error(`Error al conectar con MongoDB (${hostSanitizado}):`, error.message);
     throw error;
   }
