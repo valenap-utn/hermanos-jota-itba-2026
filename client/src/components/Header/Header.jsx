@@ -5,8 +5,10 @@ import {ShoppingCart} from "lucide-react";
 import MenuCuenta, {PanelCuenta} from "../MenuCuenta/MenuCuenta";
 import {Link, NavLink, useLocation} from "react-router-dom";
 import {useAuth} from "../../context/AuthContext";
+import {useCart} from "../../context/CartContext";
 
-function Header({cartCount = 0}) {
+function Header() {
+    const {cartCount} = useCart();
     const [isBumping, setIsBumping] = useState(false);
     const prevCountRef = useRef(cartCount);
 

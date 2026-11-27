@@ -8,10 +8,10 @@ import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import ErrorState from "../../components/ErrorState/ErrorState";
 import {ArrowLeft, Check, Minus, Pencil, Plus, ShoppingCart, Trash2} from "lucide-react";
 
-function DetalleProducto({onAgregarAlCarrito}) {
+function DetalleProducto() {
     const {id} = useParams();
     const navigate = useNavigate();
-    const {carrito = []} = useCart();
+    const {carrito = [], agregarAlCarrito, sincronizarProducto} = useCart();
     const {mostrarToast} = useToast();
 
     const [producto, setProducto] = useState(null);
@@ -20,7 +20,6 @@ function DetalleProducto({onAgregarAlCarrito}) {
     const [cantidad, setCantidad] = useState(1);
     const [agregado, setAgregado] = useState(false);
     const timeoutRef = useRef(null);
-    const {sincronizarProducto} = useCart();
     const [modalVisible, setModalVisible] = useState(false);
     const [eliminando, setEliminando] = useState(false);
     const [errorEliminar, setErrorEliminar] = useState("");
@@ -65,8 +64,8 @@ function DetalleProducto({onAgregarAlCarrito}) {
     };
 
     const handleAgregar = (e) => {
-        if (!onAgregarAlCarrito || !producto || stockDisponible === 0) return;
-        onAgregarAlCarrito(producto, cantidad);
+        if (!producto || stockDisponible === 0) return;
+        agregarAlCarrito(producto, cantidad);
         setAgregado(true);
         setCantidad(1);
 
@@ -181,103 +180,101 @@ function DetalleProducto({onAgregarAlCarrito}) {
 
                         <p className="texto-principal detalle-descripcion">{producto.descripcion}</p>
 
-                        {onAgregarAlCarrito && (
-                            <div className="detalle-comprar-bloque mt-4">
-                                <div className="d-flex align-items-center gap-3 mb-3">
-                                    <span className="detalle-cantidad-label texto-secundario-leyenda">
-                                        Cantidad:
+                        <div className="detalle-comprar-bloque mt-4">
+                            <div className="d-flex align-items-center gap-3 mb-3">
+                                <span className="detalle-cantidad-label texto-secundario-leyenda">
+                                    Cantidad:
+                                </span>
+
+                                <div
+                                    className="detalle-cantidad-selector"
+                                    role="group"
+                                    aria-label={`Seleccionar cantidad para ${producto.nombre}`}
+                                >
+                                    <button
+                                        type="button"
+                                        className="detalle-btn-cantidad"
+                                        onClick={decrementarCantidad}
+                                        disabled={cantidad <= 1 || noSePuedeAgregar}
+                                        aria-label="Disminuir cantidad"
+                                    >
+                                        <Minus size={16} aria-hidden="true"/>
+                                    </button>
+
+                                    <span
+                                        className="detalle-cantidad-valor"
+                                        aria-live="polite"
+                                        aria-atomic="true"
+                                    >
+                                        {noSePuedeAgregar ? 0 : cantidad}
                                     </span>
 
-                                    <div
-                                        className="detalle-cantidad-selector"
-                                        role="group"
-                                        aria-label={`Seleccionar cantidad para ${producto.nombre}`}
+                                    <button
+                                        type="button"
+                                        className="detalle-btn-cantidad"
+                                        onClick={incrementarCantidad}
+                                        disabled={cantidad >= stockDisponible || noSePuedeAgregar}
+                                        aria-label="Aumentar cantidad"
                                     >
-                                        <button
-                                            type="button"
-                                            className="detalle-btn-cantidad"
-                                            onClick={decrementarCantidad}
-                                            disabled={cantidad <= 1 || noSePuedeAgregar}
-                                            aria-label="Disminuir cantidad"
-                                        >
-                                            <Minus size={16} aria-hidden="true"/>
-                                        </button>
-
-                                        <span
-                                            className="detalle-cantidad-valor"
-                                            aria-live="polite"
-                                            aria-atomic="true"
-                                        >
-                                            {noSePuedeAgregar ? 0 : cantidad}
-                                        </span>
-
-                                        <button
-                                            type="button"
-                                            className="detalle-btn-cantidad"
-                                            onClick={incrementarCantidad}
-                                            disabled={cantidad >= stockDisponible || noSePuedeAgregar}
-                                            aria-label="Aumentar cantidad"
-                                        >
-                                            <Plus size={16} aria-hidden="true"/>
-                                        </button>
-                                    </div>
-
-                                    {unidadesEnCarrito > 0 && stockDisponible > 0 && (
-                                        <span className="text-muted small">
-                                            ({unidadesEnCarrito} en carrito, quedan {stockDisponible})
-                                        </span>
-                                    )}
-
-                                    {unidadesEnCarrito === 0 && stockTotal <= 5 && stockTotal > 0 && (
-                                        <span className="text-muted small">
-                                            (Últimas {stockTotal} unidades)
-                                        </span>
-                                    )}
+                                        <Plus size={16} aria-hidden="true"/>
+                                    </button>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    className={`btn btn-marca-primario texto-titulo-cta rounded-0 w-100 py-3 d-flex align-items-center justify-content-center gap-2 detalle-btn-agregar ${
-                                        agregado ? "detalle-btn-agregar--agregado" : ""
-                                    }`}
-                                    disabled={noSePuedeAgregar}
-                                    aria-label={
-                                        sinStockTotal
-                                            ? "Sin stock disponible"
-                                            : alcanzoMaximoCarrito
-                                            ? "Alcanzaste el stock máximo en tu carrito"
-                                            : agregado
-                                            ? `${cantidad} ${cantidad === 1 ? "unidad" : "unidades"} de ${producto.nombre} añadidas al carrito`
-                                            : `Añadir ${cantidad} ${cantidad === 1 ? "unidad" : "unidades"} de ${producto.nombre} al carrito`
-                                    }
-                                    onClick={handleAgregar}
-                                >
-                                    {sinStockTotal ? (
-                                        <span>Sin stock disponible</span>
-                                    ) : alcanzoMaximoCarrito ? (
-                                        <span>Alcanzaste el stock máximo en tu carrito</span>
-                                    ) : agregado ? (
-                                        <>
-                                            <Check size={18} aria-hidden="true"/>
-                                            <span>
-                                                ¡{cantidad} {cantidad === 1 ? "unidad añadida" : "unidades añadidas"}!
-                                            </span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <ShoppingCart size={18} aria-hidden="true"/>
-                                            <span>Añadir al carrito</span>
-                                        </>
-                                    )}
-                                </button>
+                                {unidadesEnCarrito > 0 && stockDisponible > 0 && (
+                                    <span className="text-muted small">
+                                        ({unidadesEnCarrito} en carrito, quedan {stockDisponible})
+                                    </span>
+                                )}
 
-                                <span role="status" className="visually-hidden">
-                                    {agregado
-                                        ? `Se ${cantidad === 1 ? "añadió 1 unidad" : `añadieron ${cantidad} unidades`} de ${producto.nombre} al carrito`
-                                        : ""}
-                                </span>
+                                {unidadesEnCarrito === 0 && stockTotal <= 5 && stockTotal > 0 && (
+                                    <span className="text-muted small">
+                                        (Últimas {stockTotal} unidades)
+                                    </span>
+                                )}
                             </div>
-                        )}
+
+                            <button
+                                type="button"
+                                className={`btn btn-marca-primario texto-titulo-cta rounded-0 w-100 py-3 d-flex align-items-center justify-content-center gap-2 detalle-btn-agregar ${
+                                    agregado ? "detalle-btn-agregar--agregado" : ""
+                                }`}
+                                disabled={noSePuedeAgregar}
+                                aria-label={
+                                    sinStockTotal
+                                        ? "Sin stock disponible"
+                                        : alcanzoMaximoCarrito
+                                        ? "Alcanzaste el stock máximo en tu carrito"
+                                        : agregado
+                                        ? `${cantidad} ${cantidad === 1 ? "unidad" : "unidades"} de ${producto.nombre} añadidas al carrito`
+                                        : `Añadir ${cantidad} ${cantidad === 1 ? "unidad" : "unidades"} de ${producto.nombre} al carrito`
+                                }
+                                onClick={handleAgregar}
+                            >
+                                {sinStockTotal ? (
+                                    <span>Sin stock disponible</span>
+                                ) : alcanzoMaximoCarrito ? (
+                                    <span>Alcanzaste el stock máximo en tu carrito</span>
+                                ) : agregado ? (
+                                    <>
+                                        <Check size={18} aria-hidden="true"/>
+                                        <span>
+                                            ¡{cantidad} {cantidad === 1 ? "unidad añadida" : "unidades añadidas"}!
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShoppingCart size={18} aria-hidden="true"/>
+                                        <span>Añadir al carrito</span>
+                                    </>
+                                )}
+                            </button>
+
+                            <span role="status" className="visually-hidden">
+                                {agregado
+                                    ? `Se ${cantidad === 1 ? "añadió 1 unidad" : `añadieron ${cantidad} unidades`} de ${producto.nombre} al carrito`
+                                    : ""}
+                            </span>
+                        </div>
 
                         <div className="detalle-admin-acciones mt-4">
                             <Link
