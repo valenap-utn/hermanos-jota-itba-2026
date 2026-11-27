@@ -9,7 +9,6 @@ import DetalleProducto from "./vistas/DetalleProducto/DetalleProducto";
 import Contacto from "./vistas/Contacto/Contacto";
 import Carrito from "./vistas/Carrito/Carrito";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
-import {useCart} from "./context/CartContext";
 import CrearProducto from "./vistas/CrearProducto/CrearProducto";
 import EditarProducto from "./vistas/EditarProducto/EditarProducto";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
@@ -18,24 +17,11 @@ import Registro from "./vistas/Registro/Registro";
 
 function App() {
     const location = useLocation();
-    const {
-        carrito,
-        cartCount,
-        agregarAlCarrito,
-        actualizarCantidad,
-        eliminarDelCarrito,
-        vaciarCarrito,
-        cargando,
-        error: errorCarrito,
-        reintentarSincronizacion
-    } = useCart();
 
     return (
         <>
             <ScrollToTop/>
-            <Header
-                cartCount={cartCount}
-            />
+            <Header/>
 
             <ErrorBoundary resetKey={location.pathname}>
                 <main id="main-content">
@@ -47,18 +33,12 @@ function App() {
 
                         <Route
                             path="/productos"
-                            element={
-                                <ListaProductos
-                                    onAgregarAlCarrito={agregarAlCarrito}
-                                />
-                            }
+                            element={<ListaProductos/>}
                         />
 
                         <Route
                             path="/productos/:id"
-                            element={
-                                <DetalleProducto onAgregarAlCarrito={agregarAlCarrito}/>
-                            }
+                            element={<DetalleProducto/>}
                         />
 
                         <Route
@@ -68,17 +48,7 @@ function App() {
 
                         <Route
                             path="/carrito"
-                            element={
-                                <Carrito
-                                    carrito={carrito}
-                                    onActualizarCantidad={actualizarCantidad}
-                                    onEliminarDelCarrito={eliminarDelCarrito}
-                                    onVaciarCarrito={vaciarCarrito}
-                                    cargando={cargando}
-                                    error={errorCarrito}
-                                    onReintentar={reintentarSincronizacion}
-                                />
-                            }
+                            element={<Carrito/>}
                         />
 
                         <Route

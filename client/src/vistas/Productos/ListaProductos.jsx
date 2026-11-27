@@ -17,7 +17,7 @@ import {
     ChevronRight
 } from "lucide-react";
 
-function ListaProductos({ onAgregarAlCarrito }) {
+function ListaProductos() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const categoriaParam = searchParams.get("categoria") || "todos";
@@ -33,7 +33,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
 
-    const { sincronizarProducto } = useCart();
+    const { agregarAlCarrito, sincronizarProducto } = useCart();
     const { mostrarToast } = useToast();
     const [productoAEliminar, setProductoAEliminar] = useState(null);
     const [eliminando, setEliminando] = useState(false);
@@ -305,7 +305,7 @@ function ListaProductos({ onAgregarAlCarrito }) {
                             <div key={producto._id} className="col-12 col-sm-6 col-lg-4">
                                 <ProductCard
                                     producto={producto}
-                                    onAgregarAlCarrito={onAgregarAlCarrito}
+                                    onAgregarAlCarrito={agregarAlCarrito}
                                     mostrarEditar
                                     onEliminar={(prod) => setProductoAEliminar(prod)}
                                 />

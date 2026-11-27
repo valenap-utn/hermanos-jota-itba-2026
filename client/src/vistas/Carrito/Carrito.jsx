@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import PropTypes from "prop-types";
 import { AlertCircle } from "lucide-react";
 import "./Carrito.styles.css";
 import CarritoVacio from "./components/CarritoVacio";
@@ -8,16 +7,20 @@ import CarritoResumen from "./components/CarritoResumen";
 import ModalEliminarProducto from "./components/ModalEliminarProducto";
 import StatusModal from "../../components/StatusModal/StatusModal";
 import ErrorState from "../../components/ErrorState/ErrorState";
+import { useCart } from "../../context/CartContext";
 
-function Carrito({
-    carrito = [],
-    onActualizarCantidad,
-    onEliminarDelCarrito,
-    onVaciarCarrito,
-    cargando = false,
-    error = null,
-    onReintentar
-}) {
+function Carrito() {
+    const {
+        carrito,
+        totalGeneral,
+        actualizarCantidad,
+        eliminarDelCarrito,
+        vaciarCarrito,
+        cargando,
+        error,
+        reintentarSincronizacion
+    } = useCart();
+
     const [productoPendienteEliminar, setProductoPendienteEliminar] = useState(null);
     const [modalCompraVisible, setModalCompraVisible] = useState(false);
     const [mensajeStatus, setMensajeStatus] = useState("");
@@ -32,9 +35,7 @@ function Carrito({
 
     const handleActualizarCantidad = (id, nuevaCantidad) => {
         const item = carrito.find((i) => i.id === id);
-        if (onActualizarCantidad) {
-            onActualizarCantidad(id, nuevaCantidad);
-        }
+        actualizarCantidad(id, nuevaCantidad);
         if (item) {
             anunciar(`Cantidad de ${item.nombre} actualizada a ${nuevaCantidad}`);
         }
@@ -48,9 +49,7 @@ function Carrito({
         if (!productoPendienteEliminar) return;
 
         const productoEliminado = productoPendienteEliminar;
-        if (onEliminarDelCarrito) {
-            onEliminarDelCarrito(productoEliminado.id);
-        }
+        eliminarDelCarrito(productoEliminado.id);
         setProductoPendienteEliminar(null);
         anunciar(`${productoEliminado.nombre} fue eliminado del carrito`);
     };
@@ -65,19 +64,12 @@ function Carrito({
 
     const handleCerrarModalCompra = () => {
         setModalCompraVisible(false);
-        if (onVaciarCarrito) {
-            onVaciarCarrito();
-        }
+        vaciarCarrito();
         anunciar("¡Compra simulada completada con éxito! Tu carrito ha sido vaciado.");
         setTimeout(() => {
             exploreButtonRef.current?.focus();
         }, 50);
     };
-
-    const totalGeneral = carrito.reduce(
-        (total, item) => total + (item.precio || 0) * item.cantidad,
-        0
-    );
 
     return (
         <section className="carrito-main">
@@ -103,7 +95,7 @@ function Carrito({
                             titulo="No pudimos sincronizar tu carrito"
                             mensaje={error}
                             textoBoton="Reintentar"
-                            onAccion={onReintentar}
+                            onAccion={reintentarSincronizacion}
                         />
                     </div>
                 ) : carrito.length === 0 ? (
@@ -157,15 +149,5 @@ function Carrito({
         </section>
     );
 }
-
-Carrito.propTypes = {
-    carrito: PropTypes.array,
-    onActualizarCantidad: PropTypes.func,
-    onEliminarDelCarrito: PropTypes.func,
-    onVaciarCarrito: PropTypes.func,
-    cargando: PropTypes.bool,
-    error: PropTypes.string,
-    onReintentar: PropTypes.func
-};
 
 export default Carrito;

@@ -1,7 +1,7 @@
 import {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {obtenerProductos} from "../services/productosService";
 
-const CARRITO_STORAGE_KEY = "hermanosJotaCarrito";
+export const CARRITO_STORAGE_KEY = "hermanosJotaCarrito";
 
 const CartContext = createContext(null);
 
@@ -66,6 +66,7 @@ export function CartProvider({children}) {
         let activo = true;
 
         async function hidratar() {
+            cambiosDuranteCargaRef.current = new Map();
             try {
                 setCargando(true);
                 setError(null);
@@ -198,6 +199,11 @@ export function CartProvider({children}) {
             ? Math.min(prodCatalogo.stock, nuevaCantidad)
             : nuevaCantidad;
 
+        if (cantidadAjustada <= 0) {
+            setReferencias((prev) => prev.filter((item) => item.id !== id));
+            return;
+        }
+
         setReferencias((prev) =>
             prev.map((item) =>
                 item.id === id
@@ -238,7 +244,7 @@ export function CartProvider({children}) {
             : [...prev, producto]);
     }, []);
 
-    const value = {
+    const value = useMemo(() => ({
         carrito,
         referencias,
         cartCount,
@@ -251,7 +257,20 @@ export function CartProvider({children}) {
         eliminarDelCarrito,
         vaciarCarrito,
         sincronizarProducto
-    };
+    }), [
+        carrito,
+        referencias,
+        cartCount,
+        totalGeneral,
+        cargando,
+        error,
+        reintentarSincronizacion,
+        agregarAlCarrito,
+        actualizarCantidad,
+        eliminarDelCarrito,
+        vaciarCarrito,
+        sincronizarProducto
+    ]);
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
