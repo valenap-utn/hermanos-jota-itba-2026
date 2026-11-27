@@ -35,6 +35,7 @@ describe("loginSchema", () => {
         ["email inválido", {email: "usuario"}],
         ["email sin dominio válido", {email: "usuario@example"}],
         ["password vacío", {password: ""}],
+        ["password solo espacios", {password: "        "}],
         ["password superior a 72 bytes", {
             password: "a".repeat(73)
         }],
@@ -94,6 +95,10 @@ describe("registroSchema", () => {
         ["password vacío", {
             password: "",
             confirmarPassword: ""
+        }],
+        ["password solo espacios", {
+            password: "        ",
+            confirmarPassword: "        "
         }],
         ["password demasiado corto", {
             password: "1234567",

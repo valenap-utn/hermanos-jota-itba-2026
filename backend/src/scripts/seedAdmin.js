@@ -13,7 +13,7 @@ async function seedAdmin() {
         const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
         const password = process.env.ADMIN_PASSWORD;
 
-        if (!nombre || !email || !password) {
+        if (!nombre || !email || !password || !password.trim()) {
             throw new Error(
                 'Debés configurar ADMIN_NAME, ADMIN_EMAIL y ADMIN_PASSWORD.'
             );

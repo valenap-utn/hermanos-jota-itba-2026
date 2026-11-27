@@ -137,6 +137,7 @@ describe('POST /api/auth/register', () => {
             ['email ausente', { email: undefined }],
             ['email inválido', { email: 'correo-invalido' }],
             ['contraseña ausente', { password: undefined }],
+            ['contraseña solo espacios', { password: '        ' }],
             ['contraseña corta', { password: '123' }],
             ['contraseña superior a 72 bytes', {
                 password: 'a'.repeat(73),
@@ -316,6 +317,7 @@ describe('POST /api/auth/register', () => {
                 ['email no textual', { email: 123 }],
                 ['contraseña ausente', { password: undefined }],
                 ['contraseña vacía', { password: '' }],
+                ['contraseña solo espacios', { password: '        ' }],
                 ['contraseña no textual', { password: 123 }],
                 ['contraseña superior a 72 bytes', {
                     password: 'a'.repeat(73),

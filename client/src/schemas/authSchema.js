@@ -15,6 +15,10 @@ const passwordSchema = z
     .string()
     .min(1, "Ingresá tu contraseña.")
     .refine(
+        (password) => password.trim().length > 0,
+        "La contraseña no puede contener solo espacios."
+    )
+    .refine(
         (password) => new Blob([password]).size <= 72,
         "La contraseña no puede superar los 72 bytes."
     );

@@ -20,7 +20,7 @@ const registrarUsuario = asyncHandler(async (req, res) => {
         throw createError.BadRequest('El email es obligatorio.');
     }
 
-    if (typeof password !== 'string' || !password) {
+    if (typeof password !== 'string' || !password.trim()) {
         throw createError.BadRequest('La contraseña es obligatoria.');
     }
 
@@ -70,7 +70,7 @@ const iniciarSesion = asyncHandler(async (req, res) => {
         throw createError.BadRequest('El email es obligatorio.');
     }
 
-    if (typeof password !== 'string' || !password) {
+    if (typeof password !== 'string' || !password.trim()) {
         throw createError.BadRequest('La contraseña es obligatoria.');
     }
 

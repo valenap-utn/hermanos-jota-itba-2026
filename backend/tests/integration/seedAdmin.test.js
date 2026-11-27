@@ -216,6 +216,11 @@ describe('Seed del administrador', () => {
 
         it.each([
             [
+                'solo espacios',
+                '        ',
+                'Debés configurar ADMIN_NAME, ADMIN_EMAIL y ADMIN_PASSWORD.',
+            ],
+            [
                 'demasiado corta',
                 '123',
                 'La contraseña debe tener al menos 8 caracteres.',
