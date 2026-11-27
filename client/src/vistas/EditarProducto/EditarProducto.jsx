@@ -78,13 +78,11 @@ function EditarProducto() {
 
     const handleGuardar = async (datos) => {
         const cicloActual = cicloCargaRef.current;
-        if (cicloCargaRef.current !== cicloActual) return;
 
         setGuardando(true);
         setErrorOperacion("");
 
         try {
-            if (cicloCargaRef.current !== cicloActual) return;
             const productoActualizado = await actualizarProducto(id, datos);
             sincronizarProducto(productoActualizado);
             if (cicloCargaRef.current !== cicloActual) return;
@@ -105,13 +103,11 @@ function EditarProducto() {
 
     const handleEliminar = async () => {
         const cicloActual = cicloCargaRef.current;
-        if (cicloCargaRef.current !== cicloActual) return;
 
         setEliminando(true);
         setErrorOperacion("");
 
         try {
-            if (cicloCargaRef.current !== cicloActual) return;
             await eliminarProducto(id);
             sincronizarProducto(id, {eliminado: true});
             if (cicloCargaRef.current !== cicloActual) return;

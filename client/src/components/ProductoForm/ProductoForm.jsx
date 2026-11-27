@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {Controller, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 
@@ -36,6 +36,11 @@ function ProductoForm({
     const [errorArchivo, setErrorArchivo] = useState("");
     const [errorEnvio, setErrorEnvio] = useState("");
 
+    const resolver = useMemo(
+        () => zodResolver(crearProductoSchema(modo)),
+        [modo]
+    );
+
     const {
         register,
         handleSubmit,
@@ -44,7 +49,7 @@ function ProductoForm({
         clearErrors,
         formState: {errors, isSubmitting},
     } = useForm({
-        resolver: zodResolver(crearProductoSchema(modo)),
+        resolver,
         defaultValues: normalizarValoresIniciales(initialValues),
         shouldFocusError: false,
     });

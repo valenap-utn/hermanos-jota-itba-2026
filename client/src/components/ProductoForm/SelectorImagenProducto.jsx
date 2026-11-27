@@ -17,6 +17,7 @@ function SelectorImagenProducto({
 
     const [arrastrando, setArrastrando] = useState(false);
     const [vistaPrevia, setVistaPrevia] = useState(null);
+    const [errorPreview, setErrorPreview] = useState(false);
 
     const inputRef = useRef(null);
 
@@ -76,6 +77,10 @@ function SelectorImagenProducto({
 
     const previewMostrada =
         vistaPrevia || imagenActual.trim();
+
+    useEffect(() => {
+        setErrorPreview(false);
+    }, [previewMostrada]);
 
     return (
         <div className="producto-form__imagen-selector">
@@ -198,17 +203,14 @@ function SelectorImagenProducto({
 
             {previewMostrada && (
                 <div className="producto-form__preview">
-                    <img
-                        src={previewMostrada}
-                        alt="Vista previa de la imagen del producto"
-                        className="producto-form__preview-imagen"
-                        onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                        }}
-                        onLoad={(e) => {
-                            e.currentTarget.style.display = "block";
-                        }}
-                    />
+                    {!errorPreview && (
+                        <img
+                            src={previewMostrada}
+                            alt="Vista previa de la imagen del producto"
+                            className="producto-form__preview-imagen"
+                            onError={() => setErrorPreview(true)}
+                        />
+                    )}
 
                     <div className="producto-form__preview-info">
                         <p className="producto-form__preview-titulo mb-0 texto-principal fw-medium">

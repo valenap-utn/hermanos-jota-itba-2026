@@ -32,7 +32,7 @@ El frontend y el backend se desarrollan en directorios separados. El cliente con
 
 Clonar el repositorio y abrir **dos terminales**, una para cada aplicación.
 
-### 1. Backend (`/backend`)
+### 1. Backend (`/servidor`)
 
 ```bash
 cd backend
@@ -75,7 +75,7 @@ Por defecto, la API queda disponible en `http://localhost:3001/api`.
 
 > El servidor intenta conectarse a MongoDB antes de comenzar a escuchar peticiones. Si falla la conexión, no inicia correctamente.
 
-### 2. Frontend (`/client`)
+### 2. Frontend (`/cliente`)
 
 En otra terminal, desde la raíz del repositorio:
 
