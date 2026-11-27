@@ -169,6 +169,39 @@ button.navbar-toggler:active {
     transform: translateY(-9px) rotate(-45deg);
 }
 
+/* ===== CUENTA DE USUARIO ===== */
+
+.cuenta-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 32px;
+    min-height: 32px;
+
+    color: var(--color-primary);
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+.cuenta-link:hover {
+    color: var(--color-dark-gray);
+}
+
+.cuenta-link:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 4px;
+    border-radius: 2px;
+}
+
+.cuenta-link svg {
+    flex-shrink: 0;
+}
+
+.cuenta-link.active {
+    background-color: var(--color-surface-hover);
+}
 
 /* ===== RESPONSIVE ===== */
 

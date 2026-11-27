@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import {Route, Routes, useLocation} from "react-router-dom";
 import "./App.css";
 
 import Header from "./components/Header/Header";
@@ -9,10 +9,12 @@ import DetalleProducto from "./vistas/DetalleProducto/DetalleProducto";
 import Contacto from "./vistas/Contacto/Contacto";
 import Carrito from "./vistas/Carrito/Carrito";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
-import { useCart } from "./context/CartContext";
+import {useCart} from "./context/CartContext";
 import CrearProducto from "./vistas/CrearProducto/CrearProducto";
 import EditarProducto from "./vistas/EditarProducto/EditarProducto";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
+import Login from "./vistas/Login/Login";
+import Registro from "./vistas/Registro/Registro";
 
 function App() {
     const location = useLocation();
@@ -30,7 +32,7 @@ function App() {
 
     return (
         <>
-            <ScrollToTop />
+            <ScrollToTop/>
             <Header
                 cartCount={cartCount}
             />
@@ -42,7 +44,7 @@ function App() {
                             path="/"
                             element={<Home/>}
                         />
-                        
+
                         <Route
                             path="/productos"
                             element={
@@ -55,7 +57,7 @@ function App() {
                         <Route
                             path="/productos/:id"
                             element={
-                                <DetalleProducto onAgregarAlCarrito={agregarAlCarrito} />
+                                <DetalleProducto onAgregarAlCarrito={agregarAlCarrito}/>
                             }
                         />
 
@@ -80,13 +82,23 @@ function App() {
                         />
 
                         <Route
+                            path="/login"
+                            element={<Login/>}
+                        />
+
+                        <Route
+                            path="/registro"
+                            element={<Registro/>}
+                        />
+
+                        <Route
                             path="/admin/crear-producto"
                             element={<CrearProducto/>}
                         />
 
                         <Route
                             path="/admin/editar-producto/:id"
-                            element={<EditarProducto />}
+                            element={<EditarProducto/>}
                         />
 
                     </Routes>

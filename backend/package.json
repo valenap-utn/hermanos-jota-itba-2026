@@ -6,24 +6,32 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "seed": "node src/scripts/seed.js",
-    "seed:reset": "node src/scripts/seed.js --reset"
+    "seed:admin": "node src/scripts/seedAdmin.js",
+    "seed:reset": "node src/scripts/seed.js --reset",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cloudinary": "^2.11.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "file-type": "^22.2.0",
     "http-errors": "^2.0.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.11.2",
     "multer": "^2.5.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "jest": "^30.5.2",
+    "mongodb-memory-server": "^11.4.0",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.3.2"
   }
 }

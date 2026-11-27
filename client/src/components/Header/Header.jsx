@@ -1,12 +1,72 @@
-import { useState, useEffect, useRef } from "react";
+import {useEffect, useId, useRef, useState} from "react";
 import "./Header.styles.css";
 import Logo from "../Logo/Logo";
-import { ShoppingCart } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import {ShoppingCart} from "lucide-react";
+import MenuCuenta, {PanelCuenta} from "../MenuCuenta/MenuCuenta";
+import {Link, NavLink, useLocation} from "react-router-dom";
+import {useAuth} from "../../context/AuthContext";
 
-function Header({ cartCount = 0 }) {
+function Header({cartCount = 0}) {
     const [isBumping, setIsBumping] = useState(false);
     const prevCountRef = useRef(cartCount);
+
+    const [cuentaMobileAbierta, setCuentaMobileAbierta] = useState(false);
+
+    const {isAuthenticated, cargandoSesion, errorSesion} = useAuth();
+
+    const tienePanelCuenta =
+        !cargandoSesion &&
+        (isAuthenticated || Boolean(errorSesion));
+
+    const location = useLocation();
+    const panelMobileId = useId();
+    const headerRef = useRef(null);
+
+    useEffect(() => {
+        setCuentaMobileAbierta(false);
+    }, [
+        location.pathname,
+        isAuthenticated,
+        tienePanelCuenta
+    ]);
+
+    useEffect(() => {
+        if (!cuentaMobileAbierta) return;
+
+        const manejarEscape = (event) => {
+            if (event.key === "Escape") {
+                setCuentaMobileAbierta(false);
+
+                headerRef.current
+                    ?.querySelector(".navbar-actions .cuenta-link")
+                    ?.focus();
+            }
+        };
+
+        const manejarClickExterior = (event) => {
+            if (!headerRef.current?.contains(event.target)) {
+                setCuentaMobileAbierta(false);
+            }
+        };
+
+        const mediaQuery = window.matchMedia("(min-width: 992px)");
+
+        const manejarResize = (event) => {
+            if (event.matches) {
+                setCuentaMobileAbierta(false);
+            }
+        };
+
+        document.addEventListener("keydown", manejarEscape);
+        document.addEventListener("pointerdown", manejarClickExterior);
+        mediaQuery.addEventListener("change", manejarResize);
+
+        return () => {
+            document.removeEventListener("keydown", manejarEscape);
+            document.removeEventListener("pointerdown", manejarClickExterior);
+            mediaQuery.removeEventListener("change", manejarResize);
+        };
+    }, [cuentaMobileAbierta]);
 
     useEffect(() => {
         if (cartCount > 0 && cartCount !== prevCountRef.current) {
@@ -15,11 +75,16 @@ function Header({ cartCount = 0 }) {
             prevCountRef.current = cartCount;
             return () => clearTimeout(timer);
         }
+
         prevCountRef.current = cartCount;
     }, [cartCount]);
 
     const MAX_BADGE_COUNT = 99;
-    const displayCount = cartCount > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : cartCount;
+
+    const displayCount =
+        cartCount > MAX_BADGE_COUNT
+            ? `${MAX_BADGE_COUNT}+`
+            : cartCount;
 
     const cartLabel = `Carrito, ${cartCount} ${
         cartCount === 1 ? "producto" : "productos"
@@ -31,12 +96,13 @@ function Header({ cartCount = 0 }) {
                 Saltar al contenido principal
             </a>
 
-            <header>
+            <header ref={headerRef}>
                 <nav
                     className="navbar navbar-expand-lg navbar-hermanos-jota"
                     aria-label="Navegación principal"
                 >
                     <div className="container">
+
                         {/* Logo y nombre */}
                         <div className="d-flex align-items-center marca-container">
                             <Link
@@ -44,7 +110,7 @@ function Header({ cartCount = 0 }) {
                                 to="/"
                                 aria-label="Hermanos Jota - Inicio"
                             >
-                                <Logo className="logo-primary" />
+                                <Logo className="logo-primary"/>
                             </Link>
 
                             <span className="texto-titulo-elegante nombre-marca">
@@ -54,6 +120,7 @@ function Header({ cartCount = 0 }) {
 
                         {/* Acciones mobile */}
                         <div className="d-flex align-items-center ms-auto d-lg-none navbar-actions">
+
                             <Link
                                 to="/carrito"
                                 className="carrito-link"
@@ -72,6 +139,15 @@ function Header({ cartCount = 0 }) {
                                 </span>
                             </Link>
 
+                            <MenuCuenta
+                                mobile
+                                abiertoMobile={cuentaMobileAbierta}
+                                onToggleMobile={() =>
+                                    setCuentaMobileAbierta((prev) => !prev)
+                                }
+                                panelMobileId={panelMobileId}
+                            />
+
                             {/* Menú hamburguesa */}
                             <button
                                 className="navbar-toggler"
@@ -81,14 +157,15 @@ function Header({ cartCount = 0 }) {
                                 aria-controls="navbarNav"
                                 aria-expanded="false"
                                 aria-label="Abrir menú de navegación"
+                                onClick={() => setCuentaMobileAbierta(false)}
                             >
                                 <span
                                     className="menu-icon"
                                     aria-hidden="true"
                                 >
-                                    <span />
-                                    <span />
-                                    <span />
+                                    <span/>
+                                    <span/>
+                                    <span/>
                                 </span>
                             </button>
                         </div>
@@ -99,11 +176,12 @@ function Header({ cartCount = 0 }) {
                             id="navbarNav"
                         >
                             <ul className="navbar-nav ms-auto align-items-lg-center">
+
                                 <li className="nav-item">
                                     <NavLink
                                         to="/"
                                         end
-                                        className={({ isActive }) =>
+                                        className={({isActive}) =>
                                             `nav-link${isActive ? " active" : ""}`
                                         }
                                     >
@@ -114,7 +192,7 @@ function Header({ cartCount = 0 }) {
                                 <li className="nav-item">
                                     <NavLink
                                         to="/productos"
-                                        className={({ isActive }) =>
+                                        className={({isActive}) =>
                                             `nav-link${isActive ? " active" : ""}`
                                         }
                                     >
@@ -125,7 +203,7 @@ function Header({ cartCount = 0 }) {
                                 <li className="nav-item">
                                     <NavLink
                                         to="/contacto"
-                                        className={({ isActive }) =>
+                                        className={({isActive}) =>
                                             `nav-link${isActive ? " active" : ""}`
                                         }
                                     >
@@ -133,6 +211,12 @@ function Header({ cartCount = 0 }) {
                                     </NavLink>
                                 </li>
 
+                                {/* Cuenta desktop */}
+                                <li className="nav-item d-none d-lg-flex align-items-center ms-lg-3">
+                                    <MenuCuenta/>
+                                </li>
+
+                                {/* Carrito desktop */}
                                 <li className="nav-item d-none d-lg-flex align-items-center ms-lg-3">
                                     <Link
                                         to="/carrito"
@@ -143,6 +227,7 @@ function Header({ cartCount = 0 }) {
                                             size={18}
                                             aria-hidden="true"
                                         />
+
                                         <span
                                             className={`cart-count${isBumping ? " cart-count--bump" : ""}`}
                                             aria-hidden="true"
@@ -151,10 +236,31 @@ function Header({ cartCount = 0 }) {
                                         </span>
                                     </Link>
                                 </li>
+
                             </ul>
                         </div>
                     </div>
                 </nav>
+
+                {tienePanelCuenta && (
+                    <div
+                        id={panelMobileId}
+                        className={`cuenta-panel-mobile d-lg-none${
+                            cuentaMobileAbierta
+                                ? " cuenta-panel-mobile--abierto"
+                                : ""
+                        }`}
+                        inert={!cuentaMobileAbierta}
+                        aria-hidden={!cuentaMobileAbierta}
+                    >
+                        <div className="cuenta-panel-mobile__contenido">
+                            <PanelCuenta
+                                onCerrar={() => setCuentaMobileAbierta(false)}
+                            />
+                        </div>
+                    </div>
+                )}
+
             </header>
         </>
     );
