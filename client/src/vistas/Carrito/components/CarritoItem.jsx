@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { PLACEHOLDER_IMAGEN, manejarErrorImagen } from "../../../config/imagenes";
 
 function CarritoItem({ item, onActualizarCantidad, onSolicitarEliminar, itemRef }) {
     const precioUnitario = item.precio > 0
@@ -16,9 +17,10 @@ function CarritoItem({ item, onActualizarCantidad, onSolicitarEliminar, itemRef 
                 aria-label={`Ver ${item.nombre}`}
             >
                 <img
-                    src={item.imagen || "/assets/img/placeholder.svg"}
+                    src={item.imagen || PLACEHOLDER_IMAGEN}
                     alt={item.nombre}
                     className="carrito-item-img"
+                    onError={manejarErrorImagen}
                 />
             </Link>
 
