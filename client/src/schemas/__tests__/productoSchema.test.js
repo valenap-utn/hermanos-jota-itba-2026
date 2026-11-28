@@ -4,132 +4,174 @@ import {
     TAMANIO_MAX_IMAGEN_BYTES,
 } from "../productoSchema";
 
-describe("Validación de Producto con campos opcionales (#108)", () => {
+describe("Validación de Producto con descripción e imagen obligatorias y stock opcional", () => {
     const schemaCrear = crearProductoSchema("crear");
     const schemaEditar = crearProductoSchema("editar");
 
-    describe.each([
-        ["crear", schemaCrear],
-        ["editar", schemaEditar],
-    ])("modo %s", (_modo, schema) => {
-        test("acepta producto mínimo sin descripción, stock ni imagen", () => {
-            const dataMinima = {
+    const crearArchivoValido = () =>
+        new File(["contenido"], "silla.webp", { type: "image/webp" });
+
+    describe("modo crear", () => {
+        test("acepta producto válido sin stock y asigna 0 por defecto", () => {
+            const archivo = crearArchivoValido();
+            const resultado = schemaCrear.safeParse({
                 nombre: "Mesa Minimal",
+                descripcion: "Mesa de madera maciza con acabado natural",
                 precio: "45000",
                 categoria: "mesas",
-            };
-
-            const resultado = schema.safeParse(dataMinima);
+                imagen: archivo,
+            });
 
             expect(resultado.success).toBe(true);
             if (resultado.success) {
                 expect(resultado.data.nombre).toBe("Mesa Minimal");
-                expect(resultado.data.descripcion).toBe("");
                 expect(resultado.data.precio).toBe(45000);
                 expect(resultado.data.stock).toBe(0);
-                expect(resultado.data.imagen).toBeNull();
-                expect(resultado.data.imagenUrl).toBe("");
+                expect(resultado.data.imagen).toBe(archivo);
             }
         });
 
-        test("convierte stock vacío en 0 y permite imagenUrl vacía", () => {
-            const resultado = schema.safeParse({
+        test("convierte stock vacío en 0", () => {
+            const resultado = schemaCrear.safeParse({
                 nombre: "Mesa Auxiliar",
-                descripcion: "",
+                descripcion: "Mesa auxiliar en madera de roble lustrado",
                 precio: "12000",
                 stock: "",
                 categoria: "mesas",
-                imagen: null,
-                imagenUrl: "",
+                imagen: crearArchivoValido(),
             });
 
             expect(resultado.success).toBe(true);
             if (resultado.success) {
                 expect(resultado.data.stock).toBe(0);
-                expect(resultado.data.descripcion).toBe("");
-                expect(resultado.data.imagenUrl).toBe("");
             }
         });
 
-        test("acepta producto completo con todos los campos y archivo de imagen válido", () => {
-            const archivoValido = new File(["contenido"], "silla.webp", {
-                type: "image/webp",
+        test("rechaza producto sin descripción o con menos de 10 caracteres", () => {
+            const sinDescripcion = schemaCrear.safeParse({
+                nombre: "Mesa Minimal",
+                descripcion: "",
+                precio: "45000",
+                categoria: "mesas",
+                imagen: crearArchivoValido(),
             });
 
-            const resultado = schema.safeParse({
+            expect(sinDescripcion.success).toBe(false);
+            if (!sinDescripcion.success) {
+                expect(sinDescripcion.error.issues[0].message).toMatch(/obligatorio/i);
+            }
+
+            const descripcionCorta = schemaCrear.safeParse({
+                nombre: "Mesa Minimal",
+                descripcion: "Muy corta",
+                precio: "45000",
+                categoria: "mesas",
+                imagen: crearArchivoValido(),
+            });
+
+            expect(descripcionCorta.success).toBe(false);
+        });
+
+        test("rechaza producto sin archivo de imagen e informa que es obligatorio", () => {
+            const resultado = schemaCrear.safeParse({
+                nombre: "Mesa Minimal",
+                descripcion: "Mesa de madera maciza con acabado natural",
+                precio: "45000",
+                categoria: "mesas",
+                imagen: null,
+            });
+
+            expect(resultado.success).toBe(false);
+            if (!resultado.success) {
+                expect(resultado.error.issues[0].path).toEqual(["imagen"]);
+                expect(resultado.error.issues[0].message).toMatch(/obligatorio/i);
+            }
+        });
+    });
+
+    describe("modo editar", () => {
+        test("acepta producto con imagenUrl existente y sin archivo nuevo ni stock", () => {
+            const resultado = schemaEditar.safeParse({
                 nombre: "Silla Córdoba",
                 descripcion: "Madera de petiribí y esterillado natural",
                 precio: "65000",
-                stock: "15",
                 categoria: "sillas",
-                materiales: "Petiribí",
-                medidas: "50x50x85 cm",
-                destacado: true,
-                imagen: archivoValido,
+                imagen: null,
                 imagenUrl: "/assets/img/silla.webp",
             });
 
             expect(resultado.success).toBe(true);
             if (resultado.success) {
-                expect(resultado.data.stock).toBe(15);
-                expect(resultado.data.precio).toBe(65000);
-                expect(resultado.data.descripcion).toBe(
-                    "Madera de petiribí y esterillado natural"
-                );
-                expect(resultado.data.imagen).toBe(archivoValido);
+                expect(resultado.data.stock).toBe(0);
+                expect(resultado.data.imagenUrl).toBe("/assets/img/silla.webp");
             }
         });
 
+        test("acepta producto con archivo nuevo aunque imagenUrl esté vacía", () => {
+            const archivo = crearArchivoValido();
+            const resultado = schemaEditar.safeParse({
+                nombre: "Silla Córdoba",
+                descripcion: "Madera de petiribí y esterillado natural",
+                precio: "65000",
+                stock: "15",
+                categoria: "sillas",
+                imagen: archivo,
+                imagenUrl: "",
+            });
+
+            expect(resultado.success).toBe(true);
+            if (resultado.success) {
+                expect(resultado.data.stock).toBe(15);
+                expect(resultado.data.imagen).toBe(archivo);
+            }
+        });
+
+        test("rechaza producto sin imagen ni imagenUrl e informa que es obligatorio", () => {
+            const resultado = schemaEditar.safeParse({
+                nombre: "Silla Córdoba",
+                descripcion: "Madera de petiribí y esterillado natural",
+                precio: "65000",
+                categoria: "sillas",
+                imagen: null,
+                imagenUrl: "",
+            });
+
+            expect(resultado.success).toBe(false);
+            if (!resultado.success) {
+                expect(resultado.error.issues[0].path).toEqual(["imagenUrl"]);
+                expect(resultado.error.issues[0].message).toMatch(/obligatorio/i);
+            }
+        });
+    });
+
+    describe.each([
+        ["crear", schemaCrear],
+        ["editar", schemaEditar],
+    ])("reglas comunes en modo %s", (_modo, schema) => {
+        const baseValida = () => ({
+            nombre: "Silla Córdoba",
+            descripcion: "Madera de petiribí y esterillado natural",
+            precio: "65000",
+            stock: "15",
+            categoria: "sillas",
+            imagen: crearArchivoValido(),
+            imagenUrl: "/assets/img/silla.webp",
+        });
+
         test("rechaza nombre menor a 3 caracteres, precio vacío o negativo", () => {
-            expect(
-                schema.safeParse({
-                    nombre: "Ab",
-                    precio: "1000",
-                    categoria: "mesas",
-                }).success
-            ).toBe(false);
-
-            expect(
-                schema.safeParse({
-                    nombre: "Mesa",
-                    precio: "",
-                    categoria: "mesas",
-                }).success
-            ).toBe(false);
-
-            expect(
-                schema.safeParse({
-                    nombre: "Mesa",
-                    precio: "-100",
-                    categoria: "mesas",
-                }).success
-            ).toBe(false);
+            expect(schema.safeParse({ ...baseValida(), nombre: "Ab" }).success).toBe(false);
+            expect(schema.safeParse({ ...baseValida(), precio: "" }).success).toBe(false);
+            expect(schema.safeParse({ ...baseValida(), precio: "-100" }).success).toBe(false);
         });
 
         test("rechaza stock negativo o no entero", () => {
-            expect(
-                schema.safeParse({
-                    nombre: "Mesa",
-                    precio: "1000",
-                    stock: "-2",
-                    categoria: "mesas",
-                }).success
-            ).toBe(false);
-
-            expect(
-                schema.safeParse({
-                    nombre: "Mesa",
-                    precio: "1000",
-                    stock: "2.5",
-                    categoria: "mesas",
-                }).success
-            ).toBe(false);
+            expect(schema.safeParse({ ...baseValida(), stock: "-2" }).success).toBe(false);
+            expect(schema.safeParse({ ...baseValida(), stock: "2.5" }).success).toBe(false);
         });
 
         test("exige nuevaCategoria cuando se selecciona Otra categoría", () => {
             const resultado = schema.safeParse({
-                nombre: "Banco Exterior",
-                precio: "30000",
+                ...baseValida(),
                 categoria: OTRA_CATEGORIA,
                 nuevaCategoria: "   ",
             });
@@ -143,12 +185,7 @@ describe("Validación de Producto con campos opcionales (#108)", () => {
             });
 
             expect(
-                schema.safeParse({
-                    nombre: "Mesa",
-                    precio: "1000",
-                    categoria: "mesas",
-                    imagen: archivoInvalido,
-                }).success
+                schema.safeParse({ ...baseValida(), imagen: archivoInvalido }).success
             ).toBe(false);
 
             const archivoGrande = new File(["x"], "grande.png", {
@@ -159,12 +196,7 @@ describe("Validación de Producto con campos opcionales (#108)", () => {
             });
 
             expect(
-                schema.safeParse({
-                    nombre: "Mesa",
-                    precio: "1000",
-                    categoria: "mesas",
-                    imagen: archivoGrande,
-                }).success
+                schema.safeParse({ ...baseValida(), imagen: archivoGrande }).success
             ).toBe(false);
         });
     });

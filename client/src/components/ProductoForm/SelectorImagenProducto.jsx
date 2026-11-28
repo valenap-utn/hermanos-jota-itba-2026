@@ -88,9 +88,15 @@ function SelectorImagenProducto({
                 htmlFor={inputId}
                 className="producto-form__label"
             >
-                {esCreacion
-                    ? "Imagen del producto (opcional)"
-                    : "Reemplazar imagen con archivo nuevo (opcional)"}
+                {esCreacion ? (
+                    <>
+                        Imagen del producto
+                        <span className="producto-form__asterisco" aria-hidden="true">*</span>
+                        <span className="producto-form__requerido-texto">(obligatorio)</span>
+                    </>
+                ) : (
+                    "Reemplazar imagen con archivo nuevo (opcional)"
+                )}
             </label>
 
             <div
@@ -134,6 +140,7 @@ function SelectorImagenProducto({
                     accept="image/jpeg,image/png,image/webp"
                     className="producto-form__file-input"
                     disabled={deshabilitado}
+                    aria-required={esCreacion}
                     aria-invalid={Boolean(error)}
                     aria-describedby={
                         error
