@@ -5,7 +5,7 @@ const productSchema = new mongoose.Schema(
     nombre:      { type: String, required: true, trim: true },
     descripcion: { type: String, required: true, trim: true },
     precio:      { type: Number, required: true, min: 0 },
-    stock:       { type: Number, min: 0, default: 0 },
+    stock:       { type: Number, required: true, min: 0, default: 0 },
     imagenUrl:   { type: String, required: true, trim: true },
     medidas:          { type: String, trim: true },
     materiales:       { type: String, trim: true },

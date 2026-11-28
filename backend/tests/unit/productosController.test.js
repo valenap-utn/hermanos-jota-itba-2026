@@ -23,6 +23,7 @@ const BODY_VALIDO = {
     nombre: 'Mesa Minimal',
     descripcion: 'Mesa de madera maciza de petiribí con acabado mate',
     precio: '45000',
+    stock: '0',
     categoria: 'Mesas',
     imagenUrl: '/assets/img/mesa.webp',
 };
@@ -55,14 +56,14 @@ function ejecutarControlador(handler, req) {
     });
 }
 
-describe('productosController - validaciones obligatorias y seguridad (#108)', () => {
+describe('productosController - validaciones obligatorias y seguridad', () => {
     beforeEach(() => {
         Product.countDocuments.mockResolvedValue(0);
         resolverCategoria.mockResolvedValue('Mesas');
     });
 
     describe('crearProducto', () => {
-        it('crea un producto válido sin stock y asigna 0 por defecto', async () => {
+        it('crea un producto válido con precio y stock explícitos en 0 o positivos', async () => {
             Product.create.mockImplementation(async (doc) => ({ _id: ID_VALIDO, ...doc }));
 
             const res = await ejecutarControlador(crearProducto, {
@@ -81,19 +82,20 @@ describe('productosController - validaciones obligatorias y seguridad (#108)', (
             );
         });
 
-        it('acepta precio explícito en 0', async () => {
+        it('acepta precio explícito en 0 y stock entero positivo', async () => {
             Product.create.mockImplementation(async (doc) => ({ _id: ID_VALIDO, ...doc }));
 
             const res = await ejecutarControlador(crearProducto, {
                 body: {
                     ...BODY_VALIDO,
                     precio: '0',
+                    stock: '12',
                 },
             });
 
             expect(res.statusCode).toBe(201);
             expect(Product.create).toHaveBeenCalledWith(
-                expect.objectContaining({ precio: 0 })
+                expect.objectContaining({ precio: 0, stock: 12 })
             );
         });
 
@@ -145,6 +147,22 @@ describe('productosController - validaciones obligatorias y seguridad (#108)', (
             }
         );
 
+        it.each(['', '   ', null, undefined, false, [], {}, -1, 2.5, '2.5', 'abc'])(
+            'rechaza stock ausente, vacío, null, decimal o negativo (%p) con 400',
+            async (stockInvalido) => {
+                await expect(
+                    ejecutarControlador(crearProducto, {
+                        body: {
+                            ...BODY_VALIDO,
+                            stock: stockInvalido,
+                        },
+                    })
+                ).rejects.toMatchObject({ status: 400 });
+
+                expect(Product.create).not.toHaveBeenCalled();
+            }
+        );
+
         it.each([123, null, { $ne: '' }, ['/assets/img/mesa.webp'], true])(
             'rechaza imagenUrl con tipo no-string (%p) con 400',
             async (imagenInvalida) => {
@@ -170,6 +188,20 @@ describe('productosController - validaciones obligatorias y seguridad (#108)', (
                     ejecutarControlador(actualizarProducto, {
                         params: { id: ID_VALIDO },
                         body: { precio: precioInvalido },
+                    })
+                ).rejects.toMatchObject({ status: 400 });
+
+                expect(Product.findByIdAndUpdate).not.toHaveBeenCalled();
+            }
+        );
+
+        it.each(['', '   ', null, false, [], {}, -1, 1.5, '1.5', 'abc'])(
+            'rechaza stock inválido (%p) con 400 para no sobrescribir con 0',
+            async (stockInvalido) => {
+                await expect(
+                    ejecutarControlador(actualizarProducto, {
+                        params: { id: ID_VALIDO },
+                        body: { stock: stockInvalido },
                     })
                 ).rejects.toMatchObject({ status: 400 });
 
@@ -216,11 +248,12 @@ describe('productosController - validaciones obligatorias y seguridad (#108)', (
             expect(Product.findByIdAndUpdate).not.toHaveBeenCalled();
         });
 
-        it('actualiza correctamente precio numérico válido e imagenUrl permitida', async () => {
+        it('actualiza correctamente precio, stock entero válido e imagenUrl permitida', async () => {
             Product.findByIdAndUpdate.mockResolvedValue({
                 _id: ID_VALIDO,
                 nombre: 'Mesa',
                 precio: 15000,
+                stock: 8,
                 imagenUrl: '/assets/img/mesa.webp',
             });
 
@@ -228,6 +261,7 @@ describe('productosController - validaciones obligatorias y seguridad (#108)', (
                 params: { id: ID_VALIDO },
                 body: {
                     precio: '15000',
+                    stock: '8',
                     imagenUrl: '  /assets/img/mesa.webp  ',
                 },
             });
@@ -237,6 +271,7 @@ describe('productosController - validaciones obligatorias y seguridad (#108)', (
                 ID_VALIDO,
                 expect.objectContaining({
                     precio: 15000,
+                    stock: 8,
                     imagenUrl: '/assets/img/mesa.webp',
                 }),
                 { new: true, runValidators: true }

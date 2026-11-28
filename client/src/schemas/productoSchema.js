@@ -54,8 +54,7 @@ export const crearProductoSchema = (modo = "crear") =>
             stock: z
                 .string()
                 .trim()
-                .optional()
-                .transform((val) => (val === "" || val === undefined ? "0" : val))
+                .min(1, "Este campo es obligatorio. Ingresá el stock del producto.")
                 .pipe(
                     z.coerce
                         .number({message: "Ingresá un stock numérico válido."})

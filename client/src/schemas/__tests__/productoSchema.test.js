@@ -4,7 +4,7 @@ import {
     TAMANIO_MAX_IMAGEN_BYTES,
 } from "../productoSchema";
 
-describe("Validación de Producto con descripción e imagen obligatorias y stock opcional", () => {
+describe("Validación de Producto con descripción, stock e imagen obligatorios", () => {
     const schemaCrear = crearProductoSchema("crear");
     const schemaEditar = crearProductoSchema("editar");
 
@@ -12,12 +12,13 @@ describe("Validación de Producto con descripción e imagen obligatorias y stock
         new File(["contenido"], "silla.webp", { type: "image/webp" });
 
     describe("modo crear", () => {
-        test("acepta producto válido sin stock y asigna 0 por defecto", () => {
+        test("acepta producto válido con stock 0 y archivo de imagen", () => {
             const archivo = crearArchivoValido();
             const resultado = schemaCrear.safeParse({
                 nombre: "Mesa Minimal",
                 descripcion: "Mesa de madera maciza con acabado natural",
                 precio: "45000",
+                stock: "0",
                 categoria: "mesas",
                 imagen: archivo,
             });
@@ -31,27 +32,12 @@ describe("Validación de Producto con descripción e imagen obligatorias y stock
             }
         });
 
-        test("convierte stock vacío en 0", () => {
-            const resultado = schemaCrear.safeParse({
-                nombre: "Mesa Auxiliar",
-                descripcion: "Mesa auxiliar en madera de roble lustrado",
-                precio: "12000",
-                stock: "",
-                categoria: "mesas",
-                imagen: crearArchivoValido(),
-            });
-
-            expect(resultado.success).toBe(true);
-            if (resultado.success) {
-                expect(resultado.data.stock).toBe(0);
-            }
-        });
-
         test("rechaza producto sin descripción o con menos de 10 caracteres", () => {
             const sinDescripcion = schemaCrear.safeParse({
                 nombre: "Mesa Minimal",
                 descripcion: "",
                 precio: "45000",
+                stock: "5",
                 categoria: "mesas",
                 imagen: crearArchivoValido(),
             });
@@ -65,6 +51,7 @@ describe("Validación de Producto con descripción e imagen obligatorias y stock
                 nombre: "Mesa Minimal",
                 descripcion: "Muy corta",
                 precio: "45000",
+                stock: "5",
                 categoria: "mesas",
                 imagen: crearArchivoValido(),
             });
@@ -77,6 +64,7 @@ describe("Validación de Producto con descripción e imagen obligatorias y stock
                 nombre: "Mesa Minimal",
                 descripcion: "Mesa de madera maciza con acabado natural",
                 precio: "45000",
+                stock: "5",
                 categoria: "mesas",
                 imagen: null,
             });
@@ -90,11 +78,12 @@ describe("Validación de Producto con descripción e imagen obligatorias y stock
     });
 
     describe("modo editar", () => {
-        test("acepta producto con imagenUrl existente y sin archivo nuevo ni stock", () => {
+        test("acepta producto con imagenUrl existente y stock válido sin archivo nuevo", () => {
             const resultado = schemaEditar.safeParse({
                 nombre: "Silla Córdoba",
                 descripcion: "Madera de petiribí y esterillado natural",
                 precio: "65000",
+                stock: "0",
                 categoria: "sillas",
                 imagen: null,
                 imagenUrl: "/assets/img/silla.webp",
@@ -131,6 +120,7 @@ describe("Validación de Producto con descripción e imagen obligatorias y stock
                 nombre: "Silla Córdoba",
                 descripcion: "Madera de petiribí y esterillado natural",
                 precio: "65000",
+                stock: "10",
                 categoria: "sillas",
                 imagen: null,
                 imagenUrl: "",
@@ -164,7 +154,14 @@ describe("Validación de Producto con descripción e imagen obligatorias y stock
             expect(schema.safeParse({ ...baseValida(), precio: "-100" }).success).toBe(false);
         });
 
-        test("rechaza stock negativo o no entero", () => {
+        test("rechaza stock vacío, ausente, negativo o no entero", () => {
+            const sinStock = schema.safeParse({ ...baseValida(), stock: "" });
+            expect(sinStock.success).toBe(false);
+            if (!sinStock.success) {
+                expect(sinStock.error.issues[0].message).toMatch(/obligatorio/i);
+            }
+
+            expect(schema.safeParse({ ...baseValida(), stock: undefined }).success).toBe(false);
             expect(schema.safeParse({ ...baseValida(), stock: "-2" }).success).toBe(false);
             expect(schema.safeParse({ ...baseValida(), stock: "2.5" }).success).toBe(false);
         });

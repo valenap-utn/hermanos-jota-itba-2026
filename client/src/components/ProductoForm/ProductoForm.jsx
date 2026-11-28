@@ -322,7 +322,7 @@ function ProductoForm({
 
                     <div className="col-12 col-md-6">
                         <label htmlFor="stock" className="producto-form__label">
-                            Stock (opcional)
+                            Stock <MarcaObligatoria />
                         </label>
 
                         <input
@@ -338,6 +338,7 @@ function ProductoForm({
                             aria-describedby={
                                 errors.stock ? "error-stock" : undefined
                             }
+                            required
                         />
 
                         {errors.stock && (

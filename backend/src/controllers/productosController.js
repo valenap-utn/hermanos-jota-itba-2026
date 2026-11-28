@@ -27,6 +27,15 @@ function parsearPrecioValido(valor) {
   return numero;
 }
 
+// Valida y convierte el stock exigiendo un entero finito mayor o igual a 0
+function parsearStockValido(valor) {
+  if (typeof valor !== 'number' && typeof valor !== 'string') return null;
+  if (typeof valor === 'string' && valor.trim() === '') return null;
+  const numero = Number(valor);
+  if (!Number.isInteger(numero) || numero < 0) return null;
+  return numero;
+}
+
 // Devuelve el catálogo de productos con filtrado y paginación
 const listarProductos = asyncHandler(async (req, res) => {
   const { categoria, busqueda, page, limit } = req.query;
@@ -113,6 +122,10 @@ const crearProducto = asyncHandler(async (req, res) => {
   if (precioValido === null) {
     throw createError.BadRequest('El precio debe ser un número válido mayor o igual a 0.');
   }
+  const stockValido = parsearStockValido(stock);
+  if (stockValido === null) {
+    throw createError.BadRequest('El stock debe ser un número entero mayor o igual a 0.');
+  }
 
   // Validar límite máximo de productos en la base de datos antes de procesar archivos o categorías
   const totalProductos = await Product.countDocuments();
@@ -150,7 +163,7 @@ const crearProducto = asyncHandler(async (req, res) => {
     nombre: nombre.trim(),
     descripcion: descripcion.trim(),
     precio: precioValido,
-    stock: stock !== undefined && stock !== '' && !isNaN(Number(stock)) ? Math.max(0, Number(stock)) : 0,
+    stock: stockValido,
     categoria: categoriaFinal,
     materiales: materiales ? materiales.trim() : '',
     medidas: medidas ? medidas.trim() : '',
@@ -209,18 +222,11 @@ const actualizarProducto = asyncHandler(async (req, res) => {
     datosActualizacion.precio = precioValido;
   }
   if (datosActualizacion.stock !== undefined) {
-    if (datosActualizacion.stock === '' || datosActualizacion.stock === null) {
-      datosActualizacion.stock = 0;
-    } else {
-      const stockNumerico =
-        typeof datosActualizacion.stock === 'number' || typeof datosActualizacion.stock === 'string'
-          ? Number(datosActualizacion.stock)
-          : NaN;
-      if (!Number.isFinite(stockNumerico) || stockNumerico < 0) {
-        throw createError.BadRequest('El stock debe ser un número válido mayor o igual a 0.');
-      }
-      datosActualizacion.stock = stockNumerico;
+    const stockValido = parsearStockValido(datosActualizacion.stock);
+    if (stockValido === null) {
+      throw createError.BadRequest('El stock debe ser un número entero mayor o igual a 0.');
     }
+    datosActualizacion.stock = stockValido;
   }
   if (datosActualizacion.destacado !== undefined) {
     datosActualizacion.destacado = datosActualizacion.destacado === true || datosActualizacion.destacado === 'true';
