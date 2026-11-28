@@ -31,19 +31,19 @@ export const crearProductoSchema = (modo = "crear") =>
             nombre: z
                 .string()
                 .trim()
-                .min(1, "Ingresá el nombre del producto.")
+                .min(1, "Este campo es obligatorio. Ingresá el nombre del producto.")
                 .min(3, "El nombre debe tener al menos 3 caracteres."),
 
             descripcion: z
                 .string()
                 .trim()
-                .min(1, "Ingresá una descripción.")
+                .min(1, "Este campo es obligatorio. Ingresá una descripción.")
                 .min(10, "La descripción debe tener al menos 10 caracteres."),
 
             precio: z
                 .string()
                 .trim()
-                .min(1, "Ingresá el precio del producto.")
+                .min(1, "Este campo es obligatorio. Ingresá el precio del producto.")
                 .pipe(
                     z.coerce
                         .number({message: "Ingresá un precio numérico válido."})
@@ -54,7 +54,7 @@ export const crearProductoSchema = (modo = "crear") =>
             stock: z
                 .string()
                 .trim()
-                .min(1, "Ingresá el stock del producto.")
+                .min(1, "Este campo es obligatorio. Ingresá el stock del producto.")
                 .pipe(
                     z.coerce
                         .number({message: "Ingresá un stock numérico válido."})
@@ -65,7 +65,7 @@ export const crearProductoSchema = (modo = "crear") =>
             categoria: z
                 .string()
                 .trim()
-                .min(1, "Seleccioná una categoría."),
+                .min(1, "Este campo es obligatorio. Seleccioná una categoría."),
 
             nuevaCategoria: z.string().trim().default(""),
 
@@ -87,7 +87,7 @@ export const crearProductoSchema = (modo = "crear") =>
                 ctx.addIssue({
                     code: "custom",
                     path: ["nuevaCategoria"],
-                    message: "Ingresá el nombre de la nueva categoría.",
+                    message: "Este campo es obligatorio. Ingresá el nombre de la nueva categoría.",
                 });
             }
 
@@ -95,7 +95,7 @@ export const crearProductoSchema = (modo = "crear") =>
                 ctx.addIssue({
                     code: "custom",
                     path: ["imagen"],
-                    message: "Seleccioná una imagen para el producto.",
+                    message: "Este campo es obligatorio. Seleccioná una imagen para el producto.",
                 });
             }
 
@@ -107,7 +107,7 @@ export const crearProductoSchema = (modo = "crear") =>
                 ctx.addIssue({
                     code: "custom",
                     path: ["imagenUrl"],
-                    message: "La imagen del producto es obligatoria.",
+                    message: "Este campo es obligatorio. Ingresá la URL o seleccioná una imagen.",
                 });
             }
         });

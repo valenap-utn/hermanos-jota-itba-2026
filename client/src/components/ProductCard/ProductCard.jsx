@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import "./ProductCard.styles.css";
 import { ArrowRight, ShoppingCart, Check, Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PLACEHOLDER_IMAGEN, manejarErrorImagen } from "../../config/imagenes";
 
 function ProductCard({ producto, onAgregarAlCarrito, mostrarEditar, onEliminar }) {
   const [agregado, setAgregado] = useState(false);
@@ -41,8 +42,9 @@ function ProductCard({ producto, onAgregarAlCarrito, mostrarEditar, onEliminar }
       <figure className="product-card-figure">
         <img
           className="product-card-image"
-          src={producto.imagenUrl}
+          src={producto.imagenUrl || PLACEHOLDER_IMAGEN}
           alt={producto.nombre}
+          onError={manejarErrorImagen}
         />
       </figure>
 

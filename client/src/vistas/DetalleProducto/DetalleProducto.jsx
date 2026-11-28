@@ -7,6 +7,7 @@ import {obtenerProductoPorId, eliminarProducto} from "../../services/productosSe
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import ErrorState from "../../components/ErrorState/ErrorState";
 import {ArrowLeft, Check, Minus, Pencil, Plus, ShoppingCart, Trash2} from "lucide-react";
+import {PLACEHOLDER_IMAGEN, manejarErrorImagen} from "../../config/imagenes";
 
 function DetalleProducto({onAgregarAlCarrito}) {
     const {id} = useParams();
@@ -162,7 +163,12 @@ function DetalleProducto({onAgregarAlCarrito}) {
                 <article className="row g-4 g-lg-5">
                     <div className="col-12 col-lg-7">
                         <figure className="detalle-figura mb-0">
-                            <img className="detalle-imagen" src={producto.imagenUrl} alt={producto.nombre}/>
+                            <img
+                                className="detalle-imagen"
+                                src={producto.imagenUrl || PLACEHOLDER_IMAGEN}
+                                alt={producto.nombre}
+                                onError={manejarErrorImagen}
+                            />
                         </figure>
                     </div>
 
@@ -179,7 +185,7 @@ function DetalleProducto({onAgregarAlCarrito}) {
                                 : "Precio a confirmar"}
                         </p>
 
-                        <p className="texto-principal detalle-descripcion">{producto.descripcion}</p>
+                        <p className="texto-principal detalle-descripcion">{producto.descripcion || "Sin descripción disponible."}</p>
 
                         {onAgregarAlCarrito && (
                             <div className="detalle-comprar-bloque mt-4">

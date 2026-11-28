@@ -28,6 +28,21 @@
     letter-spacing: var(--caption-letter-spacing, 0.02em);
 }
 
+.producto-form__asterisco {
+    color: var(--color-error);
+    font-weight: 700;
+    margin-left: 0.25rem;
+}
+
+.producto-form__requerido-texto {
+    color: var(--color-error);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0.01em;
+    margin-left: 0.35rem;
+}
+
 .producto-form .form-control:focus,
 .producto-form .form-select:focus {
     border-color: var(--color-primary) !important;
@@ -37,7 +52,15 @@
 .producto-form input[aria-invalid="true"],
 .producto-form select[aria-invalid="true"],
 .producto-form textarea[aria-invalid="true"] {
+    border: 1px solid var(--color-error) !important;
     outline: 1px solid var(--color-error);
+    background-color: rgba(163, 32, 32, 0.05) !important;
+}
+
+.producto-form input[aria-invalid="true"]::placeholder,
+.producto-form textarea[aria-invalid="true"]::placeholder {
+    color: var(--color-error);
+    opacity: 0.85;
 }
 
 .producto-form input[aria-invalid="true"]:focus,
@@ -82,6 +105,13 @@
 
 .producto-form__dropzone--error {
     border-color: var(--color-error);
+    background-color: rgba(163, 32, 32, 0.05);
+}
+
+.producto-form__dropzone--error .producto-form__dropzone-contenido,
+.producto-form__dropzone--error .producto-form__dropzone-titulo,
+.producto-form__dropzone--error .producto-form__dropzone-subtitulo {
+    color: var(--color-error);
 }
 
 .producto-form__file-input {
@@ -212,6 +242,7 @@
     margin: 0.5rem 0 0;
     color: var(--color-error);
     font-size: 0.85rem;
+    font-weight: 500;
 }
 
 /* Acciones del formulario */

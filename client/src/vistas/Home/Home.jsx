@@ -3,6 +3,7 @@ import { ArrowRight, Leaf, Hand, History } from "lucide-react";
 import { Link } from "react-router-dom";
 import { obtenerProductos } from "../../services/productosService";
 import { useState, useEffect } from "react";
+import { PLACEHOLDER_IMAGEN, manejarErrorImagen } from "../../config/imagenes";
 
 function Home() {
     const [destacados, setDestacados] = useState([]);
@@ -139,9 +140,10 @@ function Home() {
                                     <figure className="home-producto-figure">
                                         <img
                                             className="home-producto-image"
-                                            src={producto.imagenUrl}
+                                            src={producto.imagenUrl || PLACEHOLDER_IMAGEN}
                                             alt={producto.nombre}
                                             loading="lazy"
+                                            onError={manejarErrorImagen}
                                         />
                                     </figure>
 

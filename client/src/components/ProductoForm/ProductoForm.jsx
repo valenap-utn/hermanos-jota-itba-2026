@@ -15,6 +15,15 @@ import {useToast} from "../../context/ToastContext";
 
 import "./ProductoForm.styles.css";
 
+function MarcaObligatoria() {
+    return (
+        <>
+            <span className="producto-form__asterisco" aria-hidden="true">*</span>
+            <span className="producto-form__requerido-texto">(obligatorio)</span>
+        </>
+    );
+}
+
 function ProductoForm({
                           modo = "editar",
                           initialValues = {},
@@ -221,7 +230,7 @@ function ProductoForm({
                 <div className="row g-3">
                     <div className="col-12">
                         <label htmlFor="nombre" className="producto-form__label">
-                            Nombre del producto *
+                            Nombre del producto <MarcaObligatoria />
                         </label>
 
                         <input
@@ -251,7 +260,7 @@ function ProductoForm({
 
                     <div className="col-12">
                         <label htmlFor="descripcion" className="producto-form__label">
-                            Descripción *
+                            Descripción <MarcaObligatoria />
                         </label>
 
                         <textarea
@@ -281,7 +290,7 @@ function ProductoForm({
 
                     <div className="col-12 col-md-6">
                         <label htmlFor="precio" className="producto-form__label">
-                            Precio *
+                            Precio <MarcaObligatoria />
                         </label>
 
                         <input
@@ -313,7 +322,7 @@ function ProductoForm({
 
                     <div className="col-12 col-md-6">
                         <label htmlFor="stock" className="producto-form__label">
-                            Stock *
+                            Stock <MarcaObligatoria />
                         </label>
 
                         <input
@@ -353,7 +362,7 @@ function ProductoForm({
                 <div className="row g-3">
                     <div className="col-12 col-md-6">
                         <label htmlFor="categoria" className="producto-form__label">
-                            Categoría *
+                            Categoría <MarcaObligatoria />
                         </label>
 
                         <Controller
@@ -430,7 +439,7 @@ function ProductoForm({
                                 htmlFor="nuevaCategoria"
                                 className="producto-form__label"
                             >
-                                Nueva categoría *
+                                Nueva categoría <MarcaObligatoria />
                             </label>
 
                             <input
@@ -509,7 +518,7 @@ function ProductoForm({
                                 URL o ruta de imagen{" "}
                                 {archivoImagen
                                     ? "(opcional si se sube archivo)"
-                                    : "*"}
+                                    : <MarcaObligatoria />}
                             </label>
 
                             <input
