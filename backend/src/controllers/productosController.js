@@ -18,6 +18,15 @@ function validarImagen(url) {
   return Boolean(esCloudinaryOficial || esAssetLocal);
 }
 
+// Valida y convierte el precio rechazando vacío, espacios, tipos no escalares, NaN, Infinity o negativos
+function parsearPrecioValido(valor) {
+  if (typeof valor !== 'number' && typeof valor !== 'string') return null;
+  if (typeof valor === 'string' && valor.trim() === '') return null;
+  const numero = Number(valor);
+  if (!Number.isFinite(numero) || numero < 0) return null;
+  return numero;
+}
+
 // Devuelve el catálogo de productos con filtrado y paginación
 const listarProductos = asyncHandler(async (req, res) => {
   const { categoria, busqueda, page, limit } = req.query;
@@ -94,10 +103,14 @@ const crearProducto = asyncHandler(async (req, res) => {
     especificaciones
   } = req.body;
 
-  if (!nombre || !nombre.trim()) {
+  if (typeof nombre !== 'string' || !nombre.trim()) {
     throw createError.BadRequest('El nombre del producto es obligatorio.');
   }
-  if (precio === undefined || isNaN(Number(precio)) || Number(precio) < 0) {
+  if (typeof descripcion !== 'string' || !descripcion.trim()) {
+    throw createError.BadRequest('La descripción del producto es obligatoria.');
+  }
+  const precioValido = parsearPrecioValido(precio);
+  if (precioValido === null) {
     throw createError.BadRequest('El precio debe ser un número válido mayor o igual a 0.');
   }
 
@@ -109,27 +122,34 @@ const crearProducto = asyncHandler(async (req, res) => {
     );
   }
 
-  // Validar y procesar imagen (opcional)
+  // Validar y procesar imagen (obligatoria)
   let imagenUrlFinal = '';
   if (req.file && req.file.buffer) {
     imagenUrlFinal = await subirACloudinary(req.file.buffer);
-  } else if (req.body.imagenUrl && req.body.imagenUrl.trim()) {
-    if (!validarImagen(req.body.imagenUrl.trim())) {
+  } else if (req.body.imagenUrl !== undefined) {
+    if (typeof req.body.imagenUrl !== 'string') {
+      throw createError.BadRequest('La URL de la imagen debe ser un texto válido.');
+    }
+    const urlLimpia = req.body.imagenUrl.trim();
+    if (!urlLimpia) {
+      throw createError.BadRequest('Debés seleccionar una imagen para el producto.');
+    }
+    if (!validarImagen(urlLimpia)) {
       throw createError.BadRequest('La URL de la imagen debe provenir del almacenamiento oficial del proyecto.');
     }
-    imagenUrlFinal = req.body.imagenUrl.trim();
+    imagenUrlFinal = urlLimpia;
+  } else {
+    throw createError.BadRequest('Debés seleccionar una imagen para el producto.');
   }
 
   // Resolver categoría
   const categoriaFinal = await resolverCategoria(categoria);
 
-  const descripcionFinal = typeof descripcion === 'string' ? descripcion.trim() : '';
-
   // Crear el producto en MongoDB
   const nuevoProducto = await Product.create({
     nombre: nombre.trim(),
-    descripcion: descripcionFinal,
-    precio: Number(precio),
+    descripcion: descripcion.trim(),
+    precio: precioValido,
     stock: stock !== undefined && stock !== '' && !isNaN(Number(stock)) ? Math.max(0, Number(stock)) : 0,
     categoria: categoriaFinal,
     materiales: materiales ? materiales.trim() : '',
@@ -155,14 +175,24 @@ const actualizarProducto = asyncHandler(async (req, res) => {
   // Si se envió un archivo nuevo en la actualización
   if (req.file && req.file.buffer) {
     datosActualizacion.imagenUrl = await subirACloudinary(req.file.buffer);
-  } else if (datosActualizacion.imagenUrl && typeof datosActualizacion.imagenUrl === 'string' && datosActualizacion.imagenUrl.trim()) {
-    if (!validarImagen(datosActualizacion.imagenUrl.trim())) {
+  } else if (datosActualizacion.imagenUrl !== undefined) {
+    if (typeof datosActualizacion.imagenUrl !== 'string') {
+      throw createError.BadRequest('La URL de la imagen debe ser un texto válido.');
+    }
+    const urlLimpia = datosActualizacion.imagenUrl.trim();
+    if (!urlLimpia) {
+      throw createError.BadRequest('La imagen del producto es obligatoria.');
+    }
+    if (!validarImagen(urlLimpia)) {
       throw createError.BadRequest('La URL de la imagen debe provenir del almacenamiento oficial del proyecto.');
     }
-    datosActualizacion.imagenUrl = datosActualizacion.imagenUrl.trim();
+    datosActualizacion.imagenUrl = urlLimpia;
   }
 
-  if (typeof datosActualizacion.descripcion === 'string') {
+  if (datosActualizacion.descripcion !== undefined) {
+    if (typeof datosActualizacion.descripcion !== 'string' || !datosActualizacion.descripcion.trim()) {
+      throw createError.BadRequest('La descripción del producto es obligatoria.');
+    }
     datosActualizacion.descripcion = datosActualizacion.descripcion.trim();
   }
 
@@ -172,10 +202,25 @@ const actualizarProducto = asyncHandler(async (req, res) => {
   }
 
   if (datosActualizacion.precio !== undefined) {
-    datosActualizacion.precio = Number(datosActualizacion.precio);
+    const precioValido = parsearPrecioValido(datosActualizacion.precio);
+    if (precioValido === null) {
+      throw createError.BadRequest('El precio debe ser un número válido mayor o igual a 0.');
+    }
+    datosActualizacion.precio = precioValido;
   }
   if (datosActualizacion.stock !== undefined) {
-    datosActualizacion.stock = Math.max(0, Number(datosActualizacion.stock));
+    if (datosActualizacion.stock === '' || datosActualizacion.stock === null) {
+      datosActualizacion.stock = 0;
+    } else {
+      const stockNumerico =
+        typeof datosActualizacion.stock === 'number' || typeof datosActualizacion.stock === 'string'
+          ? Number(datosActualizacion.stock)
+          : NaN;
+      if (!Number.isFinite(stockNumerico) || stockNumerico < 0) {
+        throw createError.BadRequest('El stock debe ser un número válido mayor o igual a 0.');
+      }
+      datosActualizacion.stock = stockNumerico;
+    }
   }
   if (datosActualizacion.destacado !== undefined) {
     datosActualizacion.destacado = datosActualizacion.destacado === true || datosActualizacion.destacado === 'true';

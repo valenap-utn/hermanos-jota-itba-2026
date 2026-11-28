@@ -3,20 +3,20 @@ const Product = require('../../src/models/Product');
 function crearProducto(datos = {}) {
     return new Product({
         nombre: 'Mesa Minimalista',
+        descripcion: 'Mesa de madera maciza con terminación natural',
         precio: 25000,
+        imagenUrl: '/assets/img/mesa.webp',
         ...datos,
     });
 }
 
 describe('Modelo Product', () => {
-    describe('Campos opcionales y valores por defecto (#108)', () => {
-        it('acepta un producto mínimo sin descripción, stock ni imagenUrl', async () => {
+    describe('Campos obligatorios, opcionales y valores por defecto (#108)', () => {
+        it('acepta un producto válido sin stock y asigna 0 por defecto', async () => {
             const producto = crearProducto();
 
             await expect(producto.validate()).resolves.toBeUndefined();
-            expect(producto.descripcion).toBe('');
             expect(producto.stock).toBe(0);
-            expect(producto.imagenUrl).toBe('');
             expect(producto.destacado).toBe(false);
         });
 
@@ -42,8 +42,12 @@ describe('Modelo Product', () => {
         it.each([
             ['nombre', undefined, 'required'],
             ['nombre', '', 'required'],
+            ['descripcion', undefined, 'required'],
+            ['descripcion', '', 'required'],
             ['precio', undefined, 'required'],
             ['precio', -5, 'min'],
+            ['imagenUrl', undefined, 'required'],
+            ['imagenUrl', '', 'required'],
             ['stock', -3, 'min'],
         ])('rechaza %s con valor %p (%s)', async (campo, valor, tipoError) => {
             const producto = crearProducto({ [campo]: valor });

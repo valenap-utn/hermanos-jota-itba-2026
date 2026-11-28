@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const productSchema = new mongoose.Schema(
   {
     nombre:      { type: String, required: true, trim: true },
-    descripcion: { type: String, trim: true, default: '' },
+    descripcion: { type: String, required: true, trim: true },
     precio:      { type: Number, required: true, min: 0 },
     stock:       { type: Number, min: 0, default: 0 },
-    imagenUrl:   { type: String, trim: true, default: '' },
+    imagenUrl:   { type: String, required: true, trim: true },
     medidas:          { type: String, trim: true },
     materiales:       { type: String, trim: true },
     categoria:        { type: String, trim: true },
